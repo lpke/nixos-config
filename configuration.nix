@@ -13,6 +13,11 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Disable ALSA power saving
+  # boot.extraModprobeConfig = ''
+  #   options snd_hda_intel power_save=0
+  # '';
+
   networking.hostName = "lpnix";
 
   # Enable networking
@@ -49,6 +54,9 @@
   };
   hardware.graphics.enable = true;
 
+  # ZSA Moonlander Keyboard - Enable flashing
+  hardware.keyboard.zsa.enable = true;
+
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
@@ -70,6 +78,8 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    jack.enable = true;
+    wireplumber.enable = true;
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -106,6 +116,7 @@
     neofetch
     vivaldi
     _1password-gui
+    spotify
     (prismlauncher.override {
       additionalPrograms = [];
       jdks = [
