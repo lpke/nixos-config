@@ -137,5 +137,7 @@
     Defaults env_keep += "WAYLAND_DISPLAY XDG_RUNTIME_DIR"
   '';
 
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   system.stateVersion = "25.11";
 }
