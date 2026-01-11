@@ -91,8 +91,6 @@
     description = "luke";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      kdePackages.kate
-    #  thunderbird
     ];
   };
 
@@ -105,6 +103,8 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    kdePackages.kate
+    kdePackages.krunner
     git
     delta # syntax highlighting pager for git
     neovim
