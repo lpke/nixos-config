@@ -105,6 +105,7 @@
   environment.systemPackages = with pkgs; [
     kdePackages.kate
     kdePackages.krunner
+    kdePackages.yakuake
     git
     delta # syntax highlighting pager for git
     neovim
