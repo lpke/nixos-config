@@ -91,6 +91,15 @@
     description = "luke";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
+      # minecraft
+      (prismlauncher.override {
+        additionalPrograms = [];
+        jdks = [
+	  pkgs.jdk21
+	  pkgs.jdk17
+  	  pkgs.jdk8
+        ];
+      })
     ];
   };
 
@@ -112,6 +121,7 @@
     kdePackages.yakuake
     git
     delta # syntax highlighting pager for git
+    alacritty
     neovim
     wl-clipboard # allow neovim clipboard access (wayland)
     nodejs_24
@@ -123,14 +133,6 @@
     _1password-gui
     spotify
     flatpak
-    (prismlauncher.override {
-      additionalPrograms = [];
-      jdks = [
-	pkgs.jdk21
-	pkgs.jdk17
-	pkgs.jdk8
-      ];
-    })
   ];
 
   programs.neovim = {
