@@ -148,6 +148,7 @@
     alacritty
     chezmoi
     oh-my-posh
+    tmux
     neovim
     ranger
     wl-clipboard # allow neovim clipboard access (wayland)
