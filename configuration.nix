@@ -85,6 +85,29 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  # Use zsh instead of bash
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    # history.size = 1000000;
+    # autosuggestion.enable = true;
+    # syntaxHighlighting.enable = true;
+
+    shellAliases = {
+      cls = "clear";
+      ll = "ls -l";
+      la = "ls -la";
+      gs = "git status";
+      nn = "pnpm";
+      zshrc = "nvim $ZDOTDIR/.zshrc";
+      zshrs = "echo 'Reloading using: \`source $ZDOTDIR/.zshrc\` ...' && source $ZDOTDIR/.zshrc && clear";
+      r = "ranger --choosedir=$HOME/.config/ranger/lastdir; LASTDIR=`cat $HOME/.config/ranger/lastdir`; cd \"$LASTDIR\"";
+      enix = "nvim ~/.config/nixos/configuration.nix";
+      bnix = "sudo nixos-rebuild switch";
+    };
+  };
+  users.defaultUserShell = pkgs.zsh;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.luke = {
     isNormalUser = true;
@@ -95,9 +118,9 @@
       (prismlauncher.override {
         additionalPrograms = [];
         jdks = [
-	  pkgs.jdk21
-	  pkgs.jdk17
-  	  pkgs.jdk8
+          pkgs.jdk21
+          pkgs.jdk17
+          pkgs.jdk8
         ];
       })
     ];
@@ -122,7 +145,9 @@
     git
     delta # syntax highlighting pager for git
     alacritty
+    chezmoi
     neovim
+    ranger
     wl-clipboard # allow neovim clipboard access (wayland)
     nodejs_24
     fzf # fuzzy finding
