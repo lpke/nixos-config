@@ -100,6 +100,10 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Allow Flatpak and GUI support for Flatpak apps
+  services.flatpak.enable = true;
+  xdg.portal.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -118,6 +122,7 @@
     vivaldi
     _1password-gui
     spotify
+    flatpak
     (prismlauncher.override {
       additionalPrograms = [];
       jdks = [
@@ -148,6 +153,8 @@
   security.sudo.extraConfig = ''
     Defaults env_keep += "WAYLAND_DISPLAY XDG_RUNTIME_DIR"
   '';
+
+  networking.firewall.enable = false;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
