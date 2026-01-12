@@ -89,9 +89,9 @@
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    # history.size = 1000000;
-    # autosuggestion.enable = true;
-    # syntaxHighlighting.enable = true;
+    histSize = 1000000;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
 
     shellAliases = {
       cls = "clear";
@@ -147,6 +147,7 @@
     delta # syntax highlighting pager for git
     alacritty
     chezmoi
+    oh-my-posh
     neovim
     ranger
     wl-clipboard # allow neovim clipboard access (wayland)
