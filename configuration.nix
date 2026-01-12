@@ -106,13 +106,14 @@
       bnix = "sudo nixos-rebuild switch";
     };
   };
-  users.defaultUserShell = pkgs.zsh;
 
+  users.defaultUserShell = pkgs.zsh;
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.luke = {
     isNormalUser = true;
     description = "luke";
     extraGroups = [ "networkmanager" "wheel" ];
+    useDefaultShell = true;
     packages = with pkgs; [
       # minecraft
       (prismlauncher.override {
