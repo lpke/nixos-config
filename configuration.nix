@@ -115,6 +115,9 @@
     extraGroups = [ "networkmanager" "wheel" ];
     useDefaultShell = true;
     packages = with pkgs; [
+      # runescape
+      bolt-launcher
+      runelite
       # minecraft
       (prismlauncher.override {
         additionalPrograms = [];
