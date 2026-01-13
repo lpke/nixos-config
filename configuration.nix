@@ -104,6 +104,7 @@
       r = "ranger --choosedir=$HOME/.config/ranger/lastdir; LASTDIR=`cat $HOME/.config/ranger/lastdir`; cd \"$LASTDIR\"";
       enix = "nvim ~/.config/nixos/configuration.nix";
       bnix = "sudo nixos-rebuild switch";
+      cdnix = "cd ~/.config/nixos";
     };
   };
 
@@ -147,6 +148,7 @@
     kdePackages.kate
     kdePackages.krunner
     kdePackages.yakuake
+    kdePackages.filelight
     git
     delta # syntax highlighting pager for git
     alacritty
