@@ -115,6 +115,7 @@
     extraGroups = [ "networkmanager" "wheel" ];
     useDefaultShell = true;
     packages = with pkgs; [
+      discord
       # runescape
       bolt-launcher
       runelite
