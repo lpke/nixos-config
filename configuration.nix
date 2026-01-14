@@ -170,9 +170,11 @@
     ranger
     wl-clipboard # allow neovim clipboard access (wayland)
     gnumake
+    unzip
     python315
     nodejs_24
-    fzf # fuzzy finding
+    fzf
+    fd
     ripgrep
     clang # C language
     neofetch
