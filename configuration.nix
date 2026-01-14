@@ -108,8 +108,19 @@
     };
   };
 
+  # useful explanations: https://dev.to/patimapoochai/how-to-edit-the-sudoers-file-in-nixos-with-examples-4k34
+  security.sudo = {
+    enable = true;
+    execWheelOnly = false;
+    wheelNeedsPassword = false;
+
+    # Preserve Wayland environment with sudo (fix clipboard in sudo nvim)
+    extraConfig = ''
+      Defaults env_keep += "WAYLAND_DISPLAY XDG_RUNTIME_DIR"
+    '';
+  };
+
   users.defaultUserShell = pkgs.zsh;
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.luke = {
     isNormalUser = true;
     description = "luke";
@@ -163,6 +174,8 @@
     ripgrep
     clang # C language
     neofetch
+    piper # mouse assignments
+    libratbag
     vivaldi
     _1password-gui
     spotify
@@ -183,12 +196,6 @@
     jetbrains-mono
     nerd-fonts.jetbrains-mono
   ];
-
-
-  # Preserve Wayland environment with sudo (fix clipboard in sudo nvim)
-  security.sudo.extraConfig = ''
-    Defaults env_keep += "WAYLAND_DISPLAY XDG_RUNTIME_DIR"
-  '';
 
   networking.firewall.enable = false;
 
