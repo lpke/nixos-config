@@ -169,6 +169,8 @@
     neovim
     ranger
     wl-clipboard # allow neovim clipboard access (wayland)
+    gnumake
+    python315
     nodejs_24
     fzf # fuzzy finding
     ripgrep
