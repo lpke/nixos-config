@@ -165,6 +165,7 @@
     kdePackages.krunner
     kdePackages.yakuake
     kdePackages.filelight
+    kdePackages.accessibility-inspector
     git
     delta # syntax highlighting pager for git
     alacritty
