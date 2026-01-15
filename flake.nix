@@ -7,9 +7,10 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    xremap-flake.url = "github:xremap/nix-flake";
   };
 
-  outputs = { nixpkgs, home-manager, ... }: {
+  outputs = { nixpkgs, home-manager, xremap-flake, ... }@inputs: {
     nixosConfigurations.lpnix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
@@ -19,6 +20,7 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.luke = import ./home.nix;
+          home-manager.extraSpecialArgs = { inherit inputs; };
         }
       ];
     };

@@ -103,7 +103,8 @@
       zshrs = "echo 'Reloading using: \`source $ZDOTDIR/.zshrc\` ...' && source $ZDOTDIR/.zshrc && clear";
       r = "ranger --choosedir=$HOME/.config/ranger/lastdir; LASTDIR=`cat $HOME/.config/ranger/lastdir`; cd \"$LASTDIR\"";
       enix = "nvim ~/.config/nixos/configuration.nix";
-      bnix = "sudo nixos-rebuild switch";
+      bnix = "sudo nixos-rebuild switch --flake /etc/nixos#lpnix";
+      bnixnf = "sudo nixos-rebuild switch";
       cdnix = "cd ~/.config/nixos";
     };
   };
@@ -120,11 +121,15 @@
     '';
   };
 
+  # add myself to `uinput` to get xremap working
+  hardware.uinput.enable = true;
+  users.groups.uinput.members = [ "luke" ];
+
   users.defaultUserShell = pkgs.zsh;
   users.users.luke = {
     isNormalUser = true;
     description = "luke";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "input" "uinput" ];
     useDefaultShell = true;
     packages = with pkgs; [
       discord
@@ -168,10 +173,11 @@
     tmux
     neovim
     ranger
+    trashy
     wl-clipboard # allow neovim clipboard access (wayland)
     gnumake
     unzip
-    python315
+    python313
     nodejs_24
     fzf
     fd
