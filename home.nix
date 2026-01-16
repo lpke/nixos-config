@@ -20,7 +20,7 @@
 
     # enable full detail xremap logging with:
     # journalctl --user -u xremap.service -f
-    debug = true;
+    debug = false;
 
     # deviceNames = [ # only include keyboard, leave mouse alone
     #   "ZSA Technology Labs Moonlander Mark I"
@@ -32,7 +32,7 @@
     config = {
       # Logitech G903 buttons (piper setting / xremap value):
       #   left-front: Forward/BTN_EXTRA | left-back: Backward/BTN_SIDE
-      #   right-front: Button 5/BTN_FORWARD, right-back: Button 6/BTN_BACK
+      #   right-front: Button 5/BTN_FORWARD, right-back: ctrl+m/C-m
       #   wheel-left: Button 7/BTN_TASK, wheel-right: F23/KEY_F23
 
       # for key-to-key remaps (no combos/sequences)
