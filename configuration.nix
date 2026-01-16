@@ -164,6 +164,7 @@
     kdePackages.kate
     kdePackages.krunner
     kdePackages.yakuake
+    kdePackages.kfind
     kdePackages.filelight
     kdePackages.accessibility-inspector
     git
