@@ -197,6 +197,7 @@
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)
     gnumake
+    zip
     unzip
     hwinfo
     python313
@@ -212,6 +213,7 @@
     _1password-gui
     spotify
     flatpak
+    gdrive3
   ];
 
   programs.neovim = {
