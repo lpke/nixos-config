@@ -39,6 +39,20 @@
       modmap = [
         # MOUSE
         {
+          name = "G903 Minecraft";
+          device = {
+            only = [ "Logitech G903" ];
+          };
+          application = {
+            only = [ "/Minecraft/" ];
+          };
+          remap = {
+            "BTN_EXTRA" = "w"; # left front - walk forward
+            "BTN_SIDE" = "s"; # left back - walk backward
+            "BTN_FORWARD" = "KEY_F5"; # right front - third person
+          };
+        }
+        {
           name = "G903 Runelite";
           device = {
             only = [ "Logitech G903" ];
