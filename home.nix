@@ -8,7 +8,10 @@
   home.stateVersion = "25.11";
   home.username = "luke";
   home.homeDirectory = "/home/luke";
-  home.packages = [ ];
+  home.packages = [
+    # enables running `xremap` as a command
+    inputs.xremap-flake.packages.${pkgs.system}.default
+  ];
   programs.home-manager.enable = true;
 
   services.xremap = {
