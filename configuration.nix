@@ -209,6 +209,7 @@
     neofetch
     piper # mouse assignments
     libratbag
+    evtest # input event testing
     vivaldi
     _1password-gui
     spotify
