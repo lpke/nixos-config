@@ -13,10 +13,28 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.hostName = "lpnix";
+  networking = {
+    hostName = "lpnix";
+    networkmanager.enable = true;
 
-  # Enable networking
-  networking.networkmanager.enable = true;
+    # Enable newer wireless management with `iwd`
+    # (replaces `wpa_supplicant`)
+    networkmanager.wifi.backend = "iwd";
+    wireless.iwd = {
+      enable = true;
+      settings = {
+        Network = {
+          EnableIPv6 = true;
+        };
+        Settings = {
+          AutoConnect = true;
+        };
+      };
+    };
+
+    # needed for `synergy` to work
+    firewall.enable = false;
+  };
 
   # Set your time zone.
   time.timeZone = "Australia/Sydney";
@@ -180,6 +198,7 @@
     wl-clipboard # allow neovim clipboard access (wayland)
     gnumake
     unzip
+    hwinfo
     python313
     nodejs_24
     fzf
@@ -209,8 +228,6 @@
     jetbrains-mono
     nerd-fonts.jetbrains-mono
   ];
-
-  networking.firewall.enable = false;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
