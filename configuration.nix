@@ -13,11 +13,6 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # Disable ALSA power saving
-  # boot.extraModprobeConfig = ''
-  #   options snd_hda_intel power_save=0
-  # '';
-
   networking.hostName = "lpnix";
 
   # Enable networking
@@ -157,6 +152,12 @@
   # Allow Flatpak and GUI support for Flatpak apps
   services.flatpak.enable = true;
   xdg.portal.enable = true;
+
+  # environment variables in global environment
+  # (set early in login process and available to all shells)
+  environment.sessionVariables = {
+    PATH = [ "$HOME/.local/bin" ];
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
