@@ -20,7 +20,7 @@
 
     # enable full detail xremap logging with:
     # journalctl --user -u xremap.service -f
-    debug = false;
+    debug = true;
 
     # deviceNames = [ # only include keyboard, leave mouse alone
     #   "ZSA Technology Labs Moonlander Mark I"
@@ -38,25 +38,24 @@
       # for key-to-key remaps (no combos/sequences)
       modmap = [
         # MOUSE
-        # {
-        #   name = "G903 Alacritty";
-        #   device = {
-        #     only = [ "Logitech G903" ];
-        #   };
-        #   application = {
-        #     only = [ "/Alacritty/" ];
-        #   };
-        #   remap = {
-        #     "BTN_EXTRA" = { # left front (double fix)
-        #       held = "1";
-        #       alone = [];
-        #       alone_timeout_millis = 20;
-        #     };
-        #     "BTN_SIDE" = "2"; # left back
-        #     "BTN_FORWARD" = "3"; # right front
-        #     "BTN_BACK" = "4"; # right back
-        #   };
-        # }
+        {
+          name = "G903 Runelite";
+          device = {
+            only = [ "Logitech G903" ];
+          };
+          application = {
+            only = [ "/runelite/" ];
+          };
+          remap = {
+            "BTN_EXTRA" = { # left front - space (double fix)
+              held = "SPACE";
+              alone = [];
+              alone_timeout_millis = 20;
+            };
+            "BTN_SIDE" = "ESC"; # left back - esc
+            "BTN_FORWARD" = "BTN_MIDDLE"; # right front - middle mouse
+          };
+        }
         {
           name = "G903 Default";
           device = {
@@ -69,7 +68,6 @@
               alone_timeout_millis = 20;
             };
             "BTN_SIDE" = "BTN_SIDE"; # left back - backward
-            "BTN_BACK" = []; # right back - disabled
           };
         }
       ];
@@ -78,13 +76,24 @@
       keymap = [
         # MOUSE
         {
+          name = "G903 Default - right back";
+          device = {
+            only = [ "Logitech G903" ];
+          };
+          application = {
+            not = [ "/runelite/" ];
+          };
+          remap = {
+            "C-m" = "KEY_RESERVED"; # right back - disabled
+          };
+        }
+        {
           name = "G903 Default";
           device = {
             only = [ "Logitech G903" ];
           };
           remap = {
             "BTN_FORWARD" = "SUPER-w"; # right front - overview
-            # "BTN_BACK" = []; # right back (actively disabed in "modmap" section)
             "BTN_TASK" = "C-SUPER-left"; # wheel-left - desktop left
             "KEY_F23" = "C-SUPER-right"; # wheel-right - desktop right
           };
@@ -92,7 +101,10 @@
 
         # KEYBOARD
         {
-          name = "Runelite remaps";
+          name = "Runelite";
+          device = {
+            not = [ "Logitech G903" ];
+          };
           application = {
             only = [ "/runelite/" ];
           };
