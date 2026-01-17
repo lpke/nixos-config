@@ -2,6 +2,12 @@
 
 My configuration for NixOS.
 
+## Building
+
+```bash
+sudo nixos-rebuild switch --flake /etc/nixos#lpnix
+```
+
 ## Location in dotfiles
 
 The default location for these files is `/etc/nixos/`.
