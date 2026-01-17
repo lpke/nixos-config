@@ -10,7 +10,7 @@
   home.homeDirectory = "/home/luke";
   home.packages = [
     # enables running `xremap` as a command
-    inputs.xremap-flake.packages.${pkgs.system}.default
+    inputs.xremap-flake.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
   programs.home-manager.enable = true;
 
