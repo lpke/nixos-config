@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, pkgs-unstable, pkgs-neovim, ... }:
 
 {
   imports =
@@ -179,8 +179,9 @@
     PATH = [ "$HOME/.local/bin" ];
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  # System packages
+  # see `flake.nix` for how to configure a custom package version
+  # eg neovim is using `pkgs-neovim.neovim`
   environment.systemPackages = with pkgs; [
     kdePackages.kate
     kdePackages.krunner
@@ -194,7 +195,7 @@
     chezmoi
     oh-my-posh
     tmux
-    neovim
+    pkgs-neovim.neovim
     ranger
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)
