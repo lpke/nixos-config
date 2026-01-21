@@ -4,8 +4,6 @@
 {
   imports = [
     inputs.xremap-flake.homeManagerModules.default
-    ./xremap
-    ./plasma
   ];
 
   home.stateVersion = "25.11";
@@ -17,9 +15,20 @@
     # enables running `rc2nix` as a command
     inputs.plasma-manager.packages.${pkgs.stdenv.hostPlatform.system}.rc2nix
   ];
-
   programs.home-manager.enable = true;
-  
-  # enabling and settings of other modules are done from their imports
-  # eg `./xremap/default.nix` has `services.xremap.enable = true;`
+
+  # ~/.config/autostart files
+  xdg.configFile = import ./autostart.nix;
+
+  # KDE plasma settings (plasma-manager)
+  programs.plasma = import ./plasma // {
+    enable = true;
+  };
+
+  # keyboard and mouse remaps
+  services.xremap = import ./xremap // {
+    enable = true;
+    withKDE = true;
+    debug = false; # journalctl --user -u xremap.service -f
+  }; 
 }
