@@ -3,7 +3,7 @@
     enable = true;
 
     # GENERATE FROM ~/.config: `rc2nix`
-    #   filter: `rc2nix | grep '<search>'
+    #   filter: `rc2nix | grep -i '<search>'
     #   copy to clipboard: `rc2nix | wl-copy`
 
     # APPLYING CHANGES: To update after editing this file, rebuild nixos then log out/back in
