@@ -19,3 +19,9 @@ To do this, I symlink the custom location back to the default system location:
 ```bash
 sudo ln -s ~/.config/nixos /etc/nixos
 ```
+
+## Documentation
+
+Detailed explanation of how NixOS config works when using flakes/home-manager:
+
+https://www.notion.so/lpke/NixOS-Config-Explained-2eb1076d16c9806d9021e512329f9b53
