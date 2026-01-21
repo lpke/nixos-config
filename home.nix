@@ -3,7 +3,7 @@
 {
   imports = [
     inputs.xremap-flake.homeManagerModules.default
-    ./xremap.nix
+    ./xremap
   ];
 
   home.stateVersion = "25.11";
