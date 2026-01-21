@@ -32,7 +32,38 @@
     kwin.ExposeClass = [];
     kwin.ExposeClassCurrentDesktop = [];
 
+    # ====== ADDED (no default) ======
+    # window resizing
+    kwin."Window Grow Horizontal" = "Meta+Alt+G";
+    kwin."Window Grow Vertical" = "Meta+Alt+F";
+    # window move to specific desktop
+    kwin."Window to Desktop 1" = "Meta+Alt+1";
+    kwin."Window to Desktop 2" = "Meta+Alt+2";
+    kwin."Window to Desktop 3" = "Meta+Alt+3";
+    kwin."Window to Desktop 4" = "Meta+Alt+4";
+    kwin."Window to Desktop 5" = "Meta+Alt+5";
+    kwin."Window to Desktop 6" = "Meta+Alt+6";
+    kwin."Window to Desktop 7" = "Meta+Alt+7";
+    kwin."Window to Desktop 8" = "Meta+Alt+8";
+    kwin."Window to Desktop 9" = "Meta+Alt+9";
+    kwin."Window to Desktop 10" = "Meta+Alt+10";
+    kwin."Window to Desktop 11" = [];
+    kwin."Window to Desktop 12" = [];
+    kwin."Window to Desktop 13" = [];
+    kwin."Window to Desktop 14" = [];
+    kwin."Window to Desktop 15" = [];
+    kwin."Window to Desktop 16" = [];
+    kwin."Window to Desktop 17" = [];
+    kwin."Window to Desktop 18" = [];
+    kwin."Window to Desktop 19" = [];
+    kwin."Window to Desktop 20" = [];
+
     # ====== CHANGED FROM DEFAULTS ======
+    # window directional focusing
+    kwin."Switch Window Down" = "Meta+j"; # default: Meta+Alt+<arrow>
+    kwin."Switch Window Left" = "Meta+h";
+    kwin."Switch Window Right" = "Meta+l";
+    kwin."Switch Window Up" = "Meta+k";
     # desktop number switching
     kwin."Switch to Desktop 1" = "Meta+1"; # default: Ctrl+F<num> up to 4
     kwin."Switch to Desktop 2" = "Meta+2";
@@ -75,10 +106,6 @@
     kwin."Edit Tiles" = "Meta+T";
 
     # ====== TODO ======
-    # kwin."Switch Window Down" = "Meta+Alt+Down";
-    # kwin."Switch Window Left" = "Meta+Alt+Left";
-    # kwin."Switch Window Right" = "Meta+Alt+Right";
-    # kwin."Switch Window Up" = "Meta+Alt+Up";
     # kwin."Switch to Next Desktop" = [];
     # kwin."Switch to Next Screen" = [];
     # kwin."Switch to Previous Desktop" = [];
@@ -112,8 +139,6 @@
     # kwin."Window Custom Quick Tile Right" = [];
     # kwin."Window Custom Quick Tile Top" = [];
     # kwin."Window Fullscreen" = [];
-    # kwin."Window Grow Horizontal" = [];
-    # kwin."Window Grow Vertical" = [];
     # kwin."Window Lower" = [];
     # kwin."Window Maximize" = "Meta+PgUp";
     # kwin."Window Maximize Horizontal" = [];
@@ -148,26 +173,6 @@
     # kwin."Window Resize" = [];
     # kwin."Window Shrink Horizontal" = [];
     # kwin."Window Shrink Vertical" = [];
-    # kwin."Window to Desktop 1" = [];
-    # kwin."Window to Desktop 10" = [];
-    # kwin."Window to Desktop 11" = [];
-    # kwin."Window to Desktop 12" = [];
-    # kwin."Window to Desktop 13" = [];
-    # kwin."Window to Desktop 14" = [];
-    # kwin."Window to Desktop 15" = [];
-    # kwin."Window to Desktop 16" = [];
-    # kwin."Window to Desktop 17" = [];
-    # kwin."Window to Desktop 18" = [];
-    # kwin."Window to Desktop 19" = [];
-    # kwin."Window to Desktop 2" = [];
-    # kwin."Window to Desktop 20" = [];
-    # kwin."Window to Desktop 3" = [];
-    # kwin."Window to Desktop 4" = [];
-    # kwin."Window to Desktop 5" = [];
-    # kwin."Window to Desktop 6" = [];
-    # kwin."Window to Desktop 7" = [];
-    # kwin."Window to Desktop 8" = [];
-    # kwin."Window to Desktop 9" = [];
     # kwin."Window to Next Desktop" = [];
     # kwin."Window to Next Screen" = "Meta+Shift+Right";
     # kwin."Window to Previous Desktop" = [];
