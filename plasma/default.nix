@@ -15,6 +15,7 @@
 
   shortcuts = {
     # ====== DISABLED ======
+    org_kde_powerdevil.powerProfile = ["Battery"]; # disabled default Meta+B
     kaccess."Toggle Screen Reader On and Off" = [];
     kwin."Activate Window Demanding Attention" = [];
     plasmashell."activate task manager entry 1" = []; # default: Meta+<num>
@@ -31,6 +32,15 @@
     kwin.ExposeAll = [];
     kwin.ExposeClass = [];
     kwin.ExposeClassCurrentDesktop = [];
+    # window tiling (handle with Krohnkite)
+    kwin."Window Quick Tile Bottom" = [];
+    kwin."Window Quick Tile Bottom Left" = [];
+    kwin."Window Quick Tile Bottom Right" = [];
+    kwin."Window Quick Tile Left" = [];
+    kwin."Window Quick Tile Right" = [];
+    kwin."Window Quick Tile Top" = [];
+    kwin."Window Quick Tile Top Left" = [];
+    kwin."Window Quick Tile Top Right" = [];
 
     # ====== ADDED (no default) ======
     # window resizing
@@ -46,7 +56,7 @@
     kwin."Window to Desktop 7" = "Meta+Alt+7";
     kwin."Window to Desktop 8" = "Meta+Alt+8";
     kwin."Window to Desktop 9" = "Meta+Alt+9";
-    kwin."Window to Desktop 10" = "Meta+Alt+10";
+    kwin."Window to Desktop 10" = "Meta+Alt+0";
     kwin."Window to Desktop 11" = [];
     kwin."Window to Desktop 12" = [];
     kwin."Window to Desktop 13" = [];
@@ -161,14 +171,6 @@
     # kwin."Window Pack Left" = [];
     # kwin."Window Pack Right" = [];
     # kwin."Window Pack Up" = [];
-    # kwin."Window Quick Tile Bottom" = "Meta+Down";
-    # kwin."Window Quick Tile Bottom Left" = [];
-    # kwin."Window Quick Tile Bottom Right" = [];
-    # kwin."Window Quick Tile Left" = "Meta+Left";
-    # kwin."Window Quick Tile Right" = "Meta+Right";
-    # kwin."Window Quick Tile Top" = "Meta+Up";
-    # kwin."Window Quick Tile Top Left" = [];
-    # kwin."Window Quick Tile Top Right" = [];
     # kwin."Window Raise" = [];
     # kwin."Window Resize" = [];
     # kwin."Window Shrink Horizontal" = [];
@@ -209,7 +211,6 @@
     # org_kde_powerdevil.Sleep = "Sleep";
     # org_kde_powerdevil."Toggle Keyboard Backlight" = "Keyboard Light On/Off";
     # org_kde_powerdevil."Turn Off Screen" = [];
-    # org_kde_powerdevil.powerProfile = ["Battery" "Meta+B"];
     # plasmashell."Slideshow Wallpaper Next Image" = [];
     # plasmashell."activate application launcher" = ["Meta" "Alt+F1"];
     #
