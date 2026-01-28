@@ -16,6 +16,7 @@
   shortcuts = {
     # ====== DISABLED ======
     org_kde_powerdevil.powerProfile = ["Battery"]; # disabled default Meta+B
+    plasmashell.cycle-panels = []; # default: Meta+Alt+p
     kaccess."Toggle Screen Reader On and Off" = [];
     kwin."Activate Window Demanding Attention" = [];
     plasmashell."activate task manager entry 1" = []; # default: Meta+<num>
@@ -58,9 +59,11 @@
     # floating
     kwin.KrohnkiteToggleFloat = "Meta+F";
     kwin.KrohnkiteFloatAll = "Meta+Shift+F";
+    # layouts
+    kwin.KrohnkiteMonocleLayout = [];
     # increase/decrease
     kwin.KrohnkiteIncrease = "Meta+Alt+i";
-    kwin.KrohnkiteDecrease = "Meta+Alt+o";
+    kwin.KrohnkiteDecrease = "Meta+Alt+u";
     # kwin.KrohnkiteBTreeLayout = [ ];
     # kwin.KrohnkiteColumnsLayout = [ ];
     # kwin.KrohnkiteFloatingLayout = [ ];
@@ -70,7 +73,6 @@
     # kwin.KrohnkiteFocusPrev = "Meta+\\";
     # kwin.KrohnkiteFocusRight = [ ];
     # kwin.KrohnkiteFocusUp = [ ];
-    # kwin.KrohnkiteMonocleLayout = [ ];
     # kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
     # kwin.KrohnkitePreviousLayout = "Meta+|";
     # kwin.KrohnkiteQuarterLayout = [ ];
@@ -111,6 +113,7 @@
     kwin."Window to Desktop 20" = [];
 
     # ====== CHANGED FROM DEFAULTS ======
+    kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
     # window directional focusing
     kwin."Switch Window Down" = "Meta+j"; # default: Meta+Alt+<arrow>
     kwin."Switch Window Left" = "Meta+h";
@@ -189,7 +192,6 @@
     # kwin."Window Custom Quick Tile Top" = [];
     # kwin."Window Fullscreen" = [];
     # kwin."Window Lower" = [];
-    # kwin."Window Maximize" = "Meta+PgUp";
     # kwin."Window Maximize Horizontal" = [];
     # kwin."Window Maximize Vertical" = [];
     # kwin."Window Minimize" = "Meta+PgDown";
@@ -255,7 +257,6 @@
     #
     # plasmashell.clear-history = [];
     # plasmashell.clipboard_action = "Meta+Ctrl+X";
-    # plasmashell.cycle-panels = "Meta+Alt+P";
     # plasmashell.cycleNextAction = [];
     # plasmashell.cyclePrevAction = [];
     # plasmashell.edit_clipboard = [];
@@ -290,7 +291,7 @@
     # krohnkite
     kwinrc.Plugins.krohnkiteEnabled = true;
     kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
-    kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde";
+    kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";
     kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested";
     # kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
 
