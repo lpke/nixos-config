@@ -61,6 +61,9 @@
     kwin.KrohnkiteFloatAll = "Meta+Shift+F";
     # layouts
     kwin.KrohnkiteMonocleLayout = [];
+    # rotate
+    kwin.KrohnkiteRotate = "Meta+o";
+    kwin.KrohnkiteRotatePart = "Meta+p";
     # increase/decrease
     kwin.KrohnkiteIncrease = "Meta+Alt+i";
     kwin.KrohnkiteDecrease = "Meta+Alt+u";
@@ -76,8 +79,6 @@
     # kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
     # kwin.KrohnkitePreviousLayout = "Meta+|";
     # kwin.KrohnkiteQuarterLayout = [ ];
-    # kwin.KrohnkiteRotate = [ ];
-    # kwin.KrohnkiteRotatePart = [ ];
     # kwin.KrohnkiteSpiralLayout = [ ];
     # kwin.KrohnkiteSpreadLayout = [ ];
     # kwin.KrohnkiteStackedLayout = [ ];
