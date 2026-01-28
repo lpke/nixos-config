@@ -120,6 +120,8 @@
       enix = "nvim ~/.config/nixos/configuration.nix";
       bnix = "sudo nixos-rebuild switch --flake /etc/nixos#lpnix";
       bnixnf = "sudo nixos-rebuild switch";
+      lnix = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
+      dnix = "sudo nix-collect-garbage --delete-older-than 14d && nix-collect-garbage --delete-older-than 14d";
       cdnix = "cd ~/.config/nixos";
     };
   };
