@@ -33,6 +33,7 @@
     kwin.ExposeClass = [];
     kwin.ExposeClassCurrentDesktop = [];
     # window tiling (handle with Krohnkite)
+    kwin."Edit Tiles" = [];
     kwin."Window Quick Tile Bottom" = [];
     kwin."Window Quick Tile Bottom Left" = [];
     kwin."Window Quick Tile Bottom Right" = [];
@@ -42,8 +43,49 @@
     kwin."Window Quick Tile Top Left" = [];
     kwin."Window Quick Tile Top Right" = [];
 
+    # ====== KROHNKITE ======
+    kwin.KrohnkiteSetMaster = "Meta+Return";
+    # move
+    kwin.KrohnkiteShiftDown = "Meta+Down";
+    kwin.KrohnkiteShiftLeft = "Meta+Left";
+    kwin.KrohnkiteShiftRight = "Meta+Right";
+    kwin.KrohnkiteShiftUp = "Meta+Up";
+    # resize
+    kwin.KrohnkiteGrowHeight = "Meta+Alt+Down";
+    kwin.KrohnkitegrowWidth = "Meta+Alt+Right";
+    kwin.KrohnkiteShrinkHeight = "Meta+Alt+Up";
+    kwin.KrohnkiteShrinkWidth = "Meta+Alt+Left";
+    # floating
+    kwin.KrohnkiteToggleFloat = "Meta+F";
+    kwin.KrohnkiteFloatAll = "Meta+Shift+F";
+    # increase/decrease
+    kwin.KrohnkiteIncrease = "Meta+Alt+i";
+    kwin.KrohnkiteDecrease = "Meta+Alt+o";
+    # kwin.KrohnkiteBTreeLayout = [ ];
+    # kwin.KrohnkiteColumnsLayout = [ ];
+    # kwin.KrohnkiteFloatingLayout = [ ];
+    # kwin.KrohnkiteFocusDown = [ ];
+    # kwin.KrohnkiteFocusLeft = [ ];
+    # kwin.KrohnkiteFocusNext = [ ];
+    # kwin.KrohnkiteFocusPrev = "Meta+\\";
+    # kwin.KrohnkiteFocusRight = [ ];
+    # kwin.KrohnkiteFocusUp = [ ];
+    # kwin.KrohnkiteMonocleLayout = [ ];
+    # kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
+    # kwin.KrohnkitePreviousLayout = "Meta+|";
+    # kwin.KrohnkiteQuarterLayout = [ ];
+    # kwin.KrohnkiteRotate = [ ];
+    # kwin.KrohnkiteRotatePart = [ ];
+    # kwin.KrohnkiteSpiralLayout = [ ];
+    # kwin.KrohnkiteSpreadLayout = [ ];
+    # kwin.KrohnkiteStackedLayout = [ ];
+    # kwin.KrohnkiteStairLayout = [ ];
+    # kwin.KrohnkiteTileLayout = [ ];
+    # kwin.KrohnkiteTreeColumnLayout = [ ];
+    # kwin.KrohnkitetoggleDock = [ ];
+
     # ====== ADDED (no default) ======
-    # window resizing
+    # window growing (native)
     kwin."Window Grow Horizontal" = "Meta+Alt+G";
     kwin."Window Grow Vertical" = "Meta+Alt+F";
     # window move to specific desktop
@@ -111,9 +153,6 @@
     # ====== ADDED TO DEFAULTS (default on left) ======
     # window killing
     kwin."Kill Window" = ["Meta+Ctrl+Esc" "Meta+Ctrl+Del"]; # trigger window kill cursor. default: Meta+Ctrl+Esc
-
-    # to look into
-    kwin."Edit Tiles" = "Meta+T";
 
     # ====== TODO ======
     # kwin."Switch to Next Desktop" = [];
@@ -247,6 +286,12 @@
     dolphinrc.General.ShowFullPath = true;
     dolphinrc.General.DoubleClickViewAction = "show_terminal_panel";
     dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
+    
+    # krohnkite
+    kwinrc.Plugins.krohnkiteEnabled = true;
+    kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
+    kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake";
+    # kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
 
     # dolphinrc.Search.SearchTool = "Baloo";
     # baloofilerc.General.dbVersion = 2;
