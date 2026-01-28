@@ -292,7 +292,7 @@
     kwinrc.Plugins.krohnkiteEnabled = true;
     kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
     kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";
-    kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested";
+    kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
     # kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
 
     # dolphinrc.Search.SearchTool = "Baloo";
