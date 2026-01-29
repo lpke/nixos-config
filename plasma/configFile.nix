@@ -11,6 +11,65 @@
   kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
   # kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
 
+  # Konsole settings
+  "konsolerc" = {
+    General.ConfigVersion = 1;
+    "Desktop Entry" = {
+      DefaultProfile = "luke_konsole.profile";
+      MenuBar = "Disabled";
+    };
+    MainWindow.ToolBarsMovable = "Enabled";
+    "Notification Messages".CloseAllTabs = true;
+    TabBar.ExpandTabWidth = true;
+    UiSettings.ColorScheme = "";
+  };
+
+  # Yakuake settings
+  "yakuakerc" = {
+    "Desktop Entry".DefaultProfile = "luke_yakuake.profile";
+    Animation.Frames = 16;
+    Dialogs.FirstRun = false;
+    Window = {
+      Height = 60;
+      KeepOpen = false;
+      ShowTabBar = false;
+      ShowTitleBar = false;
+      Width = 60;
+    };
+  };
+
+  # Breeze window decoration settings (titlebar exceptions)
+  "breezerc" = {
+    Common = {
+      OutlineIntensity = "OutlineOff";
+      ShadowSize = "ShadowVeryLarge";
+    };
+    "Windeco Exception 0" = {
+      BorderSize = 0;
+      Enabled = true;
+      ExceptionPattern = "alacritty";
+      ExceptionType = 0;
+      HideTitleBar = true;
+      Mask = 0;
+    };
+    "Windeco Exception 1" = {
+      BorderSize = 0;
+      Enabled = true;
+      ExceptionPattern = "vivaldi";
+      ExceptionType = 0;
+      HideTitleBar = true;
+      Mask = 0;
+    };
+    "Windeco Exception 2" = {
+      BorderSize = 0;
+      Enabled = true;
+      ExceptionPattern = "net-runelite-client-RuneLite";
+      ExceptionType = 0;
+      HideTitleBar = true;
+      Mask = 0;
+    };
+  };
+
   # dolphinrc.Search.SearchTool = "Baloo";
   # baloofilerc.General.dbVersion = 2;
   # baloofilerc.General."exclude filters" = "*~,*.part,*.o,*.la,*.lo,*.loT,*.moc,moc_*.cpp,qrc_*.cpp,ui_*.h,cmake_install.cmake,CMakeCache.txt,CTestTestfile.cmake,libtool,config.status,confdefs.h,autom4te,conftest,confstat,Makefile.am,*.gcode,.ninja_deps,.ninja_log,build.ninja,*.csproj,*.m4,*.rej,*.gmo,*.pc,*.omf,*.aux,*.tmp,*.po,*.vm*,*.nvram,*.rcore,*.swp,*.swap,lzo,litmain.sh,*.orig,.histfile.*,.xsession-errors*,*.map,*.so,*.a,*.db,*.qrc,*.ini,*.init,*.img,*.vdi,*.vbox*,vbox.log,*.qcow2,*.vmdk,*.vhd,*.vhdx,*.sql,*.sql.gz,*.ytdl,*.tfstate*,*.class,*.pyc,*.pyo,*.elc,*.qmlc,*.jsc,*.fastq,*.fq,*.gb,*.fasta,*.fna,*.gbff,*.faa,po,CVS,.svn,.git,_darcs,.bzr,.hg,CMakeFiles,CMakeTmp,CMakeTmpQmake,.moc,.obj,.pch,.uic,.npm,.yarn,.yarn-cache,__pycache__,node_modules,node_packages,nbproject,.terraform,.venv,venv,core-dumps,lost+found";
