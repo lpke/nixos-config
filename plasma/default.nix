@@ -21,6 +21,11 @@
 
   dataFile = import ./dataFile.nix;
 
+  workspace = {
+    colorScheme = "BreezeDark";
+    wallpaper = null; # set non-declaratively
+  };
+
   kwin = {
     effects.desktopSwitching.animation = "off"; # default: "slide"
   };
