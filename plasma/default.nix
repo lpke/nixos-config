@@ -15,6 +15,8 @@
 
   shortcuts = import ./shortcuts.nix;
 
+  panels = import ./panels.nix;
+
   configFile = import ./configFile.nix;
 
   dataFile = import ./dataFile.nix;
