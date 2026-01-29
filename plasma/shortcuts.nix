@@ -76,7 +76,6 @@
   # launching
   "services/Alacritty.desktop"._launch = "Meta+M";
   "services/vivaldi-stable.desktop"._launch = "Meta+N";
-  "services/org.kde.plasma.colorpicker"._launch = "Meta+Alt+Shift+C";
   # window growing (native)
   kwin."Window Grow Horizontal" = "Meta+Alt+G";
   kwin."Window Grow Vertical" = "Meta+Alt+F";
@@ -139,6 +138,8 @@
   kwin."Window Close" = ["Ctrl+Del" "Meta+/"]; # close currently focused window. default: Alt+F4
 
   # ====== KEPT DEFAULTS ======
+  # launching
+  plasmashell."activate application launcher" = ["Meta" "Alt+F1"];
   # exploded views
   kwin.Overview = "Meta+W";
   kwin."Grid View" = "Meta+G";
@@ -248,7 +249,6 @@
   # org_kde_powerdevil."Toggle Keyboard Backlight" = "Keyboard Light On/Off";
   # org_kde_powerdevil."Turn Off Screen" = [];
   # plasmashell."Slideshow Wallpaper Next Image" = [];
-  # plasmashell."activate application launcher" = ["Meta" "Alt+F1"];
   #
   # plasmashell.clear-history = [];
   # plasmashell.clipboard_action = "Meta+Ctrl+X";
