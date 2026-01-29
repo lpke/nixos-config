@@ -22,38 +22,62 @@
     # widgets on the panel - left to right
     widgets = [
       # Icons-only Task Manager
+      # {
+      #   iconTasks = {
+      #     iconsOnly = true;
+      #     launchers = []; # no pinned apps
+      #     appearance = {
+      #       iconSpacing = "large";
+      #       indicateAudioStreams = true;
+      #       showTooltips = true; # show windows on hover
+      #       highlightWindows = true; # reveal hovered window
+      #       rows = {
+      #         multirowView = "never";
+      #       };
+      #     };
+      #     behavior = {
+      #       # sortingMethod = "byHorizontalPosition";
+      #       minimizeActiveTaskOnClick = true;
+      #       middleClickAction = "newInstance";
+      #       unhideOnAttentionNeeded = true;
+      #       newTasksAppearOn = "right";
+      #       showTasks = {
+      #         onlyInCurrentScreen = true;
+      #         onlyInCurrentDesktop = true;
+      #         onlyInCurrentActivity = true;
+      #       };
+      #       grouping = {
+      #         method = "byProgramName";
+      #       };
+      #       wheel = {
+      #         ignoreMinimizedTasks = true;
+      #         switchBetweenTasks = true;
+      #       };
+      #     };
+      #   };
+      # }
+
+      # Icons-only Task Manager (raw config as some things above weren't working)
       {
-        iconTasks = {
-          iconsOnly = true;
-          launchers = []; # no pinned apps
-          appearance = {
-            iconSpacing = "large";
-            indicateAudioStreams = true;
-            showTooltips = true; # show windows on hover
-            highlightWindows = true; # reveal hovered window
-            rows = {
-              multirowView = "never";
-            };
-          };
-          behavior = {
-            sortingMethod = "byHorizontalPosition";
-            minimizeActiveTaskOnClick = true;
-            middleClickAction = "newInstance";
-            unhideOnAttentionNeeded = true;
-            newTasksAppearOn = "right";
-            showTasks = {
-              onlyInCurrentScreen = true;
-              onlyInCurrentDesktop = true;
-              onlyInCurrentActivity = true;
-            };
-            grouping = {
-              method = "byProgramName";
-            };
-            wheel = {
-              ignoreMinimizedTasks = true;
-              switchBetweenTasks = true;
-            };
-          };
+        name = "org.kde.plasma.icontasks";
+        config.General = {
+          forceStripes = false;
+          groupingStrategy = 1;           # byProgramName
+          highlightWindows = true;
+          iconSpacing = 3;                # large
+          indicateAudioStreams = true;
+          launchers = "";
+          middleClickAction = 2;          # newInstance
+          minimizeActiveTaskOnClick = true;
+          reverseMode = false;
+          showOnlyCurrentActivity = true;
+          showOnlyCurrentDesktop = true;
+          showOnlyCurrentScreen = true;
+          showToolTips = true;
+          sortingStrategy = 6;            # <-- changed from 5
+          unhideOnAttention = true;
+          wheelEnabled = true;
+          wheelSkipMinimized = true;
         };
       }
 
@@ -100,6 +124,8 @@
           applicationsDisplayMode = "list";
           showButtonsFor = "power";
           showActionButtonCaptions = false; # no captions for shutdown,sleep,etc buttons
+          popupWidth = 950;
+          popupHeight = 625;
         };
       }
 
@@ -182,8 +208,7 @@
           };
           time = {
             format = "default";
-            showSeconds = "never"; # TEMP: revert after testing
-            # showSeconds = "onlyInTooltip";
+            showSeconds = "onlyInTooltip";
           };
           timeZone = {
             selected = [
@@ -201,6 +226,7 @@
           };
           font = {
             family = "JetBrains Mono";
+            weight = 400;
             size = 10;
           };
         };
@@ -229,39 +255,27 @@
 
     # widgets on the panel - left to right
     widgets = [
-      # Icons-only Task Manager
+      # Icons-only Task Manager (raw config as some things above weren't working)
       {
-        iconTasks = {
-          iconsOnly = true;
-          launchers = []; # no pinned apps
-          appearance = {
-            iconSpacing = "large";
-            indicateAudioStreams = true;
-            showTooltips = true; # show windows on hover
-            highlightWindows = true; # reveal hovered window
-            rows = {
-              multirowView = "never";
-            };
-          };
-          behavior = {
-            sortingMethod = "byHorizontalPosition";
-            minimizeActiveTaskOnClick = true;
-            middleClickAction = "newInstance";
-            unhideOnAttentionNeeded = true;
-            newTasksAppearOn = "right";
-            showTasks = {
-              onlyInCurrentScreen = true;
-              onlyInCurrentDesktop = true;
-              onlyInCurrentActivity = true;
-            };
-            grouping = {
-              method = "byProgramName";
-            };
-            wheel = {
-              ignoreMinimizedTasks = true;
-              switchBetweenTasks = true;
-            };
-          };
+        name = "org.kde.plasma.icontasks";
+        config.General = {
+          forceStripes = false;
+          groupingStrategy = 1;           # byProgramName
+          highlightWindows = true;
+          iconSpacing = 3;                # large
+          indicateAudioStreams = true;
+          launchers = "";
+          middleClickAction = 2;          # newInstance
+          minimizeActiveTaskOnClick = true;
+          reverseMode = false;
+          showOnlyCurrentActivity = true;
+          showOnlyCurrentDesktop = true;
+          showOnlyCurrentScreen = true;
+          showToolTips = true;
+          sortingStrategy = 6;            # <-- changed from 5
+          unhideOnAttention = true;
+          wheelEnabled = true;
+          wheelSkipMinimized = true;
         };
       }
 
@@ -308,6 +322,8 @@
           applicationsDisplayMode = "list";
           showButtonsFor = "power";
           showActionButtonCaptions = false; # no captions for shutdown,sleep,etc buttons
+          popupWidth = 950;
+          popupHeight = 625;
         };
       }
 
@@ -378,8 +394,7 @@
           };
           time = {
             format = "default";
-            showSeconds = "never"; # TEMP: revert after testing
-            # showSeconds = "onlyInTooltip";
+            showSeconds = "onlyInTooltip";
           };
           timeZone = {
             selected = [
@@ -397,6 +412,7 @@
           };
           font = {
             family = "JetBrains Mono";
+            weight = 400;
             size = 10;
           };
         };

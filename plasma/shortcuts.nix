@@ -97,6 +97,7 @@
   kwin."Window to Desktop 18" = [];
   kwin."Window to Desktop 19" = [];
   kwin."Window to Desktop 20" = [];
+  "org.kde.plasma.colorpicker"."_launch" = "Meta+Alt+Shift+C";
 
   # ====== CHANGED FROM DEFAULTS ======
   kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
