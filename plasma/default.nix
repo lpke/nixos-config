@@ -62,8 +62,8 @@
     # layouts
     kwin.KrohnkiteMonocleLayout = [];
     # rotate
-    kwin.KrohnkiteRotate = "Meta+o";
-    kwin.KrohnkiteRotatePart = "Meta+p";
+    kwin.KrohnkiteRotate = "Meta+Alt+o";
+    kwin.KrohnkiteRotatePart = "Meta+Alt+p";
     # increase/decrease
     kwin.KrohnkiteIncrease = "Meta+Alt+i";
     kwin.KrohnkiteDecrease = "Meta+Alt+u";
