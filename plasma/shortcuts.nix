@@ -73,6 +73,10 @@
   # kwin.KrohnkitetoggleDock = [ ];
 
   # ====== ADDED (no default) ======
+  # launching
+  "services/Alacritty.desktop"._launch = "Meta+M";
+  "services/vivaldi-stable.desktop"._launch = "Meta+N";
+  "services/org.kde.plasma.colorpicker"._launch = "Meta+Alt+Shift+C";
   # window growing (native)
   kwin."Window Grow Horizontal" = "Meta+Alt+G";
   kwin."Window Grow Vertical" = "Meta+Alt+F";
@@ -97,9 +101,13 @@
   kwin."Window to Desktop 18" = [];
   kwin."Window to Desktop 19" = [];
   kwin."Window to Desktop 20" = [];
-  "org.kde.plasma.colorpicker"."_launch" = "Meta+Alt+Shift+C";
 
   # ====== CHANGED FROM DEFAULTS ======
+  # launching
+  "services/org.kde.krunner.desktop"._launch = ["Meta+Space" "Search"]; # default: Search, Alt+Space, Alt+F2
+  "services/org.kde.spectacle.desktop"._launch = "Meta+Alt+Shift+S"; # default: Meta+Shift+s, Print (now yakuake)
+  yakuake.toggle-window-state = "Print"; # default: F12
+  # window misc
   kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
   # window directional focusing
   kwin."Switch Window Down" = "Meta+j"; # default: Meta+Alt+<arrow>
@@ -257,10 +265,5 @@
   # plasmashell."switch to next activity" = [];
   # plasmashell."switch to previous activity" = [];
   # plasmashell."toggle do not disturb" = [];
-  # "services/Alacritty.desktop"._launch = "Meta+M";
   # "services/org.kde.konsole.desktop"._launch = [];
-  # "services/org.kde.krunner.desktop"._launch = ["Meta+Space" "Search"];
-  # "services/org.kde.spectacle.desktop"._launch = "Meta+Alt+Shift+S";
-  # "services/vivaldi-stable.desktop"._launch = "Meta+N";
-  # yakuake.toggle-window-state = "Print";
 }
