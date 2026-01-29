@@ -1,4 +1,136 @@
 {
+  # Konsole/Yakuake Profiles
+  "konsole/luke_konsole.profile" = {
+    General = {
+      Name = "luke_konsole";
+      Command = ''/run/current-system/sw/bin/zsh -c "command -v tmux >/dev/null && { (tmux ls -F '#{session_name}:#{?session_attached,1,0}' 2>/dev/null | grep -q '^main:0$' && tmux attach -t main) || tmux attach -t $(tmux ls -F '#{session_name}:#{?session_attached,attached,detached}' 2>/dev/null | grep ':detached$' | head -1 | cut -d: -f1) 2>/dev/null || tmux new-session; }; exec zsh || exec zsh"'';
+      Icon = "akonadiconsole-symbolic";
+      Parent = "FALLBACK/";
+      ShowTerminalSizeHint = false;
+      TerminalMargin = 6;
+    };
+    Appearance = {
+      ColorScheme = "luke_rose-pine-yakuake";
+      BoldIntense = true;
+      BorderWhenActive = false;
+    };
+    Scrolling = {
+      HighlightScrolledLines = false;
+      HistoryMode = 2;
+      ScrollBarPosition = 2;
+    };
+  };
+  "konsole/luke_yakuake.profile" = {
+    General = {
+      Name = "luke_yakuake";
+      Command = ''/run/current-system/sw/bin/zsh -c "command -v tmux >/dev/null && tmux new-session -A -s yakuake; exec zsh || exec zsh"'';
+      Icon = "yakuake";
+      Parent = "FALLBACK/";
+      ShowTerminalSizeHint = false;
+      TerminalCenter = false;
+      TerminalMargin = 6;
+    };
+    Appearance = {
+      ColorScheme = "luke_rose-pine-yakuake";
+      BoldIntense = true;
+      BorderWhenActive = false;
+    };
+    Scrolling = {
+      HighlightScrolledLines = false;
+      HistoryMode = 2;
+      ScrollBarPosition = 2;
+    };
+  };
+
+  # Konsole/Yakuake Colorschemes
+  "konsole/luke_rose-pine.colorscheme" = {
+    General = {
+      Description = "luke_rose-pine";
+      Anchor = "0.5,0.5";
+      Blur = false;
+      ColorRandomization = false;
+      FillStyle = "Tile";
+      Opacity = 1;
+      Wallpaper = "";
+      WallpaperFlipType = "NoFlip";
+      WallpaperOpacity = 1;
+    };
+    Background.Color = "25,23,36";
+    BackgroundFaint.Color = "25,23,36";
+    BackgroundIntense.Color = "25,23,36";
+    Color0.Color = "38,35,58";
+    Color0Faint.Color = "38,35,58";
+    Color0Intense.Color = "110,106,134";
+    Color1.Color = "242,86,111";
+    Color1Faint.Color = "242,86,111";
+    Color1Intense.Color = "242,86,111";
+    Color2.Color = "58,138,170";
+    Color2Faint.Color = "58,138,170";
+    Color2Intense.Color = "47,153,138";
+    Color3.Color = "246,193,119";
+    Color3Faint.Color = "246,193,119";
+    Color3Intense.Color = "246,193,119";
+    Color4.Color = "156,207,216";
+    Color4Faint.Color = "156,207,216";
+    Color4Intense.Color = "156,207,216";
+    Color5.Color = "196,167,231";
+    Color5Faint.Color = "196,167,231";
+    Color5Intense.Color = "196,167,231";
+    Color6.Color = "235,188,186";
+    Color6Faint.Color = "235,188,186";
+    Color6Intense.Color = "235,188,186";
+    Color7.Color = "224,222,236";
+    Color7Faint.Color = "224,222,236";
+    Color7Intense.Color = "224,222,236";
+    Foreground.Color = "224,222,236";
+    ForegroundFaint.Color = "224,222,236";
+    ForegroundIntense.Color = "224,222,236";
+  };
+  "konsole/luke_rose-pine-yakuake.colorscheme" = {
+    General = {
+      Description = "luke_rose-pine-yakuake";
+      Anchor = "0.5,0.5";
+      Blur = false;
+      ColorRandomization = false;
+      FillStyle = "Tile";
+      Opacity = 1;
+      Wallpaper = "";
+      WallpaperFlipType = "NoFlip";
+      WallpaperOpacity = 1;
+    };
+    Background.Color = "32,35,38";
+    BackgroundFaint.Color = "32,35,38";
+    BackgroundIntense.Color = "32,35,38";
+    Color0.Color = "38,35,58";
+    Color0Faint.Color = "38,35,58";
+    Color0Intense.Color = "110,106,134";
+    Color1.Color = "242,86,111";
+    Color1Faint.Color = "242,86,111";
+    Color1Intense.Color = "242,86,111";
+    Color2.Color = "58,138,170";
+    Color2Faint.Color = "58,138,170";
+    Color2Intense.Color = "47,153,138";
+    Color3.Color = "246,193,119";
+    Color3Faint.Color = "246,193,119";
+    Color3Intense.Color = "246,193,119";
+    Color4.Color = "156,207,216";
+    Color4Faint.Color = "156,207,216";
+    Color4Intense.Color = "156,207,216";
+    Color5.Color = "196,167,231";
+    Color5Faint.Color = "196,167,231";
+    Color5Intense.Color = "196,167,231";
+    Color6.Color = "235,188,186";
+    Color6Faint.Color = "235,188,186";
+    Color6Intense.Color = "235,188,186";
+    Color7.Color = "224,222,236";
+    Color7Faint.Color = "224,222,236";
+    Color7Intense.Color = "224,222,236";
+    Foreground.Color = "224,222,236";
+    ForegroundFaint.Color = "224,222,236";
+    ForegroundIntense.Color = "224,222,236";
+  };
+
+  # AUTO-GENERATED - not sorted/reviewed yet:
   # "kate/anonymous.katesession"."Document 0".URL = "";
   # "kate/anonymous.katesession"."Kate Plugins".bookmarksplugin = false;
   # "kate/anonymous.katesession"."Kate Plugins".cmaketoolsplugin = false;

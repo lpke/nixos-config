@@ -14,7 +14,9 @@
   # NOT ALL SETTINGS ARE HERE - only ones I want to disable/change/explicitly keep
 
   shortcuts = import ./shortcuts.nix;
+
   configFile = import ./configFile.nix;
+
   dataFile = import ./dataFile.nix;
 
   kwin = {
