@@ -99,6 +99,11 @@ let
 
 in
   {
+  shortcuts = {
+    # Yakuake Shortcuts
+    yakuake.toggle-window-state = "Print"; # default: F12
+  };
+
   configFile = {
     # Konsole Settings
     "konsolerc" = {

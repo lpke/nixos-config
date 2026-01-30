@@ -2,10 +2,12 @@
 
 let
   krohnkite = (import ./krohnkite.nix).shortcuts;
+  konsoleYakuake = (import ./konsole-yakuake.nix { inherit lib; }).shortcuts;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in shortcuts:
     krohnkite
+    konsoleYakuake
     # all other shortcuts:
     {
       # ====== DISABLED ======
@@ -73,7 +75,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       # launching
       "services/org.kde.krunner.desktop"._launch = ["Meta+Space" "Search"]; # default: Search, Alt+Space, Alt+F2
       "services/org.kde.spectacle.desktop"._launch = "Meta+Alt+Shift+S"; # default: Meta+Shift+s, Print (now yakuake)
-      yakuake.toggle-window-state = "Print"; # default: F12
       # window misc
       kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
       # window directional focusing
