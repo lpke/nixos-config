@@ -1,14 +1,19 @@
-{
+let
+  # factory function for creating maps that exclude my mouse
+  noMouse = map: map // {
+    device = {
+      not = [ "Logitech G903" ];
+    } // (map.device or {});
+  };
+in
+  {
   # for key-to-key remaps (no combos/sequences)
   modmap = [];
 
   # for anything with sequences
   keymap = [
-    {
+    (noMouse {
       name = "Runelite";
-      device = {
-        not = [ "Logitech G903" ];
-      };
       application = {
         only = [ "/runelite/" ];
       };
@@ -24,6 +29,6 @@
         "C-r" = "9";
         "C-t" = "0";
       };
-    }
+    })
   ];
 }
