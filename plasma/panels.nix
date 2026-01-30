@@ -1,6 +1,7 @@
 # Overview: https://thedocumentation.org/plasma-manager/configuration/panels/
 # Widget config: https://github.com/nix-community/plasma-manager/tree/trunk/modules/widgets
 # Tip: Go to source code module for something, and ask AI to parse and present available options
+{ lib }:
 
 let
   # ══════════════════════════════════════════════════════════════════

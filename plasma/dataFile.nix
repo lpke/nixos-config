@@ -1,3 +1,5 @@
+{ lib }:
+
 {
   # Konsole/Yakuake Profiles
   "konsole/luke_konsole.profile" = {
