@@ -1,4 +1,5 @@
 # These settings are imported and merged into the rest of the plasma-manager config
+
 {
   shortcuts = {
     # focus - disabled as it's handled natively
@@ -15,10 +16,10 @@
     kwin.KrohnkiteShiftRight = "Meta+Right";
     kwin.KrohnkiteShiftUp = "Meta+Up";
     # resize
-    kwin.KrohnkiteGrowHeight = "Meta+Alt+Down";
-    kwin.KrohnkitegrowWidth = "Meta+Alt+Right";
-    kwin.KrohnkiteShrinkHeight = "Meta+Alt+Up";
-    kwin.KrohnkiteShrinkWidth = "Meta+Alt+Left";
+    kwin.KrohnkiteGrowHeight = "Meta+Alt+j";
+    kwin.KrohnkitegrowWidth = "Meta+Alt+l";
+    kwin.KrohnkiteShrinkHeight = "Meta+Alt+k";
+    kwin.KrohnkiteShrinkWidth = "Meta+Alt+h";
     # floating
     kwin.KrohnkiteToggleFloat = "Meta+F";
     kwin.KrohnkiteFloatAll = "Meta+Shift+F";
