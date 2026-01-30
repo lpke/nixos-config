@@ -27,6 +27,8 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin.ExposeAll = [];
       kwin.ExposeClass = [];
       kwin.ExposeClassCurrentDesktop = [];
+      "KDE Keyboard Layout Switcher"."Switch to Last-Used Keyboard Layout" = []; # default: Meta+Alt+L
+      "KDE Keyboard Layout Switcher"."Switch to Next Keyboard Layout" = []; # default: Meta+Alt+K
       # window tiling (handle with Krohnkite)
       kwin."Edit Tiles" = [];
       kwin."Window Quick Tile Bottom" = [];
