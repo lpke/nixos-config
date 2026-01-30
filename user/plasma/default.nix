@@ -9,6 +9,7 @@ in
 {
   shortcuts = withDeps ./shortcuts.nix;
   panels = withDeps ./panels.nix;
+  window-rules = withDeps ./window-rules.nix;
   configFile = withDeps ./configFile.nix;
   dataFile = withDeps ./dataFile.nix;
 
