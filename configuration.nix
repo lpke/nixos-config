@@ -191,6 +191,7 @@
     kdePackages.kfind
     kdePackages.filelight
     kdePackages.accessibility-inspector
+    kdePackages.krohnkite # tiling window manager
     git
     delta # syntax highlighting pager for git
     alacritty
