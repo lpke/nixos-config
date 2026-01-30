@@ -43,6 +43,8 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window Quick Tile Top Right" = [];
 
       # ====== ADDED (no default) ======
+      # window misc
+      kwin."Window No Border" = "Meta+D";
       # launching
       "services/Alacritty.desktop"._launch = "Meta+M";
       "services/vivaldi-stable.desktop"._launch = "Meta+N";
@@ -72,11 +74,13 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window to Desktop 20" = [];
 
       # ====== CHANGED FROM DEFAULTS ======
+      # window misc
+      kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
       # launching
       "services/org.kde.krunner.desktop"._launch = ["Meta+Space" "Search"]; # default: Search, Alt+Space, Alt+F2
       "services/org.kde.spectacle.desktop"._launch = "Meta+Alt+Shift+S"; # default: Meta+Shift+s, Print (now yakuake)
-      # window misc
-      kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
+      # alt-tabbing
+      kwin."Walk Through Windows of Current Application" = "Meta+Shift+Tab"; # default: meta+`, alt+`
       # window directional focusing
       kwin."Switch Window Down" = "Meta+j"; # default: Meta+Alt+<arrow>
       kwin."Switch Window Left" = "Meta+h";
@@ -107,6 +111,8 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window Close" = ["Ctrl+Del" "Meta+/"]; # close currently focused window. default: Alt+F4
 
       # ====== KEPT DEFAULTS ======
+      # alt-tabbing
+      kwin."Walk Through Windows" = "Meta+Tab"; # default: alt+tab, meta+tab
       # launching
       plasmashell."activate application launcher" = ["Meta" "Alt+F1"];
       # exploded views
@@ -141,11 +147,9 @@ in lib.foldl' lib.recursiveUpdate {} [
       # kwin."Switch to Screen to the Right" = [];
       # kwin."Toggle Night Color" = [];
       # kwin."Toggle Window Raise/Lower" = [];
-      # kwin."Walk Through Windows" = "Meta+Tab";
       # kwin."Walk Through Windows (Reverse)" = [];
       # kwin."Walk Through Windows Alternative" = [];
       # kwin."Walk Through Windows Alternative (Reverse)" = [];
-      # kwin."Walk Through Windows of Current Application" = "Meta+Shift+Tab";
       # kwin."Walk Through Windows of Current Application (Reverse)" = [];
       # kwin."Walk Through Windows of Current Application Alternative" = [];
       # kwin."Walk Through Windows of Current Application Alternative (Reverse)" = [];
@@ -162,7 +166,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       # kwin."Window Minimize" = "Meta+PgDown";
       # kwin."Window Move" = [];
       # kwin."Window Move Center" = [];
-      # kwin."Window No Border" = "Meta+D";
       # kwin."Window On All Desktops" = [];
       # kwin."Window One Desktop Down" = "Meta+Ctrl+Shift+Down";
       # kwin."Window One Desktop Up" = "Meta+Ctrl+Shift+Up";

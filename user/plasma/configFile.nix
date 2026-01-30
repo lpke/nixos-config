@@ -3,49 +3,19 @@
 let
   krohnkite = (import ./apps/krohnkite.nix).configFile;
   konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).configFile;
+  windowDecorations = (import ./apps/windowDecorations.nix).configFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
     krohnkite
     konsoleYakuake
+    windowDecorations
     # all other configs:
     {
       # dolphin (file explorer)
       dolphinrc.General.ShowFullPath = true;
       dolphinrc.General.DoubleClickViewAction = "show_terminal_panel";
       dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
-
-      # Breeze window decoration settings (titlebar exceptions)
-      "breezerc" = {
-        Common = {
-          OutlineIntensity = "OutlineOff";
-          ShadowSize = "ShadowVeryLarge";
-        };
-        "Windeco Exception 0" = {
-          BorderSize = 0;
-          Enabled = true;
-          ExceptionPattern = "alacritty";
-          ExceptionType = 0;
-          HideTitleBar = true;
-          Mask = 0;
-        };
-        "Windeco Exception 1" = {
-          BorderSize = 0;
-          Enabled = true;
-          ExceptionPattern = "vivaldi";
-          ExceptionType = 0;
-          HideTitleBar = true;
-          Mask = 0;
-        };
-        "Windeco Exception 2" = {
-          BorderSize = 0;
-          Enabled = true;
-          ExceptionPattern = "net-runelite-client-RuneLite";
-          ExceptionType = 0;
-          HideTitleBar = true;
-          Mask = 0;
-        };
-      };
 
       # dolphinrc.Search.SearchTool = "Baloo";
       # baloofilerc.General.dbVersion = 2;
