@@ -1,8 +1,8 @@
 { lib }:
 
 let
-  krohnkite = (import ./krohnkite.nix).configFile;
-  konsoleYakuake = (import ./konsole-yakuake.nix { inherit lib; }).configFile;
+  krohnkite = (import ./apps/krohnkite.nix).configFile;
+  konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).configFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:

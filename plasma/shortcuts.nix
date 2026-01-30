@@ -1,8 +1,8 @@
 { lib }:
 
 let
-  krohnkite = (import ./krohnkite.nix).shortcuts;
-  konsoleYakuake = (import ./konsole-yakuake.nix { inherit lib; }).shortcuts;
+  krohnkite = (import ./apps/krohnkite.nix).shortcuts;
+  konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).shortcuts;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in shortcuts:

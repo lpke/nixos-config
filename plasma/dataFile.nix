@@ -1,7 +1,7 @@
 { lib }:
 
 let
-  konsoleYakuake = (import ./konsole-yakuake.nix { inherit lib; }).dataFile;
+  konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).dataFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
