@@ -30,8 +30,15 @@
   kwin."Window Quick Tile Top Right" = [];
 
   # ====== KROHNKITE ======
-  kwin.KrohnkiteSetMaster = "Meta+Return";
+  # focus - disabled as it's handled natively
+  kwin.KrohnkiteFocusDown = [];
+  kwin.KrohnkiteFocusLeft = [];
+  kwin.KrohnkiteFocusRight = [];
+  kwin.KrohnkiteFocusUp = [];
+  kwin.KrohnkiteFocusNext = [];
+  kwin.KrohnkiteFocusPrev = [];
   # move
+  kwin.KrohnkiteSetMaster = "Meta+Return"; # move window to master node
   kwin.KrohnkiteShiftDown = "Meta+Down";
   kwin.KrohnkiteShiftLeft = "Meta+Left";
   kwin.KrohnkiteShiftRight = "Meta+Right";
@@ -45,32 +52,27 @@
   kwin.KrohnkiteToggleFloat = "Meta+F";
   kwin.KrohnkiteFloatAll = "Meta+Shift+F";
   # layouts
+  kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
+  kwin.KrohnkitePreviousLayout = "Meta+|";
   kwin.KrohnkiteMonocleLayout = [];
+  kwin.KrohnkiteBTreeLayout = [];
+  kwin.KrohnkiteColumnsLayout = [];
+  kwin.KrohnkiteFloatingLayout = [];
+  kwin.KrohnkiteQuarterLayout = [];
+  kwin.KrohnkiteSpiralLayout = [];
+  kwin.KrohnkiteSpreadLayout = [];
+  kwin.KrohnkiteStackedLayout = [];
+  kwin.KrohnkiteStairLayout = [];
+  kwin.KrohnkiteTileLayout = [];
+  kwin.KrohnkiteTreeColumnLayout = [];
   # rotate
   kwin.KrohnkiteRotate = "Meta+Alt+o";
   kwin.KrohnkiteRotatePart = "Meta+Alt+p";
-  # increase/decrease
+  # increase/decrease (number of master nodes)
   kwin.KrohnkiteIncrease = "Meta+Alt+i";
   kwin.KrohnkiteDecrease = "Meta+Alt+u";
-  # kwin.KrohnkiteBTreeLayout = [ ];
-  # kwin.KrohnkiteColumnsLayout = [ ];
-  # kwin.KrohnkiteFloatingLayout = [ ];
-  # kwin.KrohnkiteFocusDown = [ ];
-  # kwin.KrohnkiteFocusLeft = [ ];
-  # kwin.KrohnkiteFocusNext = [ ];
-  # kwin.KrohnkiteFocusPrev = "Meta+\\";
-  # kwin.KrohnkiteFocusRight = [ ];
-  # kwin.KrohnkiteFocusUp = [ ];
-  # kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
-  # kwin.KrohnkitePreviousLayout = "Meta+|";
-  # kwin.KrohnkiteQuarterLayout = [ ];
-  # kwin.KrohnkiteSpiralLayout = [ ];
-  # kwin.KrohnkiteSpreadLayout = [ ];
-  # kwin.KrohnkiteStackedLayout = [ ];
-  # kwin.KrohnkiteStairLayout = [ ];
-  # kwin.KrohnkiteTileLayout = [ ];
-  # kwin.KrohnkiteTreeColumnLayout = [ ];
-  # kwin.KrohnkitetoggleDock = [ ];
+  # TODO:
+  # kwin.KrohnkitetoggleDock = [];
 
   # ====== ADDED (no default) ======
   # launching

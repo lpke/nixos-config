@@ -5,11 +5,24 @@
   dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
 
   # krohnkite
-  kwinrc.Plugins.krohnkiteEnabled = true;
+  kwinrc.Plugins.krohnkiteEnabled = true; # enable krohnkite in "KWin Scripts" settings (check the box)
+  # window rules
   kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
   kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";
   kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
-  # kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
+  # layout order (0 = disabled)
+  kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
+  kwinrc.Script-krohnkite.threeColumnLayoutOrder = 2;
+  kwinrc.Script-krohnkite.columnsLayoutOrder = 3;
+  kwinrc.Script-krohnkite.quarterLayoutOrder = 4;
+  kwinrc.Script-krohnkite.binaryTreeLayoutOrder = 0;
+  kwinrc.Script-krohnkite.cascadeLayoutOrder = 0;
+  kwinrc.Script-krohnkite.floatingLayoutOrder = 0;
+  kwinrc.Script-krohnkite.monocleLayoutOrder = 0;
+  kwinrc.Script-krohnkite.spiralLayoutOrder = 0;
+  kwinrc.Script-krohnkite.spreadLayoutOrder = 0;
+  kwinrc.Script-krohnkite.stackedLayoutOrder = 0;
+  kwinrc.Script-krohnkite.stairLayoutOrder = 0;
 
   # Konsole settings
   "konsolerc" = {
