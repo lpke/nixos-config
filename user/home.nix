@@ -1,3 +1,6 @@
+# ══════════════════════════════════════════════════════════════════
+# HOME-MANAGER
+# ══════════════════════════════════════════════════════════════════
 { config, pkgs, lib, inputs, ... }:
 
 # `flake.nix` outputs > modules > home-manager.users.luke...
@@ -18,7 +21,7 @@
   programs.home-manager.enable = true;
 
   # ~/.config/autostart files
-  xdg.configFile = import ./autostart.nix;
+  xdg.configFile = import ./autostart;
 
   # KDE plasma settings (plasma-manager)
   programs.plasma = lib.recursiveUpdate

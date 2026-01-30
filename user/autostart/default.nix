@@ -1,3 +1,6 @@
+# ══════════════════════════════════════════════════════════════════
+# AUTOSTART
+# ══════════════════════════════════════════════════════════════════
 # Desktop Entry Specification:
 # https://specifications.freedesktop.org/desktop-entry/latest/
 

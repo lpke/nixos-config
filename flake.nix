@@ -1,3 +1,7 @@
+# ══════════════════════════════════════════════════════════════════
+# NIXOS CONFIG ENTRYPOINT: It all starts here!
+# ══════════════════════════════════════════════════════════════════
+
 {
   description = "NixOS config with Home Manager";
 
@@ -58,13 +62,13 @@
           specialArgs = { inherit pkgs-unstable pkgs-neovim; };
           modules = [
             # base config
-            ./configuration.nix
+            ./system/configuration.nix
             # enable home manager
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.luke = import ./home.nix;
+              home-manager.users.luke = import ./user/home.nix;
               # pass `inputs` to `home.nix` for access to modules like `xremap-flake`
               home-manager.extraSpecialArgs = { inherit inputs; };
               # modules enabled for all users

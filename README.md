@@ -2,6 +2,14 @@
 
 My configuration for NixOS.
 
+## Entrypoints
+
+The root entrypoint file is `/flake.nix`.
+
+System configuration starts with `/system/configuration.nix`
+
+User configuration with home-manager starts with `/user/home.nix`
+
 ## Building
 
 ```bash
