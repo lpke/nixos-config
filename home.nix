@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 # `flake.nix` outputs > modules > home-manager.users.luke...
 {
@@ -21,14 +21,18 @@
   xdg.configFile = import ./autostart.nix;
 
   # KDE plasma settings (plasma-manager)
-  programs.plasma = import ./plasma // {
-    enable = true;
-  };
+  programs.plasma = lib.recursiveUpdate
+    (import ./plasma { inherit lib; })
+    {
+      enable = true;
+    };
 
   # keyboard and mouse remaps
-  services.xremap = import ./xremap // {
-    enable = true;
-    withKDE = true;
-    debug = false; # journalctl --user -u xremap.service -f
-  }; 
+  services.xremap = lib.recursiveUpdate
+    (import ./xremap)
+    {
+      enable = true;
+      withKDE = true;
+      debug = false; # journalctl --user -u xremap.service -f
+    }; 
 }

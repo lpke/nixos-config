@@ -1,3 +1,5 @@
+{ lib }:
+
 {
   # GENERATE FROM ~/.config: `rc2nix`
   #   filter: `rc2nix | grep -i '<search>'
@@ -13,11 +15,11 @@
 
   # NOT ALL SETTINGS ARE HERE - only ones I want to disable/change/explicitly keep
 
-  shortcuts = import ./shortcuts.nix;
+  shortcuts = import ./shortcuts.nix { inherit lib; };
 
   panels = import ./panels.nix;
 
-  configFile = import ./configFile.nix;
+  configFile = import ./configFile.nix { inherit lib; };
 
   dataFile = import ./dataFile.nix;
 

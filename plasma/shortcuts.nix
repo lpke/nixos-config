@@ -1,3 +1,12 @@
+{ lib }:
+
+let
+  krohnkite = (import ./krohnkite.nix).shortcuts;
+
+in lib.recursiveUpdate
+# merged-in shortcuts:
+krohnkite
+# all other shortcuts:
 {
   # ====== DISABLED ======
   org_kde_powerdevil.powerProfile = ["Battery"]; # disabled default Meta+B
@@ -28,51 +37,6 @@
   kwin."Window Quick Tile Top" = [];
   kwin."Window Quick Tile Top Left" = [];
   kwin."Window Quick Tile Top Right" = [];
-
-  # ====== KROHNKITE ======
-  # focus - disabled as it's handled natively
-  kwin.KrohnkiteFocusDown = [];
-  kwin.KrohnkiteFocusLeft = [];
-  kwin.KrohnkiteFocusRight = [];
-  kwin.KrohnkiteFocusUp = [];
-  kwin.KrohnkiteFocusNext = [];
-  kwin.KrohnkiteFocusPrev = [];
-  # move
-  kwin.KrohnkiteSetMaster = "Meta+Return"; # move window to master node
-  kwin.KrohnkiteShiftDown = "Meta+Down";
-  kwin.KrohnkiteShiftLeft = "Meta+Left";
-  kwin.KrohnkiteShiftRight = "Meta+Right";
-  kwin.KrohnkiteShiftUp = "Meta+Up";
-  # resize
-  kwin.KrohnkiteGrowHeight = "Meta+Alt+Down";
-  kwin.KrohnkitegrowWidth = "Meta+Alt+Right";
-  kwin.KrohnkiteShrinkHeight = "Meta+Alt+Up";
-  kwin.KrohnkiteShrinkWidth = "Meta+Alt+Left";
-  # floating
-  kwin.KrohnkiteToggleFloat = "Meta+F";
-  kwin.KrohnkiteFloatAll = "Meta+Shift+F";
-  # layouts
-  kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
-  kwin.KrohnkitePreviousLayout = "Meta+|";
-  kwin.KrohnkiteMonocleLayout = [];
-  kwin.KrohnkiteBTreeLayout = [];
-  kwin.KrohnkiteColumnsLayout = [];
-  kwin.KrohnkiteFloatingLayout = [];
-  kwin.KrohnkiteQuarterLayout = [];
-  kwin.KrohnkiteSpiralLayout = [];
-  kwin.KrohnkiteSpreadLayout = [];
-  kwin.KrohnkiteStackedLayout = [];
-  kwin.KrohnkiteStairLayout = [];
-  kwin.KrohnkiteTileLayout = [];
-  kwin.KrohnkiteTreeColumnLayout = [];
-  # rotate
-  kwin.KrohnkiteRotate = "Meta+Alt+o";
-  kwin.KrohnkiteRotatePart = "Meta+Alt+p";
-  # increase/decrease (number of master nodes)
-  kwin.KrohnkiteIncrease = "Meta+Alt+i";
-  kwin.KrohnkiteDecrease = "Meta+Alt+u";
-  # TODO:
-  # kwin.KrohnkitetoggleDock = [];
 
   # ====== ADDED (no default) ======
   # launching
