@@ -99,6 +99,37 @@ let
 
 in
   {
+  configFile = {
+    # Konsole Settings
+    "konsolerc" = {
+      General.ConfigVersion = 1;
+      "Desktop Entry" = {
+        DefaultProfile = "${konsoleProfile}.profile";
+        MenuBar = "Disabled";
+      };
+      MainWindow.ToolBarsMovable = "Enabled";
+      "Notification Messages".CloseAllTabs = true;
+      TabBar.ExpandTabWidth = true;
+      UiSettings.ColorScheme = "";
+    };
+
+    # Yakuake Settings
+    "yakuakerc" = {
+      "Desktop Entry" = {
+        DefaultProfile = "${yakuakeProfile}.profile";
+      };
+      Animation.Frames = 16;
+      Dialogs.FirstRun = false;
+      Window = {
+        Height = 60;
+        KeepOpen = false;
+        ShowTabBar = false;
+        ShowTitleBar = false;
+        Width = 60;
+      };
+    };
+  };
+
   dataFile = {
     # Konsole/Yakuake Profiles
     "konsole/${konsoleProfile}.profile" = lib.recursiveUpdate sharedProfile {
