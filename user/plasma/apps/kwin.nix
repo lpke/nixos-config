@@ -9,8 +9,13 @@
 
     effects = {
       desktopSwitching.animation = "off"; # default: "slide"
-      hideCursor.enable = true; # hide cursor when typing
       shakeCursor.enable = false; # do not grow cursor when shaken
+      # hide cursor when typing
+      hideCursor = {
+        enable = true;
+        hideOnTyping = true;
+        hideOnInactivity = null;
+      };
     };
 
     titlebarButtons = {
