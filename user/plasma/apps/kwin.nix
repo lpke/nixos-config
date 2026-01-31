@@ -55,8 +55,7 @@
       # Modifier+Clicking: Any Window (> Window Actions)
       MouseBindings.CommandAllKey = "Meta"; # modifier
       MouseBindings.CommandAll1 = "Activate, raise and move"; # mod+left click
-      # MouseBindings.CommandAll2 = "Operations menu"; # mod+middle click
-      MouseBindings.CommandAll2 = "Activate, raise and move"; # TEMP: see if meta+middle moves window
+      MouseBindings.CommandAll2 = "Operations menu"; # mod+middle click
       MouseBindings.CommandAll3 = "Resize"; # mod+right click
       MouseBindings.CommandAllWheel = "Raise/Lower"; # mod+scroll
     };
