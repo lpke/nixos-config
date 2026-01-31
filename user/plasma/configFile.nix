@@ -5,6 +5,7 @@ let
   konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).configFile;
   windowDecorations = (import ./apps/windowDecorations.nix).configFile;
   kwin = (import ./apps/kwin.nix).configFile;
+  spectacle = (import ./apps/spectacle.nix).configFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
@@ -12,6 +13,7 @@ in lib.foldl' lib.recursiveUpdate {} [
     konsoleYakuake
     windowDecorations
     kwin
+    spectacle
     # all other configs:
     {
       kdeglobals = {
@@ -360,12 +362,4 @@ in lib.foldl' lib.recursiveUpdate {} [
       # plasmanotifyrc.Notifications.PopupPosition = "BottomRight";
       # plasmaparc.General.AudioFeedback = false;
       # plasmarc.Wallpapers.usersWallpapers = "";
-      # spectaclerc.Annotations.annotationToolType = 1;
-      # spectaclerc.ImageSave.imageFilenameTemplate = "screenshot_<yyyy>-<MM>-<dd>_<HH><mm><ss>";
-      # spectaclerc.ImageSave.lastImageSaveLocation = "file:///home/luke/Pictures/Screenshots/screenshot_2026-01-20_164806.png";
-      # spectaclerc.ImageSave.translatedScreenshotsFolder = "Screenshots";
-      # spectaclerc.VideoSave.preferredVideoFormat = 2;
-      # spectaclerc.VideoSave.translatedScreencastsFolder = "Screencasts";
-      # spectaclerc.VideoSave.videoFilenameTemplate = "recording_<yyyy>-<MM>-<dd>_<HH><mm><ss>";
-      # spectaclerc.VideoSave.videoSaveLocation = "file:///home/luke/Videos/Recordings/";
     }]

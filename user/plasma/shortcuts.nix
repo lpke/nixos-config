@@ -78,7 +78,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
       # launching
       "services/org.kde.krunner.desktop"._launch = ["Meta+Space" "Search"]; # default: Search, Alt+Space, Alt+F2
-      "services/org.kde.spectacle.desktop"._launch = "Meta+Alt+Shift+S"; # default: Meta+Shift+s, Print (now yakuake)
       # alt-tabbing
       kwin."Walk Through Windows of Current Application" = "Meta+Shift+Tab"; # default: meta+`, alt+`
       # window directional focusing

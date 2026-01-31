@@ -6,6 +6,8 @@
 let
   withDeps = path: import path { inherit lib; };
   kwinModule = (import ./apps/kwin.nix).kwin;
+  spectacleModule = (import ./apps/spectacle.nix).spectacle;
+
 in
   {
   # MODULES (high-level plasma-manager provided settings)
@@ -20,6 +22,7 @@ in
   panels = withDeps ./panels.nix;
   window-rules = withDeps ./window-rules.nix;
   kwin = kwinModule;
+  spectacle = spectacleModule;
 
   # CONFIG CONTROL (low-level handling of KDE config files in nix format)
 
