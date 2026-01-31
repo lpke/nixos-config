@@ -12,6 +12,11 @@
       hideCursor.enable = true; # hide cursor when typing
       shakeCursor.enable = false; # do not grow cursor when shaken
     };
+
+    titlebarButtons = {
+      left = ["on-all-desktops" "keep-above-windows" "help"];
+      right = ["minimize" "maximize" "close"];
+    };
   };
 
   configFile = {
