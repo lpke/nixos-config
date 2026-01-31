@@ -14,11 +14,87 @@ in lib.foldl' lib.recursiveUpdate {} [
     kwin
     # all other configs:
     {
+      kdeglobals = {
+        Shortcuts = {
+          RenameFile = "Ctrl+Return";
+          # DeleteWordForward = "";
+        };
+
+        General = {
+          # default terminal
+          TerminalApplication = "alacritty";
+          TerminalService = "Alacritty.desktop";
+          # text rendering
+          XftAntialias = true;
+          XftHintStyle = "hintslight";
+          XftSubPixel = "rgb";
+          # fonts
+          fixed = "JetBrainsMono Nerd Font Mono,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          font = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          menuFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          smallestReadableFont = "Noto Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          toolBarFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+        };
+
+        KDE = {
+          AnimationDurationFactor = 0.5;
+          DndBehavior = "MoveIfSameDevice"; # drag and drop behaviour
+          ShowDeleteCommand = false; # show perma-delete context option in dolphin etc
+        };
+
+        # open/save/file select dialogs
+        KFileDialog = {
+          "Allow Expansion" = true; # allow dropdown expansion in details view
+          "Automatically select filename extension" = true;
+          "Breadcrumb Navigation" = true;
+          "Decoration position" = 2;
+          "Show Full Path" = false; # show GUI path unless clicked
+          "Show Inline Previews" = true;
+          "Show Preview" = false;
+          "Show Speedbar" = true;
+          "Show hidden files" = true;
+          "Sort by" = "Name";
+          "Sort directories first" = true;
+          "Sort hidden files last" = false;
+          "Sort reversed" = false;
+          "Speedbar Width" = 173;
+          "View Style" = "DetailTree";
+        };
+      };
+
+      # System Settings > Mouse
+      kcminputrc = {
+        # "xremap" takes over keyboard and mouse when xremap is running
+        "Libinput/4660/22136/xremap" = {
+          Enabled = true;
+          PointerAcceleration = 0.000; # pointer speed (not technically acceleration)
+          PointerAccelerationProfile = 1; # disable acceleration (this is the checkbox in the GUI)
+          ScrollFactor = 1; # scroll speed
+        };
+        "Libinput/1133/16487/Logitech G903" = {
+          Enabled = true;
+          PointerAcceleration = 0.000;
+          PointerAccelerationProfile = 1;
+          ScrollFactor = 1;
+        };
+        "Libinput/12951/6505/ZSA Technology Labs Moonlander Mark I" = {
+          Enabled = true;
+          PointerAcceleration = 0.000;
+          PointerAccelerationProfile = 1;
+          ScrollFactor = 1;
+        };
+      };
+
+      systemsettingsrc = {
+        # open/save/file select dialog - static sidebar icons size
+        "KFileDialog Settings"."Places Icons Auto-resize" = false;
+        "KFileDialog Settings"."Places Icons Static Size" = 22;
+      };
+
       # dolphin (file explorer)
       dolphinrc.General.ShowFullPath = true;
       dolphinrc.General.DoubleClickViewAction = "show_terminal_panel";
       dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
-
 
       # dolphinrc.Search.SearchTool = "Baloo";
       # baloofilerc.General.dbVersion = 2;
@@ -247,58 +323,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       # katerc.lspclient.SymbolSort = false;
       # katerc.lspclient.SymbolTree = true;
       # katerc.lspclient.TypeFormatting = false;
-      # kcminputrc."Libinput/1133/16487/Logitech G903".Enabled = true;
-      # kcminputrc."Libinput/1133/16487/Logitech G903".PointerAcceleration = 0.000;
-      # kcminputrc."Libinput/1133/16487/Logitech G903".PointerAccelerationProfile = 1;
-      # kcminputrc."Libinput/1133/16487/Logitech G903".ScrollFactor = 1;
-      # kcminputrc."Libinput/12951/6505/ZSA Technology Labs Moonlander Mark I".PointerAccelerationProfile = 1;
-      # kcminputrc."Libinput/12951/6505/ZSA Technology Labs Moonlander Mark I".ScrollFactor = 3;
-      # kcminputrc."Libinput/4660/22136/xremap".PointerAccelerationProfile = 1;
-      # kcminputrc."Libinput/4660/22136/xremap".ScrollFactor = 1;
-      # kded5rc.Module-browserintegrationreminder.autoload = false;
-      # kded5rc.Module-device_automounter.autoload = false;
-      # kdeglobals.General.TerminalApplication = "alacritty";
-      # kdeglobals.General.TerminalService = "Alacritty.desktop";
-      # kdeglobals.General.UseSystemBell = true;
-      # kdeglobals.General.XftAntialias = true;
-      # kdeglobals.General.XftHintStyle = "hintslight";
-      # kdeglobals.General.XftSubPixel = "rgb";
-      # kdeglobals.General.fixed = "JetBrainsMono Nerd Font Mono,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-      # kdeglobals.General.font = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-      # kdeglobals.General.menuFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-      # kdeglobals.General.smallestReadableFont = "Noto Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-      # kdeglobals.General.toolBarFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-      # kdeglobals.KDE.AnimationDurationFactor = 0.5;
-      # kdeglobals.KDE.DndBehavior = "MoveIfSameDevice";
-      # kdeglobals.KDE.ShowDeleteCommand = false;
-      # kdeglobals."KFileDialog Settings"."Allow Expansion" = false;
-      # kdeglobals."KFileDialog Settings"."Automatically select filename extension" = true;
-      # kdeglobals."KFileDialog Settings"."Breadcrumb Navigation" = true;
-      # kdeglobals."KFileDialog Settings"."Decoration position" = 2;
-      # kdeglobals."KFileDialog Settings"."Show Full Path" = false;
-      # kdeglobals."KFileDialog Settings"."Show Inline Previews" = true;
-      # kdeglobals."KFileDialog Settings"."Show Preview" = false;
-      # kdeglobals."KFileDialog Settings"."Show Speedbar" = true;
-      # kdeglobals."KFileDialog Settings"."Show hidden files" = true;
-      # kdeglobals."KFileDialog Settings"."Sort by" = "Name";
-      # kdeglobals."KFileDialog Settings"."Sort directories first" = true;
-      # kdeglobals."KFileDialog Settings"."Sort hidden files last" = false;
-      # kdeglobals."KFileDialog Settings"."Sort reversed" = false;
-      # kdeglobals."KFileDialog Settings"."Speedbar Width" = 173;
-      # kdeglobals."KFileDialog Settings"."View Style" = "DetailTree";
-      # kdeglobals.KScreen.ScreenScaleFactors = "DP-1=1;DP-2=1;";
-      # kdeglobals."KShortcutsDialog Settings"."Dialog Size" = "600,480";
-      # kdeglobals.PreviewSettings.EnableRemoteFolderThumbnail = false;
-      # kdeglobals.PreviewSettings.MaximumRemoteSize = 0;
-      # kdeglobals.Shortcuts.DeleteWordForward = "";
-      # kdeglobals.Shortcuts.RenameFile = "Ctrl+Return";
-      # kdeglobals.WM.activeBackground = "39,44,49";
-      # kdeglobals.WM.activeBlend = "252,252,252";
-      # kdeglobals.WM.activeFont = "Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-      # kdeglobals.WM.activeForeground = "252,252,252";
-      # kdeglobals.WM.inactiveBackground = "32,36,40";
-      # kdeglobals.WM.inactiveBlend = "161,169,177";
-      # kdeglobals.WM.inactiveForeground = "161,169,177";
       # kiorc.Confirmations.ConfirmDelete = true;
       # kiorc.Confirmations.ConfirmEmptyTrash = true;
       # kiorc.Confirmations.ConfirmTrash = false;
@@ -331,30 +355,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       # ktrashrc."\\/home\\/luke\\/.local\\/share\\/Trash".UseSizeLimit = true;
       # ktrashrc."\\/home\\/luke\\/.local\\/share\\/Trash".UseTimeLimit = false;
       # kwalletrc.Wallet."First Use" = false;
-      # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".Description = "App - Minecraft Beta";
-      # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".adaptivesyncrule = 2;
-      # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".clientmachine = "localhost";
-      # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".wmclass = "Minecraft Minecraft Beta 1.7.3";
-      # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".wmclassmatch = 1;
-      # kwinrulesrc."415e7363-e7c9-4f52-bc38-8cfa6703094a".Description = "App - Vivaldi";
-      # kwinrulesrc."415e7363-e7c9-4f52-bc38-8cfa6703094a".noborder = true;
-      # kwinrulesrc."415e7363-e7c9-4f52-bc38-8cfa6703094a".noborderrule = 3;
-      # kwinrulesrc."415e7363-e7c9-4f52-bc38-8cfa6703094a".wmclass = "vivaldi";
-      # kwinrulesrc."415e7363-e7c9-4f52-bc38-8cfa6703094a".wmclasscomplete = true;
-      # kwinrulesrc."415e7363-e7c9-4f52-bc38-8cfa6703094a".wmclassmatch = 2;
-      # kwinrulesrc."6ad308fc-ed84-4d03-9f87-41c3ffca52b9".Description = "App - Alacritty";
-      # kwinrulesrc."6ad308fc-ed84-4d03-9f87-41c3ffca52b9".noborder = true;
-      # kwinrulesrc."6ad308fc-ed84-4d03-9f87-41c3ffca52b9".noborderrule = 3;
-      # kwinrulesrc."6ad308fc-ed84-4d03-9f87-41c3ffca52b9".wmclass = "alacritty";
-      # kwinrulesrc."6ad308fc-ed84-4d03-9f87-41c3ffca52b9".wmclasscomplete = true;
-      # kwinrulesrc."6ad308fc-ed84-4d03-9f87-41c3ffca52b9".wmclassmatch = 2;
-      # kwinrulesrc."7de36d84-3740-4bdc-85f1-318ecabfdeea".Description = "App - RuneLite";
-      # kwinrulesrc."7de36d84-3740-4bdc-85f1-318ecabfdeea".adaptivesyncrule = 2;
-      # kwinrulesrc."7de36d84-3740-4bdc-85f1-318ecabfdeea".clientmachine = "localhost";
-      # kwinrulesrc."7de36d84-3740-4bdc-85f1-318ecabfdeea".wmclass = "net-runelite-client-RuneLite";
-      # kwinrulesrc."7de36d84-3740-4bdc-85f1-318ecabfdeea".wmclassmatch = 1;
-      # kwinrulesrc.General.count = 4;
-      # kwinrulesrc.General.rules = "6ad308fc-ed84-4d03-9f87-41c3ffca52b9,415e7363-e7c9-4f52-bc38-8cfa6703094a,29f89595-7245-4147-be0e-5be3cc6f96e6,7de36d84-3740-4bdc-85f1-318ecabfdeea";
       # plasma-localerc.Formats.LANG = "en_AU.UTF-8";
       # plasmanotifyrc."Applications/vivaldi-stable".Seen = true;
       # plasmanotifyrc.Notifications.PopupPosition = "BottomRight";
@@ -368,6 +368,4 @@ in lib.foldl' lib.recursiveUpdate {} [
       # spectaclerc.VideoSave.translatedScreencastsFolder = "Screencasts";
       # spectaclerc.VideoSave.videoFilenameTemplate = "recording_<yyyy>-<MM>-<dd>_<HH><mm><ss>";
       # spectaclerc.VideoSave.videoSaveLocation = "file:///home/luke/Videos/Recordings/";
-      # systemsettingsrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
-      # systemsettingsrc."KFileDialog Settings"."Places Icons Static Size" = 22;
     }]
