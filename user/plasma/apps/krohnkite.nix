@@ -48,8 +48,10 @@
   };
 
   configFile = {
-    # enable krohnkite in "KWin Scripts" settings (check the box)
+    # ENABLE KROHNKITE
+    # Equivilent of: System Settings > KWin Scripts > Krohnkite > check the box > apply)
     kwinrc.Plugins.krohnkiteEnabled = true;
+
     # window rules
     kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
     kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";

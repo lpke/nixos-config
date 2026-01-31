@@ -4,18 +4,21 @@ let
   krohnkite = (import ./apps/krohnkite.nix).configFile;
   konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).configFile;
   windowDecorations = (import ./apps/windowDecorations.nix).configFile;
+  kwin = (import ./apps/kwin.nix).configFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
     krohnkite
     konsoleYakuake
     windowDecorations
+    kwin
     # all other configs:
     {
       # dolphin (file explorer)
       dolphinrc.General.ShowFullPath = true;
       dolphinrc.General.DoubleClickViewAction = "show_terminal_panel";
       dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
+
 
       # dolphinrc.Search.SearchTool = "Baloo";
       # baloofilerc.General.dbVersion = 2;
@@ -328,46 +331,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       # ktrashrc."\\/home\\/luke\\/.local\\/share\\/Trash".UseSizeLimit = true;
       # ktrashrc."\\/home\\/luke\\/.local\\/share\\/Trash".UseTimeLimit = false;
       # kwalletrc.Wallet."First Use" = false;
-      # kwinrc.Desktops.Id_1 = "f1117005-f1e7-4df1-83eb-ecfe27b2e0d0";
-      # kwinrc.Desktops.Id_2 = "b40d255b-9a40-4c3e-a563-ad12704744d1";
-      # kwinrc.Desktops.Number = 2;
-      # kwinrc.Desktops.Rows = 1;
-      # kwinrc.Effect-overview.BorderActivate = 9;
-      # kwinrc.Effect-translucency.DropdownMenus = 51;
-      # kwinrc.Effect-translucency.Menus = 87;
-      # kwinrc.Effect-translucency.MoveResize = 100;
-      # kwinrc.MouseBindings.CommandAll1 = "Activate, raise and move";
-      # kwinrc.MouseBindings.CommandAll2 = "Operations menu";
-      # kwinrc.MouseBindings.CommandAllWheel = "Raise/Lower";
-      # kwinrc.MouseBindings.CommandTitlebarWheel = "Raise/Lower";
-      # kwinrc.Plugins.hidecursorEnabled = true;
-      # kwinrc.Plugins.screenedgeEnabled = false;
-      # kwinrc.Plugins.shakecursorEnabled = false;
-      # kwinrc.TabBox.MultiScreenMode = 1;
-      # kwinrc.Tiling.padding = 4;
-      # kwinrc."Tiling/39003a6d-8539-400a-aa6d-303deb36fc37/1eaeddaa-b4da-4d33-9949-cf60d288ef74".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/39003a6d-8539-400a-aa6d-303deb36fc37/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/39003a6d-8539-400a-aa6d-303deb36fc37/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/426ea396-5603-45fb-9fc6-b1ebb1ab7421/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/426ea396-5603-45fb-9fc6-b1ebb1ab7421/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/4b7e7978-f9fe-42ba-9006-5156ed788178/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/4b7e7978-f9fe-42ba-9006-5156ed788178/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/a066cbde-28df-46e4-8a12-b1b78e844418/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/a066cbde-28df-46e4-8a12-b1b78e844418/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/b40d255b-9a40-4c3e-a563-ad12704744d1/1eaeddaa-b4da-4d33-9949-cf60d288ef74".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/b40d255b-9a40-4c3e-a563-ad12704744d1/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/b40d255b-9a40-4c3e-a563-ad12704744d1/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/e812037a-6707-4551-b056-03f64db0caf3/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/e812037a-6707-4551-b056-03f64db0caf3/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/edbad974-7e93-4e3d-86c2-bceff8e862c1/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/edbad974-7e93-4e3d-86c2-bceff8e862c1/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e"."[Tiling][f1117005-f1e7-4df1-83eb-ecfe27b2e0d0][]" = "";
-      # kwinrc."Tiling/edbad974-7e93-4e3d-86c2-bceff8e862c1/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/f1117005-f1e7-4df1-83eb-ecfe27b2e0d0/1eaeddaa-b4da-4d33-9949-cf60d288ef74".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/f1117005-f1e7-4df1-83eb-ecfe27b2e0d0/369b6c02-4a29-4eb5-ac8d-2e287000305f".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/f1117005-f1e7-4df1-83eb-ecfe27b2e0d0/75305ad7-f910-40df-b3ca-ba9df6530060".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.25},{\"width\":0.5},{\"width\":0.25}]}";
-      # kwinrc."Tiling/f1117005-f1e7-4df1-83eb-ecfe27b2e0d0/bc9e6ab1-89b2-437a-9cf6-eba3b7b9037e".tiles = "{\"layoutDirection\":\"horizontal\",\"tiles\":[{\"width\":0.258430232558139},{\"width\":0.4915697674418611},{\"width\":0.2499999999999999}]}";
-      # kwinrc.Windows.TitlebarDoubleClickCommand = "Maximize (vertical only)";
-      # kwinrc.Xwayland.Scale = 1;
       # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".Description = "App - Minecraft Beta";
       # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".adaptivesyncrule = 2;
       # kwinrulesrc."29f89595-7245-4147-be0e-5be3cc6f96e6".clientmachine = "localhost";

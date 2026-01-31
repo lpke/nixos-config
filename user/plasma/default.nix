@@ -5,20 +5,24 @@
 
 let
   withDeps = path: import path { inherit lib; };
+  kwinModule = (import ./apps/kwin.nix).kwin;
 in
-{
-  shortcuts = withDeps ./shortcuts.nix;
-  panels = withDeps ./panels.nix;
-  window-rules = withDeps ./window-rules.nix;
-  configFile = withDeps ./configFile.nix;
-  dataFile = withDeps ./dataFile.nix;
+  {
+  # MODULES (high-level plasma-manager provided settings)
+  # https://github.com/nix-community/plasma-manager/tree/trunk/modules
 
   workspace = {
     colorScheme = "BreezeDark";
     wallpaper = null; # set non-declaratively
   };
 
-  kwin = {
-    effects.desktopSwitching.animation = "off"; # default: "slide"
-  };
+  shortcuts = withDeps ./shortcuts.nix;
+  panels = withDeps ./panels.nix;
+  window-rules = withDeps ./window-rules.nix;
+  kwin = kwinModule;
+
+  # CONFIG CONTROL (low-level handling of KDE config files in nix format)
+
+  configFile = withDeps ./configFile.nix;
+  dataFile = withDeps ./dataFile.nix;
 }
