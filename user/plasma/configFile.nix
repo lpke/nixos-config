@@ -37,12 +37,13 @@ in lib.foldl' lib.recursiveUpdate {} [
           XftAntialias = true;
           XftHintStyle = "hintslight";
           XftSubPixel = "rgb";
-          # fonts
-          fixed = "JetBrainsMono Nerd Font Mono,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          font = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          menuFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          smallestReadableFont = "Noto Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          toolBarFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          # fonts (handled in `fonts` module in `plasma/default.nix`)
+          # font = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          # fixed = "JetBrainsMono Nerd Font Mono,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          # smallestReadableFont = "Noto Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          # toolBarFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          # menuFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          # windowTitleFont = "Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"; # key name not verified
         };
 
         KDE = {
