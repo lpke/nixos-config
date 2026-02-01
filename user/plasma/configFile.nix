@@ -27,6 +27,12 @@ in lib.foldl' lib.recursiveUpdate {} [
       # plasmarc.Wallpapers.usersWallpapers = "";
       # kwalletrc.Wallet."First Use" = false;
 
+      # screen locking
+      kscreenlockerrc = {
+        Daemon.Autolock = false;
+        Daemon.Timeout = 0;
+      };
+
       kdeglobals = {
         Shortcuts = {
           RenameFile = "Ctrl+Return";
@@ -60,7 +66,6 @@ in lib.foldl' lib.recursiveUpdate {} [
           "Sort directories first" = true;
           "Sort hidden files last" = false;
           "Sort reversed" = false;
-          "Speedbar Width" = 173;
           "View Style" = "DetailTree";
         };
       };
@@ -90,26 +95,79 @@ in lib.foldl' lib.recursiveUpdate {} [
 
       systemsettingsrc = {
         # open/save/file select dialog - static sidebar icons size
-        "KFileDialog Settings"."Places Icons Auto-resize" = false;
-        "KFileDialog Settings"."Places Icons Static Size" = 22;
+        "KFileDialog Settings" = {
+          "Places Icons Auto-resize" = false;
+          "Places Icons Static Size" = 22;
+        };
       };
 
       # dolphin (file explorer)
       dolphinrc = {
         General = {
-          ShowFullPath = true;
+          ShowFullPath = true; # show path from root
           DoubleClickViewAction = "show_terminal_panel";
         };
-        "KFileDialog Settings"."Places Icons Auto-resize" = false;
-        Search.SearchTool = "Baloo";
+        Search = {
+          SearchTool = "Baloo";
+        };
+        # open/save/file select dialog - static sidebar icons size
+        "KFileDialog Settings" = {
+          "Places Icons Auto-resize" = false;
+          "Places Icons Static Size" = 22;
+        };
+      };
+
+      # moving/copying/deleting files/folders
+      kiorc = {
+        Confirmations = {
+          ConfirmDelete = true; # perma-delete
+          ConfirmTrash = false; # to trash
+          ConfirmEmptyTrash = true;
+        };
+        "Executable scripts".behaviourOnLaunch = "alwaysAsk";
       };
 
       # baloo (search tool/indexer used by KDE)
       baloofilerc = {
-        # General.dbVersion = 2;
-        # General."exclude filters" = "*~,*.part,*.o,*.la,*.lo,*.loT,*.moc,moc_*.cpp,qrc_*.cpp,ui_*.h,cmake_install.cmake,CMakeCache.txt,CTestTestfile.cmake,libtool,config.status,confdefs.h,autom4te,conftest,confstat,Makefile.am,*.gcode,.ninja_deps,.ninja_log,build.ninja,*.csproj,*.m4,*.rej,*.gmo,*.pc,*.omf,*.aux,*.tmp,*.po,*.vm*,*.nvram,*.rcore,*.swp,*.swap,lzo,litmain.sh,*.orig,.histfile.*,.xsession-errors*,*.map,*.so,*.a,*.db,*.qrc,*.ini,*.init,*.img,*.vdi,*.vbox*,vbox.log,*.qcow2,*.vmdk,*.vhd,*.vhdx,*.sql,*.sql.gz,*.ytdl,*.tfstate*,*.class,*.pyc,*.pyo,*.elc,*.qmlc,*.jsc,*.fastq,*.fq,*.gb,*.fasta,*.fna,*.gbff,*.faa,po,CVS,.svn,.git,_darcs,.bzr,.hg,CMakeFiles,CMakeTmp,CMakeTmpQmake,.moc,.obj,.pch,.uic,.npm,.yarn,.yarn-cache,__pycache__,node_modules,node_packages,nbproject,.terraform,.venv,venv,core-dumps,lost+found";
-        # General."exclude filters version" = 9;
-        # General."index hidden folders" = true;
+        General = {
+          "index hidden folders" = true;
+        };
+      };
+
+      # context menu options
+      kservicemenurc = {
+        Show = {
+          # compressfileitemaction = true;
+          # extractfileitemaction = true;
+          # filelight = true;
+          # forgetfileitemaction = true;
+          # installFont = true;
+          # kactivitymanagerd_fileitem_linking_plugin = true;
+          # kio-admin = true;
+          # makefileactions = true;
+          # mountisoaction = true;
+          # movetonewfolderitemaction = true;
+          # runInKonsole = true;
+          # setfoldericonitemaction = true;
+          # slideshowfileitemaction = true;
+          # tagsfileitemaction = true;
+          # wallpaperfileitemaction = true;
+        };
+      };
+
+      ktrashrc = {
+        # size limit
+        "\\/home\\/luke\\/.local\\/share\\/Trash".UseSizeLimit = true;
+        "\\/home\\/luke\\/.local\\/share\\/Trash".Percent = 5; # max trash size as percent of disk
+        "\\/home\\/luke\\/.local\\/share\\/Trash".LimitReachedAction = 1; # what happens if trash is full (size limit). 0 = warn, 1 = delete oldest, 2 = delete biggest
+        # time limit
+        "\\/home\\/luke\\/.local\\/share\\/Trash".UseTimeLimit = false;
+        "\\/home\\/luke\\/.local\\/share\\/Trash".Days = 30; # auto-delete files older than X days (if `UseTimeLimit` is on)
+      };
+
+      plasmanotifyrc = {
+        # "Applications/vivaldi-stable".Seen = true;
+        # Notifications.PopupPosition = "BottomRight";
       };
 
       katerc = {
@@ -160,9 +218,10 @@ in lib.foldl' lib.recursiveUpdate {} [
           # "Tabbar Tab Limit" = 0;
         };
 
+        # open/save/file select dialog - static sidebar icons size
         "KFileDialog Settings" = {
-          # "Places Icons Auto-resize" = false;
-          # "Places Icons Static Size" = 22;
+          "Places Icons Auto-resize" = false;
+          "Places Icons Static Size" = 22;
         };
 
         "KTextEditor Document" = {
@@ -366,50 +425,5 @@ in lib.foldl' lib.recursiveUpdate {} [
           # SymbolTree = true;
           # TypeFormatting = false;
         };
-      };
-
-      kiorc = {
-        # Confirmations.ConfirmDelete = true;
-        # Confirmations.ConfirmEmptyTrash = true;
-        # Confirmations.ConfirmTrash = false;
-        # "Executable scripts".behaviourOnLaunch = "alwaysAsk";
-      };
-
-      kscreenlockerrc = {
-        # Daemon.Autolock = false;
-        # Daemon.Timeout = 0;
-      };
-
-      kservicemenurc = {
-        Show = {
-          # compressfileitemaction = true;
-          # extractfileitemaction = true;
-          # filelight = true;
-          # forgetfileitemaction = true;
-          # installFont = true;
-          # kactivitymanagerd_fileitem_linking_plugin = true;
-          # kio-admin = true;
-          # makefileactions = true;
-          # mountisoaction = true;
-          # movetonewfolderitemaction = true;
-          # runInKonsole = true;
-          # setfoldericonitemaction = true;
-          # slideshowfileitemaction = true;
-          # tagsfileitemaction = true;
-          # wallpaperfileitemaction = true;
-        };
-      };
-
-      ktrashrc = {
-        # "\\/home\\/luke\\/.local\\/share\\/Trash".Days = 7;
-        # "\\/home\\/luke\\/.local\\/share\\/Trash".LimitReachedAction = 0;
-        # "\\/home\\/luke\\/.local\\/share\\/Trash".Percent = 10;
-        # "\\/home\\/luke\\/.local\\/share\\/Trash".UseSizeLimit = true;
-        # "\\/home\\/luke\\/.local\\/share\\/Trash".UseTimeLimit = false;
-      };
-
-      plasmanotifyrc = {
-        # "Applications/vivaldi-stable".Seen = true;
-        # Notifications.PopupPosition = "BottomRight";
       };
     }]
