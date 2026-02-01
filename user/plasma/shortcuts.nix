@@ -31,6 +31,15 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin.ExposeClassCurrentDesktop = [];
       "KDE Keyboard Layout Switcher"."Switch to Last-Used Keyboard Layout" = []; # default: Meta+Alt+L
       "KDE Keyboard Layout Switcher"."Switch to Next Keyboard Layout" = []; # default: Meta+Alt+K
+      kwin."Window to Next Screen" = []; # default: Meta+Shift+Right
+      kwin."Window to Previous Screen" = []; # default: Meta+Shift+Left
+      kwin.disableInputCapture = []; # default: Meta+Shift+Esc
+      # power
+      org_kde_powerdevil.Hibernate = []; # default: "Hibernate"
+      org_kde_powerdevil.PowerDown = []; # default: "Power Down"
+      org_kde_powerdevil.PowerOff = []; # default: "Power Off"
+      org_kde_powerdevil.Sleep = []; # default: "Sleep"
+      org_kde_powerdevil."Turn Off Screen" = [];
       # window tiling (handle with Krohnkite)
       kwin."Edit Tiles" = [];
       kwin."Window Quick Tile Bottom" = [];
@@ -43,14 +52,23 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window Quick Tile Top Right" = [];
 
       # ====== ADDED (no default) ======
-      # window misc
-      kwin."Window No Border" = "Meta+D";
       # launching
       "services/Alacritty.desktop"._launch = "Meta+M";
       "services/vivaldi-stable.desktop"._launch = "Meta+N";
+      # window misc
+      kwin."Window No Border" = "Meta+D";
+      kwin."Window Fullscreen" = "Meta+A"; # real fullscreen (covers panel)
+      # window move to another screen (monitor)
+      kwin."Window One Screen Up" = "Meta+Ctrl+Alt+Shift+Up";
+      kwin."Window One Screen Down" = "Meta+Ctrl+Alt+Shift+Down";
+      kwin."Window One Screen to the Left" = "Meta+Ctrl+Alt+Shift+Left";
+      kwin."Window One Screen to the Right" = "Meta+Ctrl+Alt+Shift+Right";
       # window growing (native)
-      kwin."Window Grow Horizontal" = "Meta+Alt+G";
       kwin."Window Grow Vertical" = "Meta+Alt+F";
+      kwin."Window Grow Horizontal" = "Meta+Alt+G";
+      # window maximizing (native)
+      kwin."Window Maximize Vertical" = "Meta+Alt+Shift+F";
+      kwin."Window Maximize Horizontal" = "Meta+Alt+Shift+G";
       # window move to specific desktop
       kwin."Window to Desktop 1" = "Meta+Alt+1";
       kwin."Window to Desktop 2" = "Meta+Alt+2";
@@ -74,8 +92,10 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window to Desktop 20" = [];
 
       # ====== CHANGED FROM DEFAULTS ======
+      # activities
+      plasmashell."manage activities" = "Meta+Q";
       # window misc
-      kwin."Window Maximize" = "Meta+s"; # default: Meta+PgUp
+      kwin."Window Maximize" = "Meta+S"; # fake fullscreen. default: Meta+PgUp
       # alt-tabbing
       kwin."Walk Through Windows of Current Application" = "Meta+Shift+Tab"; # default: meta+`, alt+`
       # window directional focusing
@@ -120,119 +140,12 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Switch One Desktop Up" = "Meta+Ctrl+Up";
       kwin."Switch One Desktop to the Left" = "Meta+Ctrl+Left";
       kwin."Switch One Desktop to the Right" = "Meta+Ctrl+Right";
+      # zooming
+      kwin.view_actual_size = "Meta+0";
+      kwin.view_zoom_in = ["Meta++" "Meta+="];
+      kwin.view_zoom_out = "Meta+-";
 
       # ====== ADDED TO DEFAULTS (default on left) ======
       # window killing
       kwin."Kill Window" = ["Meta+Ctrl+Esc" "Meta+Ctrl+Del"]; # trigger window kill cursor. default: Meta+Ctrl+Esc
-
-      # ====== TODO ======
-      # kwin."Switch to Next Desktop" = [];
-      # kwin."Switch to Next Screen" = [];
-      # kwin."Switch to Previous Desktop" = [];
-      # kwin."Switch to Previous Screen" = [];
-      # kwin."Switch to Screen 0" = [];
-      # kwin."Switch to Screen 1" = [];
-      # kwin."Switch to Screen 2" = [];
-      # kwin."Switch to Screen 3" = [];
-      # kwin."Switch to Screen 4" = [];
-      # kwin."Switch to Screen 5" = [];
-      # kwin."Switch to Screen 6" = [];
-      # kwin."Switch to Screen 7" = [];
-      # kwin."Switch to Screen Above" = [];
-      # kwin."Switch to Screen Below" = [];
-      # kwin."Switch to Screen to the Left" = [];
-      # kwin."Switch to Screen to the Right" = [];
-      # kwin."Toggle Night Color" = [];
-      # kwin."Toggle Window Raise/Lower" = [];
-      # kwin."Walk Through Windows (Reverse)" = [];
-      # kwin."Walk Through Windows Alternative" = [];
-      # kwin."Walk Through Windows Alternative (Reverse)" = [];
-      # kwin."Walk Through Windows of Current Application (Reverse)" = [];
-      # kwin."Walk Through Windows of Current Application Alternative" = [];
-      # kwin."Walk Through Windows of Current Application Alternative (Reverse)" = [];
-      # kwin."Window Above Other Windows" = [];
-      # kwin."Window Below Other Windows" = [];
-      # kwin."Window Custom Quick Tile Bottom" = [];
-      # kwin."Window Custom Quick Tile Left" = [];
-      # kwin."Window Custom Quick Tile Right" = [];
-      # kwin."Window Custom Quick Tile Top" = [];
-      # kwin."Window Fullscreen" = [];
-      # kwin."Window Lower" = [];
-      # kwin."Window Maximize Horizontal" = [];
-      # kwin."Window Maximize Vertical" = [];
-      # kwin."Window Minimize" = "Meta+PgDown";
-      # kwin."Window Move" = [];
-      # kwin."Window Move Center" = [];
-      # kwin."Window On All Desktops" = [];
-      # kwin."Window One Desktop Down" = "Meta+Ctrl+Shift+Down";
-      # kwin."Window One Desktop Up" = "Meta+Ctrl+Shift+Up";
-      # kwin."Window One Desktop to the Left" = "Meta+Ctrl+Shift+Left";
-      # kwin."Window One Desktop to the Right" = "Meta+Ctrl+Shift+Right";
-      # kwin."Window One Screen Down" = [];
-      # kwin."Window One Screen Up" = [];
-      # kwin."Window One Screen to the Left" = [];
-      # kwin."Window One Screen to the Right" = [];
-      # kwin."Window Operations Menu" = "Alt+F3";
-      # kwin."Window Pack Down" = [];
-      # kwin."Window Pack Left" = [];
-      # kwin."Window Pack Right" = [];
-      # kwin."Window Pack Up" = [];
-      # kwin."Window Raise" = [];
-      # kwin."Window Resize" = [];
-      # kwin."Window Shrink Horizontal" = [];
-      # kwin."Window Shrink Vertical" = [];
-      # kwin."Window to Next Desktop" = [];
-      # kwin."Window to Next Screen" = "Meta+Shift+Right";
-      # kwin."Window to Previous Desktop" = [];
-      # kwin."Window to Previous Screen" = "Meta+Shift+Left";
-      # kwin."Window to Screen 0" = [];
-      # kwin."Window to Screen 1" = [];
-      # kwin."Window to Screen 2" = [];
-      # kwin."Window to Screen 3" = [];
-      # kwin."Window to Screen 4" = [];
-      # kwin."Window to Screen 5" = [];
-      # kwin."Window to Screen 6" = [];
-      # kwin."Window to Screen 7" = [];
-      # kwin.disableInputCapture = "Meta+Shift+Esc";
-      # kwin.view_actual_size = "Meta+0";
-      # kwin.view_zoom_in = ["Meta++" "Meta+="];
-      # kwin.view_zoom_out = "Meta+-";
-      # mediacontrol.mediavolumedown = [];
-      # mediacontrol.mediavolumeup = [];
-      # mediacontrol.nextmedia = "Media Next";
-      # mediacontrol.pausemedia = "Media Pause";
-      # mediacontrol.playmedia = [];
-      # mediacontrol.playpausemedia = "Media Play";
-      # mediacontrol.previousmedia = "Media Previous";
-      # mediacontrol.stopmedia = "Media Stop";
-      # org_kde_powerdevil."Decrease Keyboard Brightness" = "Keyboard Brightness Down";
-      # org_kde_powerdevil."Decrease Screen Brightness" = "Monitor Brightness Down";
-      # org_kde_powerdevil."Decrease Screen Brightness Small" = "Shift+Monitor Brightness Down";
-      # org_kde_powerdevil.Hibernate = "Hibernate";
-      # org_kde_powerdevil."Increase Keyboard Brightness" = "Keyboard Brightness Up";
-      # org_kde_powerdevil."Increase Screen Brightness" = "Monitor Brightness Up";
-      # org_kde_powerdevil."Increase Screen Brightness Small" = "Shift+Monitor Brightness Up";
-      # org_kde_powerdevil.PowerDown = "Power Down";
-      # org_kde_powerdevil.PowerOff = "Power Off";
-      # org_kde_powerdevil.Sleep = "Sleep";
-      # org_kde_powerdevil."Toggle Keyboard Backlight" = "Keyboard Light On/Off";
-      # org_kde_powerdevil."Turn Off Screen" = [];
-      # plasmashell."Slideshow Wallpaper Next Image" = [];
-      #
-      # plasmashell.clear-history = [];
-      # plasmashell.clipboard_action = "Meta+Ctrl+X";
-      # plasmashell.cycleNextAction = [];
-      # plasmashell.cyclePrevAction = [];
-      # plasmashell.edit_clipboard = [];
-      # plasmashell."manage activities" = "Meta+Q";
-      # plasmashell."next activity" = "Meta+A";
-      # plasmashell."previous activity" = "Meta+Shift+A";
-      # plasmashell.repeat_action = [];
-      # plasmashell."show dashboard" = "Ctrl+F12";
-      # plasmashell.show-barcode = [];
-      # plasmashell.show-on-mouse-pos = "Meta+V";
-      # plasmashell."switch to next activity" = [];
-      # plasmashell."switch to previous activity" = [];
-      # plasmashell."toggle do not disturb" = [];
-      # "services/org.kde.konsole.desktop"._launch = [];
     }]

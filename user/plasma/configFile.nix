@@ -22,10 +22,7 @@ in lib.foldl' lib.recursiveUpdate {} [
     {
       plasma-localerc.Formats.LANG = "en_AU.UTF-8";
 
-      # ksmserverrc.General.loginMode = "restoreSavedSession";
-      # plasmaparc.General.AudioFeedback = false;
-      # plasmarc.Wallpapers.usersWallpapers = "";
-      # kwalletrc.Wallet."First Use" = false;
+      ksmserverrc.General.loginMode = "restoreSavedSession";
 
       # screen locking
       kscreenlockerrc = {
@@ -179,8 +176,8 @@ in lib.foldl' lib.recursiveUpdate {} [
       };
 
       plasmanotifyrc = {
+        Notifications.PopupPosition = "BottomRight";
         # "Applications/vivaldi-stable".Seen = true;
-        # Notifications.PopupPosition = "BottomRight";
       };
 
       katerc = {
