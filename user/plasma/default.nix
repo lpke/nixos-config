@@ -8,9 +8,7 @@ let
   kwinModule = (import ./apps/kwin.nix).kwin;
   spectacleModule = (import ./apps/spectacle.nix).spectacle;
   krunnerModule = (import ./apps/krunner.nix).krunner;
-
-  systemFont = "Noto Sans";
-  systemFontMono = "JetBrainsMono Nerd Font Mono";
+  fontsModule = import ./fonts.nix;
 
 in
   {
@@ -22,41 +20,7 @@ in
     wallpaper = null; # set non-declaratively
   };
 
-  # System Settings > Text & Fonts
-  # (for global anti-aliasing settings, see `kdeglobals` in `configFile.nix`)
-  fonts = {
-    general = {
-      family = systemFont;
-      pointSize = 11;
-      weight = "normal"; # 400
-    };
-    fixedWidth = {
-      family = systemFontMono;
-      pointSize = 12;
-      weight = "normal";
-    };
-    small = {
-      family = systemFont;
-      pointSize = 9;
-      weight = "normal";
-    };
-    toolbar = {
-      family = systemFont;
-      pointSize = 11;
-      weight = "normal";
-    };
-    menu = {
-      family = systemFont;
-      pointSize = 11;
-      weight = "normal";
-    };
-    windowTitle = {
-      family = systemFont;
-      pointSize = 10;
-      weight = "normal";
-    };
-  };
-
+  fonts = fontsModule;
   shortcuts = withDeps ./shortcuts.nix;
   panels = withDeps ./panels.nix;
   window-rules = withDeps ./window-rules.nix;
