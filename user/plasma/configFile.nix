@@ -7,6 +7,7 @@ let
   kwin = (import ./apps/kwin.nix).configFile;
   spectacle = (import ./apps/spectacle.nix).configFile;
   krunner = (import ./apps/krunner.nix).configFile;
+  fonts = (import ./apps/fonts.nix).configFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
@@ -16,6 +17,7 @@ in lib.foldl' lib.recursiveUpdate {} [
     kwin
     spectacle
     krunner
+    fonts
     # all other configs:
     {
       plasma-localerc.Formats.LANG = "en_AU.UTF-8";
@@ -35,17 +37,6 @@ in lib.foldl' lib.recursiveUpdate {} [
           # default terminal
           TerminalApplication = "alacritty";
           TerminalService = "Alacritty.desktop";
-          # text rendering
-          XftAntialias = true;
-          XftHintStyle = "hintslight";
-          XftSubPixel = "rgb";
-          # fonts (handled in `fonts` module in `plasma/default.nix`)
-          # font = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          # fixed = "JetBrainsMono Nerd Font Mono,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          # smallestReadableFont = "Noto Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          # toolBarFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          # menuFont = "Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
-          # windowTitleFont = "Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"; # key name not verified
         };
 
         KDE = {

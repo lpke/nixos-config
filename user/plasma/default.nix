@@ -8,7 +8,7 @@ let
   kwinModule = (import ./apps/kwin.nix).kwin;
   spectacleModule = (import ./apps/spectacle.nix).spectacle;
   krunnerModule = (import ./apps/krunner.nix).krunner;
-  fontsModule = import ./fonts.nix;
+  fontsModule = (import ./apps/fonts.nix).fonts;
 
 in
   {
@@ -20,10 +20,10 @@ in
     wallpaper = null; # set non-declaratively
   };
 
-  fonts = fontsModule;
   shortcuts = withDeps ./shortcuts.nix;
   panels = withDeps ./panels.nix;
   window-rules = withDeps ./window-rules.nix;
+  fonts = fontsModule;
   kwin = kwinModule;
   spectacle = spectacleModule;
   krunner = krunnerModule;
