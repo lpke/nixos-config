@@ -7,6 +7,7 @@ let
   withDeps = path: import path { inherit lib; };
   kwinModule = (import ./apps/kwin.nix).kwin;
   spectacleModule = (import ./apps/spectacle.nix).spectacle;
+  krunnerModule = (import ./apps/krunner.nix).krunner;
 
   systemFont = "Noto Sans";
   systemFontMono = "JetBrainsMono Nerd Font Mono";
@@ -61,6 +62,7 @@ in
   window-rules = withDeps ./window-rules.nix;
   kwin = kwinModule;
   spectacle = spectacleModule;
+  krunner = krunnerModule;
 
   # CONFIG CONTROL (low-level handling of KDE config files in nix format)
 
