@@ -150,7 +150,7 @@
   users.users.luke = {
     isNormalUser = true;
     description = "luke";
-    extraGroups = [ "networkmanager" "wheel" "input" "uinput" ];
+    extraGroups = [ "networkmanager" "wheel" "input" "uinput" "vboxusers" ];
     useDefaultShell = true;
     packages = with pkgs; [
       discord
@@ -241,6 +241,10 @@
     jetbrains-mono
     nerd-fonts.jetbrains-mono
   ];
+
+  # Virtualisation
+  virtualisation.virtualbox.host.enable = true; # enable VirtualBox - do NOT add to system packages
+  users.extraGroups.vboxusers.members = [ "user-with-access-to-virtualbox" ]; # users require `vboxusers` group to use VirtualBox
 
   system.stateVersion = "25.11";
 }
