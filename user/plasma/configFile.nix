@@ -110,12 +110,46 @@ in lib.foldl' lib.recursiveUpdate {} [
         Search = {
           SearchTool = "Baloo";
         };
+        # AKA preview panel
+        InformationPanel = {
+          showHovered = false; # only update previews on click
+        };
+        ContextMenu = {
+          ShowCopyMoveMenu = true;
+          # see more below under `kservicemenurc`
+        };
         # open/save/file select dialog - static sidebar icons size
         "KFileDialog Settings" = {
           "Places Icons Auto-resize" = false;
           "Places Icons Static Size" = 22;
         };
+        # allow previews for everything (including text files)
+        PreviewSettings.Plugins = "appimagethumbnail,audiothumbnail,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,mobithumbnail,opendocumentthumbnail,gsthumbnail,rawthumbnail,svgthumbnail,textthumbnail,ffmpegthumbs";
       };
+
+      # other context menu options
+      kservicemenurc = {
+        Show = {
+          # disabled
+          slideshowfileitemaction = false; # gwenview: "Start a Slideshow"
+          filelight = false; # filelight: "Show Disk Usage Statistics"
+          # enabled
+          compressfileitemaction = true;
+          extractfileitemaction = true;
+          forgetfileitemaction = true;
+          installFont = true;
+          kactivitymanagerd_fileitem_linking_plugin = true;
+          kio-admin = true;
+          makefileactions = true;
+          mountisoaction = true;
+          movetonewfolderitemaction = true;
+          runInKonsole = true;
+          setfoldericonitemaction = true;
+          tagsfileitemaction = true;
+          wallpaperfileitemaction = true;
+        };
+      };
+
 
       # moving/copying/deleting files/folders
       kiorc = {
@@ -131,27 +165,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       baloofilerc = {
         General = {
           "index hidden folders" = true;
-        };
-      };
-
-      # context menu options
-      kservicemenurc = {
-        Show = {
-          # compressfileitemaction = true;
-          # extractfileitemaction = true;
-          # filelight = true;
-          # forgetfileitemaction = true;
-          # installFont = true;
-          # kactivitymanagerd_fileitem_linking_plugin = true;
-          # kio-admin = true;
-          # makefileactions = true;
-          # mountisoaction = true;
-          # movetonewfolderitemaction = true;
-          # runInKonsole = true;
-          # setfoldericonitemaction = true;
-          # slideshowfileitemaction = true;
-          # tagsfileitemaction = true;
-          # wallpaperfileitemaction = true;
         };
       };
 
