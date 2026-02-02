@@ -24,7 +24,7 @@
     kwin.KrohnkiteToggleFloat = "Meta+F";
     kwin.KrohnkiteFloatAll = "Meta+Shift+F";
     # layouts
-    kwin.KrohnkiteNextLayout = "Meta+\\\\,none";
+    kwin.KrohnkiteNextLayout = "Meta+\\";
     kwin.KrohnkitePreviousLayout = "Meta+|";
     kwin.KrohnkiteMonocleLayout = [];
     kwin.KrohnkiteBTreeLayout = [];
