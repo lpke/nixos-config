@@ -64,11 +64,11 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window One Screen to the Left" = "Meta+Ctrl+Alt+Shift+Left";
       kwin."Window One Screen to the Right" = "Meta+Ctrl+Alt+Shift+Right";
       # window growing (native)
-      kwin."Window Grow Vertical" = "Meta+Alt+F";
-      kwin."Window Grow Horizontal" = "Meta+Alt+G";
+      kwin."Window Grow Vertical" = "Meta+Alt+V";
+      kwin."Window Grow Horizontal" = "Meta+Alt+B";
       # window maximizing (native)
-      kwin."Window Maximize Vertical" = "Meta+Alt+Shift+F";
-      kwin."Window Maximize Horizontal" = "Meta+Alt+Shift+G";
+      kwin."Window Maximize Vertical" = "Meta+Alt+Shift+V";
+      kwin."Window Maximize Horizontal" = "Meta+Alt+Shift+B";
       # window move to specific desktop
       kwin."Window to Desktop 1" = "Meta+Alt+1";
       kwin."Window to Desktop 2" = "Meta+Alt+2";
