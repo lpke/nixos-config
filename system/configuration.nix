@@ -210,6 +210,7 @@
     zip
     unzip
     hwinfo
+    pciutils # provides commands: lspci, setpci
     python313
     nodejs_24
     fzf
