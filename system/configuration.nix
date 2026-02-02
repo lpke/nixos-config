@@ -127,6 +127,7 @@
       dnix = "sudo nix-collect-garbage --delete-older-than 14d && nix-collect-garbage --delete-older-than 14d";
       cdnix = "cd ~/.config/nixos";
       xrs = "systemctl --user restart xremap"; # "xremap restart"
+      wrs = "sudo modprobe -r iwlwifi && sudo modprobe iwlwifi"; # "wifi restart" (unloads/loads iwlwifi kernel module, fixes no wifi issue)
     };
   };
 

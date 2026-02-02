@@ -98,8 +98,8 @@
 
     # layout order (0 = disabled)
     kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
-    kwinrc.Script-krohnkite.threeColumnLayoutOrder = 2;
-    kwinrc.Script-krohnkite.columnsLayoutOrder = 3;
+    kwinrc.Script-krohnkite.columnsLayoutOrder = 2;
+    kwinrc.Script-krohnkite.threeColumnLayoutOrder = 3;
     kwinrc.Script-krohnkite.quarterLayoutOrder = 4;
     kwinrc.Script-krohnkite.binaryTreeLayoutOrder = 0;
     kwinrc.Script-krohnkite.cascadeLayoutOrder = 0;
