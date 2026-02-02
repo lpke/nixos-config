@@ -85,6 +85,7 @@
       "kcm_kwinrules"
       "VirtualBox"
       "VirtualBox Manager"
+      "org.kde.plasma-systemmonitor"
     ];
 
     # kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
