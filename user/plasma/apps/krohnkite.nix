@@ -27,7 +27,7 @@
     kwin.KrohnkiteNextLayout = "Meta+Alt+."; # default: Meta+\
     kwin.KrohnkitePreviousLayout = "Meta+Alt+,"; # default: Meta+|
     kwin.KrohnkiteTreeColumnLayout = "Meta+Alt+D"; # "default" layout
-    kwin.KrohnkiteMonocleLayout = "Meta+Alt+S"; # "fullscreen all"
+    kwin.KrohnkiteMonocleLayout = "Meta+Alt+S"; # fullscreen all"
     kwin.KrohnkiteFloatingLayout = "Meta+Alt+F"; # "float all"
     kwin.KrohnkiteBTreeLayout = [];
     kwin.KrohnkiteColumnsLayout = [];
@@ -52,8 +52,7 @@
     # Equivilent of: System Settings > KWin Scripts > Krohnkite > check the box > apply)
     kwinrc.Plugins.krohnkiteEnabled = true;
 
-    # window rules
-    # kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
+    # WINDOW RULES
     # Fully ignore windows with this class
     kwinrc.Script-krohnkite.ignoreClass = builtins.concatStringsSep "," [
       "krunner"
@@ -73,7 +72,6 @@
       "yakuake"
     ];
 
-    # kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";
     # Start windows with this class as floating (but still manage them)
     kwinrc.Script-krohnkite.floatingClass = builtins.concatStringsSep "," [
       "BoltLauncher"
@@ -86,9 +84,9 @@
       "VirtualBox"
       "VirtualBox Manager"
       "org.kde.plasma-systemmonitor"
+      "org.kde.plasma.emojier"
     ];
 
-    # kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
     # Start windows with this title as floating (but still manage them)
     kwinrc.Script-krohnkite.floatingTitle = builtins.concatStringsSep "," [
       "Input Capture Requested"
@@ -96,12 +94,12 @@
       "RuneLite Launcher"
     ];
 
-    # layout order (0 = disabled)
-    kwinrc.Script-krohnkite.threeColumnLayoutOrder = 1;
+    # layout order (0 = disabled completely)
+    kwinrc.Script-krohnkite.threeColumnLayoutOrder = 1; # also accessed with direct shortcut
     kwinrc.Script-krohnkite.columnsLayoutOrder = 2;
     kwinrc.Script-krohnkite.tileLayoutOrder = 3;
-    kwinrc.Script-krohnkite.floatingLayoutOrder = 0; # accessed with shortcut
-    kwinrc.Script-krohnkite.monocleLayoutOrder = 0; # accessed with shortcut
+    kwinrc.Script-krohnkite.monocleLayoutOrder = 4; # also accessed with direct shortcut
+    kwinrc.Script-krohnkite.floatingLayoutOrder = 5; # also accessed with direct shortcut
     # hot garbage layouts
     kwinrc.Script-krohnkite.quarterLayoutOrder = 0;
     kwinrc.Script-krohnkite.spiralLayoutOrder = 0;
