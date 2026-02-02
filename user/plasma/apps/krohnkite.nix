@@ -25,7 +25,7 @@
     kwin.KrohnkiteFloatAll = "Meta+Shift+F";
     # layouts
     kwin.KrohnkiteNextLayout = "Meta+\\";
-    kwin.KrohnkitePreviousLayout = "Meta+|";
+    kwin.KrohnkitePreviousLayout = "Meta+Alt+\\"; # default: Meta+|
     kwin.KrohnkiteMonocleLayout = [];
     kwin.KrohnkiteBTreeLayout = [];
     kwin.KrohnkiteColumnsLayout = [];
@@ -99,15 +99,15 @@
     # layout order (0 = disabled)
     kwinrc.Script-krohnkite.columnsLayoutOrder = 1;
     kwinrc.Script-krohnkite.threeColumnLayoutOrder = 2;
-    kwinrc.Script-krohnkite.tiledWindowsLayer = 3;
-    kwinrc.Script-krohnkite.quarterLayoutOrder = 4;
-    kwinrc.Script-krohnkite.binaryTreeLayoutOrder = 0;
-    kwinrc.Script-krohnkite.cascadeLayoutOrder = 0;
-    kwinrc.Script-krohnkite.floatingLayoutOrder = 0;
-    kwinrc.Script-krohnkite.monocleLayoutOrder = 0;
-    kwinrc.Script-krohnkite.spiralLayoutOrder = 0;
-    kwinrc.Script-krohnkite.spreadLayoutOrder = 0;
-    kwinrc.Script-krohnkite.stackedLayoutOrder = 0;
-    kwinrc.Script-krohnkite.stairLayoutOrder = 0;
+    kwinrc.Script-krohnkite.tileLayoutOrder = 3;
+    kwinrc.Script-krohnkite.spiralLayoutOrder = 4;
+    kwinrc.Script-krohnkite.quarterLayoutOrder = 5;
+    kwinrc.Script-krohnkite.binaryTreeLayoutOrder = 6;
+    kwinrc.Script-krohnkite.floatingLayoutOrder = 7;
+    kwinrc.Script-krohnkite.monocleLayoutOrder = 8;
+    kwinrc.Script-krohnkite.cascadeLayoutOrder = 9;
+    kwinrc.Script-krohnkite.spreadLayoutOrder = 10;
+    kwinrc.Script-krohnkite.stackedLayoutOrder = 11;
+    kwinrc.Script-krohnkite.stairLayoutOrder = 12;
   };
 }

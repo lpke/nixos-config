@@ -43,7 +43,7 @@
 
   # ensure wifi loads correctly (reload if it doesnt)
   systemd.services.wifi-fix = {
-    description = "Reload wireless driver if WiFi interface is missing";
+    description = "WIFI-FIX: Reload wireless driver if WiFi interface is missing";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-modules-load.service" ];
     before = [ "iwd.service" "NetworkManager.service" ];
@@ -69,7 +69,7 @@
       done
 
       if [ -z "$WIFI_DRIVER" ]; then
-      echo "No wireless PCI device or driver found"
+      echo "No wireless PCI device or driver found."
       exit 0
       fi
 
@@ -77,7 +77,7 @@
       for i in 1 2 3; do
       for iface in /sys/class/net/*; do
       if [ -d "$iface/wireless" ]; then
-      # Wireless interface found, no action needed
+      echo "Wireless interface found, no action needed."
       exit 0
       fi
       done
