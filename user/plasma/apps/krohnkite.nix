@@ -23,10 +23,12 @@
     # floating
     kwin.KrohnkiteToggleFloat = "Meta+F";
     kwin.KrohnkiteFloatAll = "Meta+Shift+F";
+    # dock (pinned to left/right/top/bottom, outside of layout)
+    kwin.KrohnkitetoggleDock = "Meta+Alt+D";
     # layouts
     kwin.KrohnkiteNextLayout = "Meta+Alt+."; # default: Meta+\
     kwin.KrohnkitePreviousLayout = "Meta+Alt+,"; # default: Meta+|
-    kwin.KrohnkiteTreeColumnLayout = "Meta+Alt+D"; # "default" layout
+    kwin.KrohnkiteTreeColumnLayout = "Meta+Alt+C";
     kwin.KrohnkiteMonocleLayout = "Meta+Alt+S"; # fullscreen all"
     kwin.KrohnkiteFloatingLayout = "Meta+Alt+F"; # "float all"
     kwin.KrohnkiteBTreeLayout = [];
@@ -43,8 +45,6 @@
     # increase/decrease (number of master nodes)
     kwin.KrohnkiteIncrease = "Meta+Alt+i";
     kwin.KrohnkiteDecrease = "Meta+Alt+u";
-    # TODO:
-    # kwin.KrohnkitetoggleDock = [];
   };
 
   configFile = {
