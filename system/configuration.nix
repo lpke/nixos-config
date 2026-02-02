@@ -41,6 +41,58 @@
     firewall.enable = false;
   };
 
+  # ensure wifi loads correctly (reload if it doesnt)
+  systemd.services.wifi-fix = {
+    description = "Reload wireless driver if WiFi interface is missing";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-modules-load.service" ];
+    before = [ "iwd.service" "NetworkManager.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      StandardOutput = "journal+console";
+      StandardError = "journal+console";
+      ExecStart = pkgs.writeShellScript "wifi-fix" ''
+      # Find wireless PCI device (class 0x028000) and its driver
+      WIFI_DRIVER=""
+      for dev in /sys/bus/pci/devices/*; do
+      if [ -f "$dev/class" ]; then
+      class=$(${pkgs.coreutils}/bin/cat "$dev/class")
+      # PCI class 0x028000 = Network controller (wireless)
+      if [ "$class" = "0x028000" ]; then
+      if [ -L "$dev/driver" ]; then
+      WIFI_DRIVER=$(${pkgs.coreutils}/bin/basename $(${pkgs.coreutils}/bin/readlink "$dev/driver"))
+      fi
+      break
+      fi
+      fi
+      done
+
+      if [ -z "$WIFI_DRIVER" ]; then
+      echo "No wireless PCI device or driver found"
+      exit 0
+      fi
+
+      # Wait for interface to appear (up to 3 seconds)
+      for i in 1 2 3; do
+      for iface in /sys/class/net/*; do
+      if [ -d "$iface/wireless" ]; then
+      # Wireless interface found, no action needed
+      exit 0
+      fi
+      done
+      ${pkgs.coreutils}/bin/sleep 1
+      done
+
+      # Reload the detected driver
+      echo "No wireless interface found, reloading $WIFI_DRIVER..."
+      ${pkgs.kmod}/bin/modprobe -r "$WIFI_DRIVER"
+      ${pkgs.coreutils}/bin/sleep 1
+      ${pkgs.kmod}/bin/modprobe "$WIFI_DRIVER"
+      '';
+    };
+  };
+
   # Set your time zone.
   time.timeZone = "Australia/Sydney";
 
