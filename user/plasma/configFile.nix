@@ -26,8 +26,11 @@ in lib.foldl' lib.recursiveUpdate {} [
 
       # screen locking
       kscreenlockerrc = {
-        Daemon.Autolock = false;
-        Daemon.Timeout = 0;
+        Greeter.WallpaperPlugin = "org.kde.haenau";
+        Daemon = {
+          Autolock = false;
+          Timeout = 0;
+        };
       };
 
       kdeglobals = {
@@ -44,7 +47,7 @@ in lib.foldl' lib.recursiveUpdate {} [
 
         KDE = {
           AnimationDurationFactor = 0.5;
-          DndBehavior = "MoveIfSameDevice"; # drag and drop behaviour
+          DndBehavior = "Ask"; # drag and drop behaviour: "MoveIfSameDevice" for moving without context menu
           ShowDeleteCommand = false; # show perma-delete context option in dolphin etc
         };
 
