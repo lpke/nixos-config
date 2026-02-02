@@ -14,11 +14,10 @@
 
   configFile = {
     krunnerrc = {
+      # plugins with priority in search results
+      "Plugins/Favorites".plugins = "krunner_services,krunner_sessions,krunner_powerdevil,krunner_systemsettings";
       Plugins.baloosearchEnabled = true; # use indexed search
       Plugins.krunner_webshortcutsEnabled = false;
-      # Plugins.krunner_appstreamEnabled = false;
-      # "Plugins/Favorites".plugins = "krunner_sessions,krunner_powerdevil,krunner_services,krunner_systemsettings";
     };
-
   };
 }

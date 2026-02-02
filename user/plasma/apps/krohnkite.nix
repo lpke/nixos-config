@@ -85,6 +85,7 @@
       "VirtualBox Manager"
       "org.kde.plasma-systemmonitor"
       "org.kde.plasma.emojier"
+      "kcm_krunnersettings"
     ];
 
     # Start windows with this title as floating (but still manage them)
