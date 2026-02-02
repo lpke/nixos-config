@@ -53,9 +53,48 @@
     kwinrc.Plugins.krohnkiteEnabled = true;
 
     # window rules
-    kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
-    kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";
-    kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
+    # kwinrc.Script-krohnkite.ignoreClass = "krunner,yakuake,spectacle,kded5,xwaylandvideobridge,plasmashell,ksplashqml,org.kde.plasmashell,org.kde.polkit-kde-authentication-agent-1,org.kde.kruler,kruler,kwin_wayland,ksmserver-logout-greeter,org.kde.yakuake,yakuake";
+    # Fully ignore windows with this class
+    kwinrc.Script-krohnkite.ignoreClass = builtins.concatStringsSep "," [
+      "krunner"
+      "yakuake"
+      "spectacle"
+      "kded5"
+      "xwaylandvideobridge"
+      "plasmashell"
+      "ksplashqml"
+      "org.kde.plasmashell"
+      "org.kde.polkit-kde-authentication-agent-1"
+      "org.kde.kruler"
+      "kruler"
+      "kwin_wayland"
+      "ksmserver-logout-greeter"
+      "org.kde.yakuake"
+      "yakuake"
+    ];
+
+    # kwinrc.Script-krohnkite.floatingClass = "BoltLauncher,org.prismlauncher.PrismLauncher,org.kde.yakuake,synergy,ord.freedesktop.impl.portal.desktop.kde,systemsettings,kcm_kwinrules";
+    # Start windows with this class as floating (but still manage them)
+    kwinrc.Script-krohnkite.floatingClass = builtins.concatStringsSep "," [
+      "BoltLauncher"
+      "org.prismlauncher.PrismLauncher"
+      "org.kde.yakuake"
+      "synergy"
+      "ord.freedesktop.impl.portal.desktop.kde"
+      "systemsettings"
+      "kcm_kwinrules"
+      "VirtualBox"
+      "VirtualBox Manager"
+    ];
+
+    # kwinrc.Script-krohnkite.floatingTitle = "Input Capture Requested,Remote control requested,RuneLite Launcher";
+    # Start windows with this title as floating (but still manage them)
+    kwinrc.Script-krohnkite.floatingTitle = builtins.concatStringsSep "," [
+      "Input Capture Requested"
+      "Remote control requested"
+      "RuneLite Launcher"
+    ];
+
     # layout order (0 = disabled)
     kwinrc.Script-krohnkite.tiledWindowsLayer = 1;
     kwinrc.Script-krohnkite.threeColumnLayoutOrder = 2;
