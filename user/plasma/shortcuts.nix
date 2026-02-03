@@ -34,6 +34,7 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window to Next Screen" = []; # default: Meta+Shift+Right
       kwin."Window to Previous Screen" = []; # default: Meta+Shift+Left
       kwin.disableInputCapture = []; # default: Meta+Shift+Esc
+      "services/org.kde.kscreen.desktop".ShowOSD = ["Display"]; # Switch display. default: Display, Meta+P
       # power
       org_kde_powerdevil.Hibernate = []; # default: "Hibernate"
       org_kde_powerdevil.PowerDown = []; # default: "Power Down"
