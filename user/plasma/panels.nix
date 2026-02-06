@@ -216,4 +216,10 @@ in [
     showWindowOutlines = true;
     includeColorPicker = false;
   })
+
+  (mkPanel {
+    screen = 2;
+    showWindowOutlines = true;
+    includeColorPicker = false;
+  })
 ]
