@@ -20,8 +20,20 @@
   ];
   programs.home-manager.enable = true;
 
-  # ~/.config/autostart files
-  xdg.configFile = import ./autostart;
+  xdg.configFile = lib.foldl' lib.recursiveUpdate {} [
+    # ~/.config/autostart files
+    (import ./autostart)
+    {
+      "mimeapps.list".force = true; # fully overwrite mimeapps when building
+    }
+  ];
+
+  # Default apps: ~/.config/mimeapps.list
+  xdg.mimeApps = lib.recursiveUpdate
+    (import ./mimeapps)
+    {
+      enable = true;
+    }; 
 
   # KDE plasma settings (plasma-manager)
   programs.plasma = lib.recursiveUpdate
