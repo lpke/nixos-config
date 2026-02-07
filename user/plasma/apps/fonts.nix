@@ -1,7 +1,7 @@
 # These settings are imported and merged into the rest of the plasma-manager config
 
 let
-  systemFont = "Noto Sans";
+  systemFont = "Inter";
   systemFontMono = "JetBrainsMono Nerd Font Mono";
 
 in
