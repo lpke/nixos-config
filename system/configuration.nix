@@ -266,9 +266,9 @@
     pciutils # provides commands: lspci, setpci
     python313
     nodejs_24
-    fzf
-    fd
-    ripgrep
+    fzf # CLI fuzzy finding
+    fd # much faster version of `find`
+    ripgrep # much faster version of `grep`
     clang # C language
     neofetch
     piper # mouse assignments
