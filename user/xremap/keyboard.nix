@@ -28,6 +28,7 @@ in
         "C-e" = "8";
         "C-r" = "9";
         "C-t" = "0";
+        "SUPER-s" = [ "SUPER-s" "SUPER-a" ];
       };
     })
   ];
