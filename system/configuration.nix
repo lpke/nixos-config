@@ -279,6 +279,10 @@
     spotify
     flatpak
     gdrive3
+    # windows compatibility
+    winePackages.waylandFull
+    wineWowPackages.waylandFull
+    winetricks
   ];
 
   programs.neovim = {
