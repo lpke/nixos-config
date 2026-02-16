@@ -18,6 +18,10 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  boot.kernelParams = [
+    "kvm.enable_virt_at_load=0" # disable KVM at boot to workaround a virtualbox issue
+  ];
+
   networking = {
     hostName = "lpnix";
     networkmanager.enable = true;
@@ -120,7 +124,7 @@
   hardware.nvidia = {
     modesetting.enable = true;
     nvidiaSettings = true;
-    open = true;
+    open = false;
   };
   hardware.graphics.enable = true;
 
