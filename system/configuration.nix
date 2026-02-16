@@ -20,6 +20,7 @@
 
   boot.kernelParams = [
     "kvm.enable_virt_at_load=0" # disable KVM at boot to workaround a virtualbox issue
+    "nvidia-drm.fbdev=1" # use nvidia for framebuffers (TTY)
   ];
 
   networking = {
