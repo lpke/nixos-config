@@ -86,6 +86,7 @@
       "org.kde.plasma-systemmonitor"
       "org.kde.plasma.emojier"
       "kcm_krunnersettings"
+      "org.kde.kmenuedit"
     ];
 
     # Start windows with this title as floating (but still manage them)

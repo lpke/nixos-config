@@ -284,6 +284,7 @@
     spotify
     flatpak
     gdrive3
+    normcap # OCR image to text based on screen selection
     # windows compatibility
     winePackages.waylandFull
     wineWowPackages.waylandFull
