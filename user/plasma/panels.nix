@@ -121,6 +121,7 @@ let
           "spotify-client"
           "org.kde.plasma.brightness"
           "org.kde.plasma.battery"
+          "JavaEmbeddedFrame" # RuneLite
         ];
         shown = []; # always show
       };
