@@ -88,6 +88,7 @@
       "kcm_krunnersettings"
       "org.kde.kmenuedit"
       "org.kde.dolphin"
+      "io.github.radiolamp.mangojuice"
     ];
 
     # Start windows with this title as floating (but still manage them)
@@ -95,6 +96,7 @@
       "Input Capture Requested"
       "Remote control requested"
       "RuneLite Launcher"
+      "Vkcube X11"
     ];
 
     # layout order (0 = disabled completely)
