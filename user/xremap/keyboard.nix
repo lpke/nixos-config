@@ -13,6 +13,16 @@ in
   # for anything with sequences
   keymap = [
     (noMouse {
+      name = "Minecraft";
+      application = {
+        only = [ "/Minecraft/" ];
+      };
+      remap = {
+        "SUPER-s" = "SUPER-a";
+      };
+    })
+
+    (noMouse {
       name = "Runelite";
       application = {
         only = [ "/runelite/" ];
