@@ -259,6 +259,7 @@
     kdePackages.filelight
     kdePackages.accessibility-inspector
     kdePackages.krohnkite # tiling window manager
+    kdePackages.kamoso # webcam app
     git
     delta # syntax highlighting pager for git
     alacritty

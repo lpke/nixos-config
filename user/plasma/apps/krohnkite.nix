@@ -89,6 +89,7 @@
       "org.kde.kmenuedit"
       "org.kde.dolphin"
       "io.github.radiolamp.mangojuice"
+      "org.kde.gwenview"
     ];
 
     # Start windows with this title as floating (but still manage them)
