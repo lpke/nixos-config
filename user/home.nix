@@ -33,7 +33,10 @@
     (import ./mimeapps)
     {
       enable = true;
-    }; 
+    };
+
+  # Custom .desktop files for: ~/.local/share/applications
+  xdg.desktopEntries = import ./desktopEntries;
 
   # KDE plasma settings (plasma-manager)
   programs.plasma = lib.recursiveUpdate
