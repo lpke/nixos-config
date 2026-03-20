@@ -114,8 +114,10 @@ let
         scaleToFit = false;
         spacing = "medium";
       };
-      items = { # not specified = show when relevant
-        hidden = [ # always hide
+      items = {
+        # not specified = show when relevant
+        hidden = [
+          # always hide:
           "Yakuake"
           "chrome_status_icon_1"
           "spotify-client"
@@ -123,7 +125,11 @@ let
           "org.kde.plasma.battery"
           "JavaEmbeddedFrame" # RuneLite
         ];
-        shown = []; # always show
+        shown = [
+          # always show:
+          "org.kde.plasma.bluetooth"
+          "org.kde.plasma.networkmanagement"
+        ];
       };
     };
   };
