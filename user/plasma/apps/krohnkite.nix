@@ -90,6 +90,9 @@
       "org.kde.dolphin"
       "io.github.radiolamp.mangojuice"
       "org.kde.gwenview"
+      "steam_app_0"
+      "steam_app"
+      "steam"
     ];
 
     # Start windows with this title as floating (but still manage them)
@@ -98,6 +101,7 @@
       "Remote control requested"
       "RuneLite Launcher"
       "Vkcube X11"
+      "Battle.net"
     ];
 
     # layout order (0 = disabled completely)
