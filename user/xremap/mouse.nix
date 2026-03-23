@@ -43,6 +43,18 @@ in
     })
 
     (mouseOnly {
+      name = "G903 WoW";
+      window = {
+        only = [ "/World of Warcraft/" ];
+      };
+      remap = {
+        "BTN_EXTRA" = "w"; # left front - w
+        "BTN_SIDE" = "ESC"; # left back - esc
+        "BTN_FORWARD" = "BTN_RIGHT"; # right front - right click
+      };
+    })
+
+    (mouseOnly {
       name = "G903 Default";
       remap = {
         "BTN_EXTRA" = { # left front - forward (double fix)
