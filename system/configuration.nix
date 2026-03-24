@@ -300,6 +300,7 @@
     pciutils # provides commands: lspci, setpci
     python313
     nodejs_24
+    nodePackages.pnpm
     fzf # CLI fuzzy finding
     fd # much faster version of `find`
     ripgrep # much faster version of `grep`
