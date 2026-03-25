@@ -258,6 +258,9 @@
     enable = true;
   };
 
+  # run non-nix-patched executables
+  programs.nix-ld.enable = true;
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
