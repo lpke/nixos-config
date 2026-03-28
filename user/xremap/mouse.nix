@@ -48,7 +48,7 @@ in
         only = [ "/World of Warcraft/" ];
       };
       remap = {
-        "BTN_EXTRA" = "w"; # left front - w
+        "BTN_EXTRA" = "i"; # left front - w
         "BTN_SIDE" = "ESC"; # left back - esc
         "BTN_FORWARD" = "BTN_RIGHT"; # right front - right click
       };
