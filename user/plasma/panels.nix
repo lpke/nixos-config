@@ -150,7 +150,7 @@ let
       timeZone = {
         selected = [
           "Local"
-          "Europe/London"
+          "Etc/UTC"
         ];
         lastSelected = "Local";
         format = "code";
