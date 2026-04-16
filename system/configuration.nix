@@ -319,6 +319,7 @@
     gdrive3
     normcap # OCR image to text based on screen selection
     libnotify # required for desktop notifications for some apps (eg my own tool, aspyn)
+    jq # json parser
     # Global/app FPS limiter / HUD (RTSS alternative)
     mangohud # the actual library
     mangojuice # the GUI for the library
