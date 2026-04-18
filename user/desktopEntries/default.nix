@@ -55,4 +55,15 @@
       };
     };
   };
+
+  # Battle.net (via Steam)
+  battlenet = {
+    name = "Battle.net";
+    comment = "Launch via Steam";
+    exec = "steam steam://rungameid/14634017402250067968";
+    icon = "/home/luke/.local/share/icons/battlenet.png";
+    type = "Application";
+    terminal = false;
+    categories = [ "Game" ];
+  };
 }
