@@ -286,6 +286,7 @@
     kdePackages.accessibility-inspector
     kdePackages.krohnkite # tiling window manager
     kdePackages.kamoso # webcam app
+    kdePackages.kdenlive # video editing
     git
     delta # syntax highlighting pager for git
     alacritty
