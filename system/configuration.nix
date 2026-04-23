@@ -259,7 +259,21 @@
   };
 
   # run non-nix-patched executables
-  programs.nix-ld.enable = true;
+  programs.nix-ld = {
+    enable = true;
+    # covers common browser + native-module needs (safety net)
+    libraries = with pkgs; [
+      stdenv.cc.cc.lib
+      zlib openssl curl
+      glib nss nspr atk at-spi2-atk at-spi2-core cups dbus
+      libdrm expat xorg.libX11 xorg.libXcomposite xorg.libXdamage
+      xorg.libXext xorg.libXfixes xorg.libXrandr xorg.libXcursor
+      xorg.libXi xorg.libxcb xorg.libXrender libxkbcommon
+      mesa pango cairo alsa-lib
+      gtk3 gdk-pixbuf freetype fontconfig
+      libgbm libnotify
+    ];
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
