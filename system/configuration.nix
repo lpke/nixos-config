@@ -211,6 +211,13 @@
     };
   };
 
+  # auto-load per-project dev shells from .envrc + flake.nix
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    silent = false;
+  };
+
   # useful explanations: https://dev.to/patimapoochai/how-to-edit-the-sudoers-file-in-nixos-with-examples-4k34
   security.sudo = {
     enable = true;
