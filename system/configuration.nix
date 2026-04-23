@@ -192,7 +192,6 @@
     syntaxHighlighting.enable = true;
 
     shellAliases = {
-      cls = "clear";
       ll = "ls -l";
       la = "ls -la";
       gs = "git status";
