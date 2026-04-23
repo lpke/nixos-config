@@ -326,6 +326,7 @@
     python313
     nodejs_24
     nodePackages.pnpm
+    fnm # "fast node manager" - for ad-hoc node version swapping
     fzf # CLI fuzzy finding
     fd # much faster version of `find`
     ripgrep # much faster version of `grep`
