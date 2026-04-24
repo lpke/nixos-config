@@ -290,8 +290,21 @@
 
   # environment variables in global environment
   # (set early in login process and available to all shells)
-  environment.sessionVariables = {
-    PATH = [ "$HOME/.local/bin" ];
+  environment = {
+    variables = {
+      ZDOTDIR = "$HOME/.config/zsh";
+      NPM_CONFIG_USERCONFIG = "$HOME/.config/npm/.npmrc";
+      PNPM_HOME = "$HOME/.local/share/pnpm";
+    };
+
+    sessionVariables = {
+      PATH = [
+        "$HOME/.local/bin"
+        "$HOME/bin"
+        "$HOME/.local/share/npm/bin"
+        "$HOME/.local/share/pnpm"
+      ];
+    };
   };
 
   # System packages
