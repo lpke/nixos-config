@@ -329,6 +329,7 @@
     fzf # CLI fuzzy finding
     fd # much faster version of `find`
     ripgrep # much faster version of `grep`
+    bat # cat clone with syntax highlighting and git integration
     clang # C language
     neofetch
     piper # mouse assignments
