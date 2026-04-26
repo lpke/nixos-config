@@ -278,6 +278,8 @@
       mesa pango cairo alsa-lib
       gtk3 gdk-pixbuf freetype fontconfig
       libgbm libnotify
+      # for codex-acp
+      libcap
     ];
   };
 
