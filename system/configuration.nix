@@ -339,7 +339,7 @@
     pciutils # provides commands: lspci, setpci
     python313
     nodejs_24
-    nodePackages.pnpm
+    (pnpm.override { nodejs = nodejs_24; }) # pnpm but using specific version
     fnm # "fast node manager" - for ad-hoc node version swapping
     fzf # CLI fuzzy finding
     fd # much faster version of `find`
