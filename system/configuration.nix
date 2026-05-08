@@ -152,6 +152,12 @@
   };
   hardware.graphics.enable = true;
 
+  # Local LLM AI
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";
+  };
+
   # ZSA Moonlander Keyboard - Enable flashing
   hardware.keyboard.zsa.enable = true;
 
