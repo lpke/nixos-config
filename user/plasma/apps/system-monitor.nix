@@ -298,6 +298,271 @@ let
     };
   };
 
+  overview2Layout = {
+    "Face-overview-2-network-rates/Appearance" = {
+      Title = "Network Rates";
+      chartFace = "org.kde.ksysguard.linechart";
+    };
+    "Face-overview-2-network-rates/SensorColors" = {
+      "network/all/download" = "61,174,233";
+      "network/all/upload" = "233,120,61";
+    };
+    "Face-overview-2-network-rates/SensorLabels" = {
+      "network/all/download" = "Download";
+      "network/all/upload" = "Upload";
+    };
+    "Face-overview-2-network-rates/Sensors" = {
+      highPrioritySensorIds = sensorList [
+        "network/all/download"
+        "network/all/upload"
+      ];
+    };
+    "Face-overview-2-network-rates/org.kde.ksysguard.linechart/General" = autoLineChartSettings;
+
+    "Face-overview-2-networks/Appearance" = {
+      Title = "Networks";
+      chartFace = "org.kde.ksysguard.textonly";
+    };
+    "Face-overview-2-networks/Sensors" = {
+      highPrioritySensorIds = sensorList [
+        "network/(?!all).*/download"
+        "network/(?!all).*/upload"
+        "network/(?!all).*/ipv4address"
+        "network/(?!all).*/ipv6address"
+      ];
+    };
+    "Face-overview-2-networks/org.kde.ksysguard.textonly/General" = {
+      groupByTotal = true;
+    };
+
+    "Face-overview-2-processes/Appearance" = {
+      chartFace = "org.kde.ksysguard.processtable";
+      showTitle = true;
+      Title = "Processes";
+    };
+
+    page = {
+      Title = "Overview 2";
+      actionsFace = "";
+      icon = "speedometer";
+      loadType = "onstart";
+      margin = 2;
+      version = 1;
+    };
+
+    "page/row-0" = {
+      Title = "";
+      heightMode = "balanced";
+      isTitle = false;
+      name = "row-0";
+    };
+    "page/row-0/column-0" = {
+      name = "column-0";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-0/column-0/section-0" = {
+      face = "Face-hw-cpu-usage";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-0/column-1" = {
+      name = "column-1";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-0/column-1/section-0" = {
+      face = "Face-hw-cpu-usage-history";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-0/column-2" = {
+      name = "column-2";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-0/column-2/section-0" = {
+      face = "Face-hw-gpu-usage";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-0/column-3" = {
+      name = "column-3";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-0/column-3/section-0" = {
+      face = "Face-hw-gpu-usage-history";
+      isSeparator = false;
+      name = "section-0";
+    };
+
+    "page/row-1" = {
+      Title = "";
+      heightMode = "balanced";
+      isTitle = false;
+      name = "row-1";
+    };
+    "page/row-1/column-0" = {
+      name = "column-0";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-1/column-0/section-0" = {
+      face = "Face-hw-cpu";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-1/column-1" = {
+      name = "column-1";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-1/column-1/section-0" = {
+      face = "Face-hw-cpu-frequency";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-1/column-2" = {
+      name = "column-2";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-1/column-2/section-0" = {
+      face = "Face-hw-gpu";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-1/column-3" = {
+      name = "column-3";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-1/column-3/section-0" = {
+      face = "Face-hw-gpu-vram";
+      isSeparator = false;
+      name = "section-0";
+    };
+
+    "page/row-2" = {
+      Title = "";
+      heightMode = "balanced";
+      isTitle = false;
+      name = "row-2";
+    };
+    "page/row-2/column-0" = {
+      name = "column-0";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-2/column-0/section-0" = {
+      face = "Face-hw-memory";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-2/column-1" = {
+      name = "column-1";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-2/column-1/section-0" = {
+      face = "Face-hw-disks";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-2/column-2" = {
+      name = "column-2";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-2/column-2/section-0" = {
+      face = "Face-hw-kraken";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-2/column-3" = {
+      name = "column-3";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-2/column-3/section-0" = {
+      face = "Face-hw-misc-fans";
+      isSeparator = false;
+      name = "section-0";
+    };
+
+    "page/row-3" = {
+      Title = "";
+      heightMode = "balanced";
+      isTitle = false;
+      name = "row-3";
+    };
+    "page/row-3/column-0" = {
+      name = "column-0";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-3/column-0/section-0" = {
+      face = "Face-hw-ram-temps";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-3/column-1" = {
+      name = "column-1";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-3/column-1/section-0" = {
+      face = "Face-hw-ssd-temps";
+      isSeparator = false;
+      name = "section-0";
+    };
+
+    "page/row-4" = {
+      Title = "";
+      heightMode = "balanced";
+      isTitle = false;
+      name = "row-4";
+    };
+    "page/row-4/column-0" = {
+      name = "column-0";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-4/column-0/section-0" = {
+      face = "Face-overview-2-network-rates";
+      isSeparator = false;
+      name = "section-0";
+    };
+    "page/row-4/column-1" = {
+      name = "column-1";
+      noMargins = false;
+      showBackground = true;
+    };
+    "page/row-4/column-1/section-0" = {
+      face = "Face-overview-2-networks";
+      isSeparator = false;
+      name = "section-0";
+    };
+
+    "page/row-5" = {
+      Title = "";
+      heightMode = "half";
+      isTitle = false;
+      name = "row-5";
+    };
+    "page/row-5/column-0" = {
+      name = "column-0";
+      noMargins = true;
+      showBackground = true;
+    };
+    "page/row-5/column-0/section-0" = {
+      face = "Face-overview-2-processes";
+      isSeparator = false;
+      name = "section-0";
+    };
+  };
+
 in
 let
   hardwarePage = {
@@ -832,7 +1097,10 @@ in
     # KDE System Monitor custom pages:
     # ~/.local/share/plasma-systemmonitor/hardware.page
     # ~/.local/share/plasma-systemmonitor/monitor.page
+    # ~/.local/share/plasma-systemmonitor/overview-2.page
     "plasma-systemmonitor/hardware.page" = hardwarePage;
     "plasma-systemmonitor/monitor.page" = (builtins.removeAttrs hardwarePage layoutKeys) // monitorLayout;
+    "plasma-systemmonitor/overview-2.page" =
+      (builtins.removeAttrs hardwarePage layoutKeys) // overview2Layout;
   };
 }
