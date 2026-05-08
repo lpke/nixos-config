@@ -341,8 +341,12 @@
     gnumake
     zip
     unzip
+    lm_sensors # sensors, sensors-detect, pwmconfig, fancontrol (you have sensor data but not the CLI tools)
+    nvtopPackages.full # terminal GPU/CPU monitor — shows nvidia GPU temp, VRAM, utilisation, fan speed
     hwinfo
+    liquidctl # fan control for supported devices
     pciutils # provides commands: lspci, setpci
+    usbutils # provides command: lsusb
     python313
     nodejs_24
     (pnpm.override { nodejs = nodejs_24; }) # pnpm but using specific version
