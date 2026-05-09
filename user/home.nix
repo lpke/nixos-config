@@ -4,6 +4,9 @@
 { config, pkgs, lib, inputs, ... }:
 
 # `flake.nix` outputs > modules > home-manager.users.luke...
+let
+  systemMonitor = import ./plasma/apps/system-monitor.nix { inherit lib; };
+in
 {
   imports = [
     inputs.xremap-flake.homeManagerModules.default
@@ -20,9 +23,17 @@
   ];
   programs.home-manager.enable = true;
 
+  home.activation.resetGeneratedSystemMonitorPages =
+    lib.hm.dag.entryBefore [ "configure-plasma" ] ''
+      $DRY_RUN_CMD rm -f \
+        ${config.xdg.dataHome}/plasma-systemmonitor/monitor.page \
+        ${config.xdg.dataHome}/plasma-systemmonitor/inspect.page
+    '';
+
   xdg.configFile = lib.foldl' lib.recursiveUpdate {} [
     # ~/.config/autostart files
     (import ./autostart)
+    systemMonitor.customSensorConfigFile
     {
       "mimeapps.list".force = true; # fully overwrite mimeapps when building
     }

@@ -7,6 +7,7 @@
   imports =
     [
       ./hardware-configuration.nix
+      ./fan-control.nix
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
