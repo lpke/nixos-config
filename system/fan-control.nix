@@ -4,11 +4,14 @@ let
   fanControl = import ./fan-control-config.nix { inherit lib; };
   smoothSourceNames = lib.attrNames fanControl.grid.smoothSources;
   validGridSources = [
-    "cpu"
+    "cpu_hot"
+    "cpu_max"
     "liquid"
     "gpu"
-    "max"
-    "max_smooth"
+    "max_hot"
+    "max_max"
+    "max_hot_smooth"
+    "max_max_smooth"
   ] ++ smoothSourceNames;
   configuredGridSources =
     map (settings: settings.source) (lib.attrValues fanControl.grid.channels);
@@ -126,6 +129,48 @@ let
           return None
 
 
+      def hwmon_temps(device_name):
+          temps = {}
+          for hwmon in sorted(Path("/sys/class/hwmon").glob("hwmon*")):
+              try:
+                  if read_text(hwmon / "name") != device_name:
+                      continue
+                  for label_path in sorted(hwmon.glob("temp*_label")):
+                      label = read_text(label_path)
+                      input_path = label_path.with_name(
+                          label_path.name.replace("_label", "_input")
+                      )
+                      temps[label] = int(read_text(input_path)) / 1000.0
+              except (OSError, ValueError):
+                  continue
+          return temps
+
+
+      def cpu_temperatures():
+          temps = hwmon_temps("coretemp")
+          core_temps = [
+              value for label, value in temps.items()
+              if label.startswith("Core ")
+          ]
+          package_temp = temps.get("Package id 0")
+          max_candidates = core_temps + (
+              [package_temp] if package_temp is not None else []
+          )
+          hottest_cores = sorted(core_temps, reverse=True)
+          hot_candidates = (
+              [hottest_cores[0], hottest_cores[0]]
+              + hottest_cores[1:3]
+          ) if hottest_cores else []
+          return {
+              "cpu_hot": (
+                  sum(hot_candidates) / len(hot_candidates)
+                  if hot_candidates
+                  else package_temp
+              ),
+              "cpu_max": max(max_candidates) if max_candidates else None,
+          }
+
+
       def gpu_temp():
           nvidia_smi = CONFIG["nvidiaSmi"]
           if not os.path.exists(nvidia_smi):
@@ -176,12 +221,24 @@ let
 
       def control_temperatures(smooth_state):
           values = {
-              "cpu": hwmon_temp("coretemp", "Package id 0"),
               "liquid": hwmon_temp("z53", "Coolant temp"),
               "gpu": gpu_temp(),
           }
-          available = [value for value in values.values() if value is not None]
-          values["max"] = max(available) if available else None
+          values.update(cpu_temperatures())
+
+          max_hot_values = [
+              values.get(source)
+              for source in ("cpu_hot", "gpu", "liquid")
+              if values.get(source) is not None
+          ]
+          values["max_hot"] = max(max_hot_values) if max_hot_values else None
+
+          max_max_values = [
+              values.get(source)
+              for source in ("cpu_max", "gpu", "liquid")
+              if values.get(source) is not None
+          ]
+          values["max_max"] = max(max_max_values) if max_max_values else None
 
           for name, settings in CONFIG["smoothSources"].items():
               values[name] = update_smoothed_source(
@@ -190,16 +247,28 @@ let
                   smooth_state,
               )
 
-          max_smooth_values = [
-              values.get("cpu_smooth"),
+          max_hot_smooth_values = [
+              values.get("cpu_hot_smooth"),
               values.get("gpu_smooth"),
               values.get("liquid"),
           ]
-          available_smoothed = [
-              value for value in max_smooth_values if value is not None
+          available_hot_smoothed = [
+              value for value in max_hot_smooth_values if value is not None
           ]
-          values["max_smooth"] = (
-              max(available_smoothed) if available_smoothed else None
+          values["max_hot_smooth"] = (
+              max(available_hot_smoothed) if available_hot_smoothed else None
+          )
+
+          max_max_smooth_values = [
+              values.get("cpu_max_smooth"),
+              values.get("gpu_smooth"),
+              values.get("liquid"),
+          ]
+          available_max_smoothed = [
+              value for value in max_max_smooth_values if value is not None
+          ]
+          values["max_max_smooth"] = (
+              max(available_max_smoothed) if available_max_smoothed else None
           )
           return values
 
@@ -417,8 +486,8 @@ assert lib.assertMsg
   (lib.all (source: lib.elem source validGridSources) configuredGridSources)
   "Grid+ V2 channel source must be one of: ${lib.concatStringsSep ", " validGridSources}";
 assert lib.assertMsg
-  (lib.all (settings: lib.elem settings.rawSource [ "cpu" "liquid" "gpu" ]) smoothSourceConfigs)
-  "Grid+ V2 smooth source rawSource must be one of: cpu, liquid, gpu";
+  (lib.all (settings: lib.elem settings.rawSource [ "cpu_hot" "cpu_max" "liquid" "gpu" ]) smoothSourceConfigs)
+  "Grid+ V2 smooth source rawSource must be one of: cpu_hot, cpu_max, liquid, gpu";
 assert lib.assertMsg
   (lib.all
     (settings:

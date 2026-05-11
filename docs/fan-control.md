@@ -74,18 +74,22 @@ It no longer has adaptive polling, process detection, NVIDIA polling, Kraken pol
 
 Available Grid source names:
 
-- `cpu`: raw Intel CPU package temperature.
+- `cpu_hot`: weighted hot-core temperature: `average(hottest, hottest, second hottest, third hottest)`.
+- `cpu_max`: highest raw Intel CPU core/package temperature.
 - `gpu`: raw NVIDIA GPU temperature.
 - `liquid`: raw Kraken coolant temperature.
-- `max`: highest available raw `cpu`, `gpu`, or `liquid`.
-- `cpu_smooth`: smoothed CPU package temperature.
+- `max_hot`: highest available raw `cpu_hot`, `gpu`, or `liquid`.
+- `max_max`: highest available raw `cpu_max`, `gpu`, or `liquid`.
+- `cpu_hot_smooth`: smoothed weighted hot-core temperature.
+- `cpu_max_smooth`: smoothed highest CPU core/package temperature.
 - `gpu_smooth`: smoothed GPU temperature.
-- `max_smooth`: highest available `cpu_smooth`, `gpu_smooth`, or raw `liquid`.
+- `max_hot_smooth`: highest available `cpu_hot_smooth`, `gpu_smooth`, or raw `liquid`.
+- `max_max_smooth`: highest available `cpu_max_smooth`, `gpu_smooth`, or raw `liquid`.
 
 Current intent:
 
 - Front radiator intake channels stay on `liquid`.
-- General case airflow channels use `max_smooth`.
+- General case airflow channels use `max_max_smooth` or `max_hot_smooth`.
 
 ## Smoothing
 
@@ -99,10 +103,11 @@ Higher alpha means faster response and less smoothing. Lower alpha means calmer 
 
 The config has separate rise/fall alpha values per smooth source. Rise alpha should usually be higher than fall alpha so real heat is handled promptly while short spikes settle quietly.
 
-`max_smooth` is not smoothed a second time. It is calculated as:
+The combined smooth sources are not smoothed a second time. They are calculated as:
 
 ```text
-max(cpu_smooth, gpu_smooth, liquid)
+max_hot_smooth = max(cpu_hot_smooth, gpu_smooth, liquid)
+max_max_smooth = max(cpu_max_smooth, gpu_smooth, liquid)
 ```
 
 That avoids double-lag and avoids letting one short CPU spike contaminate the combined max signal longer than necessary.
@@ -172,13 +177,13 @@ Quiet idle:
 
 Random short spin-ups:
 
-- Use `max_smooth` instead of `max` for case airflow channels.
+- Use `max_hot_smooth` or `max_max_smooth` instead of raw max sources for case airflow channels.
 - Lower `riseAlpha` for more smoothing.
 - Raise `hysteresisPercent` only if you are comfortable with larger fan jumps.
 
 More cooling:
 
-- Raise occupied `max_smooth` Grid channel curves first.
+- Raise occupied `max_hot_smooth` or `max_max_smooth` Grid channel curves first.
 - Raise Kraken radiator fan duty before pushing pump duty much higher.
 
 ## Reliability Notes
@@ -190,4 +195,4 @@ Monitoring fidelity is reduced in two places:
 - Kraken duty percent is no longer exposed in System Monitor. Native Kraken coolant temp and RPM remain.
 - GPU fan percent/RPM is no longer exposed in System Monitor. Native GPU temperature, usage, power, clocks, and VRAM remain.
 
-The Grid daemon still uses `nvidia-smi` for GPU temperature when a channel source needs GPU or `max_smooth`. If `nvidia-smi` is unavailable, the daemon omits GPU from `max`/`max_smooth` for that loop and continues using the remaining available sources.
+The Grid daemon still uses `nvidia-smi` for GPU temperature when a channel source needs GPU or a combined max source. If `nvidia-smi` is unavailable, the daemon omits GPU from `max_hot`, `max_max`, `max_hot_smooth`, and `max_max_smooth` for that loop and continues using the remaining available sources.
