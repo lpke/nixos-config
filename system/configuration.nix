@@ -4,6 +4,7 @@
 { config, pkgs, pkgs-unstable, pkgs-neovim, ... }:
 
 let
+  gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
@@ -381,7 +382,7 @@ in
     libnotify # required for desktop notifications for some apps (eg my own tool, aspyn)
     jq # json parser
     # photo/image editing
-    gimp
+    gimpLatest
     darktable
     # Global/app FPS limiter / HUD (RTSS alternative)
     mangohud # the actual library
