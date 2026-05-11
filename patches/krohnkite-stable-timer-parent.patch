@@ -1,0 +1,70 @@
+diff --git a/res/main.qml b/res/main.qml
+index 1be17e5..b7cbe0d 100644
+--- a/res/main.qml
++++ b/res/main.qml
+@@ -52,5 +52,6 @@ Item {
+             "workspace": Workspace,
+             // "options": Options,
+             "kwin": KWin,
+-            "shortcuts": shortcutsLoader.item
++            "shortcuts": shortcutsLoader.item,
++            "timerRoot": scriptRoot
+         };
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index bcc259a..f09e7c0 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -104,6 +104,7 @@ class KWinDriver implements IDriverContext {
+ 
+   constructor(api: Api) {
+     KWIN = api.kwin;
++    KWIN_TIMER_ROOT = api.timerRoot;
+     this.workspace = api.workspace;
+     this.shortcuts = api.shortcuts;
+     this.engine = new TilingEngine();
+diff --git a/src/driver/kwin/kwinsettimeout.ts b/src/driver/kwin/kwinsettimeout.ts
+index b263628..50e0865 100644
+--- a/src/driver/kwin/kwinsettimeout.ts
++++ b/src/driver/kwin/kwinsettimeout.ts
+@@ -17,6 +17,8 @@
+ // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ // DEALINGS IN THE SOFTWARE.
+ 
++var KWIN_TIMER_ROOT: any = null;
++
+ class KWinTimerPool {
+   public static readonly instance = new KWinTimerPool();
+ 
+@@ -39,9 +41,17 @@ class KWinTimerPool {
+       );
+     }
+ 
+-    const timer: QTimer =
+-      this.timers.pop() ||
+-      Qt.createQmlObject("import QtQuick 2.0; Timer {}", scriptRoot);
++    let timer = this.timers.pop();
++    if (!timer && KWIN_TIMER_ROOT !== null) {
++      timer = Qt.createQmlObject(
++        "import QtQuick 2.0; Timer {}",
++        KWIN_TIMER_ROOT
++      );
++    }
++    if (!timer) {
++      func();
++      return;
++    }
+ 
+     const callback = () => {
+       try {
+diff --git a/src/extern/global.d.ts b/src/extern/global.d.ts
+index ef32f58..be219f4 100644
+--- a/src/extern/global.d.ts
++++ b/src/extern/global.d.ts
+@@ -27,6 +27,7 @@ interface Api {
+   workspace: Workspace;
+   kwin: KWin;
+   shortcuts: IShortcuts;
++  timerRoot: any;
+ }
+ declare var KWINCONFIG: KWinConfig;
+ /* QML objects */

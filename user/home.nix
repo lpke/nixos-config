@@ -30,6 +30,12 @@ in
         ${config.xdg.dataHome}/plasma-systemmonitor/inspect.page
     '';
 
+  # Avoid stale compiled KWin scripts after Krohnkite patch changes.
+  home.activation.resetKwinQmlCache =
+    lib.hm.dag.entryBefore [ "configure-plasma" ] ''
+      $DRY_RUN_CMD rm -rf ${config.xdg.cacheHome}/kwin/qmlcache
+    '';
+
   xdg.configFile = lib.foldl' lib.recursiveUpdate {} [
     # ~/.config/autostart files
     (import ./autostart)

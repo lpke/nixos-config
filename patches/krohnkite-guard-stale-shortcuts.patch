@@ -1,0 +1,46 @@
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index d31f4b7..c55d8e7 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -180,6 +180,7 @@ class KWinDriver implements IDriverContext {
+   private bindShortcut() {
+     const callbackShortcut = (shortcut: Shortcut) => {
+       return () => {
++        if (this.isStaleDriver()) return;
+         LOG?.send(
+           LogModules.shortcut,
+           `Shortcut pressed:`,
+@@ -269,6 +270,7 @@ class KWinDriver implements IDriverContext {
+ 
+     const callbackShortcutLayout = (layoutClass: ILayoutClass) => {
+       return () => {
++        if (this.isStaleDriver()) return;
+         LOG?.send(LogModules.shortcut, "shortcut layout", `${layoutClass.id}`);
+         this.enter(() =>
+           this.control.onShortcut(this, Shortcut.SetLayout, layoutClass.id)
+@@ -316,5 +318,12 @@ class KWinDriver implements IDriverContext {
+ 
+   //#region Helper functions
++  private isStaleDriver(): boolean {
++    return (
++      this.generation !== KWIN_DRIVER_GENERATION ||
++      typeof this.workspace === "undefined"
++    );
++  }
++
+   /**
+    * Binds callback to the signal w/ extra fail-safe measures, like re-entry
+    * prevention and auto-disconnect on termination.
+@@ -324,11 +333,8 @@ class KWinDriver implements IDriverContext {
+     handler: (..._: any[]) => void
+   ): () => void {
+     const wrapper = (...args: any[]) => {
+       /* HACK: `workspace` become undefined when the script is disabled. */
+-      if (
+-        this.generation !== KWIN_DRIVER_GENERATION ||
+-        typeof this.workspace === "undefined"
+-      )
++      if (this.isStaleDriver())
+         signal.disconnect(wrapper);
+       else this.enter(() => handler.apply(this, args));
+     };

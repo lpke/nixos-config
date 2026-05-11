@@ -1,0 +1,40 @@
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index f09e7c0..d31f4b7 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -27,6 +27,7 @@
+  * functions.
+  */
+ var KWIN: KWin;
++var KWIN_DRIVER_GENERATION = 0;
+ 
+ class KWinDriver implements IDriverContext {
+   public static backendName: string = "kwin";
+@@ -100,10 +101,12 @@ class KWinDriver implements IDriverContext {
+   private control: TilingController;
+   private windowMap: WrapperMap<Window, WindowClass>;
+   private entered: boolean;
++  private generation: number;
+ 
+   constructor(api: Api) {
+     KWIN = api.kwin;
+     KWIN_TIMER_ROOT = api.timerRoot;
++    this.generation = ++KWIN_DRIVER_GENERATION;
+     this.workspace = api.workspace;
+     this.shortcuts = api.shortcuts;
+     this.engine = new TilingEngine();
+@@ -321,8 +324,12 @@ class KWinDriver implements IDriverContext {
+   ): () => void {
+     const wrapper = (...args: any[]) => {
+       /* HACK: `workspace` become undefined when the script is disabled. */
+-      if (typeof this.workspace === "undefined") signal.disconnect(wrapper);
+-      else this.enter(() => handler.apply(this, args));
++      if (
++        this.generation !== KWIN_DRIVER_GENERATION ||
++        typeof this.workspace === "undefined"
++      )
++        signal.disconnect(wrapper);
++      else this.enter(() => handler.apply(this, args));
+     };
+     signal.connect(wrapper);
+ 

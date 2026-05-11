@@ -7,6 +7,9 @@ let
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
+      ../patches/krohnkite-stable-timer-parent.patch
+      ../patches/krohnkite-ignore-stale-driver.patch
+      ../patches/krohnkite-guard-stale-shortcuts.patch
     ];
   });
 in
