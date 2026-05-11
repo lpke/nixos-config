@@ -3,6 +3,13 @@
 # ══════════════════════════════════════════════════════════════════
 { config, pkgs, pkgs-unstable, pkgs-neovim, ... }:
 
+let
+  krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
+    patches = (oldAttrs.patches or []) ++ [
+      ../patches/krohnkite-unmaximize-before-tiling.patch
+    ];
+  });
+in
 {
   imports =
     [
@@ -326,7 +333,7 @@
     kdePackages.kfind
     kdePackages.filelight
     kdePackages.accessibility-inspector
-    kdePackages.krohnkite # tiling window manager
+    krohnkitePatched # tiling window manager
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
     git

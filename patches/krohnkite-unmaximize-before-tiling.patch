@@ -1,0 +1,21 @@
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index bcc259a..b0a65f4 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -142,12 +142,15 @@ class KWinDriver implements IDriverContext {
+       !client.hidden &&
+       client.width * client.height > 10
+     ) {
++      if (client.maximizeMode > 0) {
++        client.setMaximize(false, false);
++      }
++
+       const window = this.windowMap.add(client);
+       this.control.onWindowAdded(this, window);
+       if (window.state !== WindowState.Unmanaged) {
+         this.bindWindowEvents(window, client);
+-        if (client.maximizeMode > 0) client.setMaximize(false, false);
+         LOG?.send(LogModules.newWindowAdded, "", debugWin(client), {
+           winClass: [`${client.resourceClass}`],
+         });
+         return window;
