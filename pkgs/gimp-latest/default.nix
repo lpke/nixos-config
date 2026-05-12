@@ -4,6 +4,7 @@
   fetchurl,
   appimageTools,
   kdePackages,
+  darktable,
 }:
 
 let
@@ -36,6 +37,20 @@ let
           'export GDK_BACKEND=x11
 export UBUNTU_MENUPROXY=1
 exec "$APPDIR"/usr/bin/org.gimp.GIMP.Stable "$@"'
+
+      cat > "$out/usr/bin/darktable" <<EOF
+#!/bin/sh
+unset LD_PRELOAD
+exec ${darktable}/bin/darktable "\$@"
+EOF
+      chmod +x "$out/usr/bin/darktable"
+
+      cat > "$out/usr/bin/darktable-cli" <<EOF
+#!/bin/sh
+unset LD_PRELOAD
+exec ${darktable}/bin/darktable-cli "\$@"
+EOF
+      chmod +x "$out/usr/bin/darktable-cli"
     '';
   };
 in
