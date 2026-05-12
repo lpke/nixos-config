@@ -2,9 +2,11 @@
   lib,
   callPackage,
   fetchurl,
+  runCommand,
   appimageTools,
   kdePackages,
   darktable,
+  gimpPlugins,
 }:
 
 let
@@ -12,6 +14,14 @@ let
   version = "3.2.4";
   appmenuGtkModule = callPackage ../appmenu-gtk-module {};
   kdeGtkConfig = kdePackages.kde-gtk-config;
+  resynthesizer = gimpPlugins.resynthesizer;
+  appimageResynthesizer = runCommand "${resynthesizer.name}-appimage" {} ''
+    cp -a ${resynthesizer} "$out"
+    chmod -R u+w "$out"
+    find "$out/lib/gimp/3.0/plug-ins" -name '*.scm' \
+      -exec sed -i '1s|^#!.*$|#!/usr/bin/env gimp-script-fu-interpreter-3.0|' {} +
+    find "$out/lib/gimp/3.0/plug-ins" -name '*.scm' -exec chmod +x {} +
+  '';
 
   src = fetchurl {
     url = "https://download.gimp.org/gimp/v${lib.versions.majorMinor version}/linux/GIMP-${version}-x86_64.AppImage";
@@ -37,6 +47,11 @@ let
           'export GDK_BACKEND=x11
 export UBUNTU_MENUPROXY=1
 exec "$APPDIR"/usr/bin/org.gimp.GIMP.Stable "$@"'
+
+      cat >> "$out/usr/etc/gimp/3.0/gimprc" <<'EOF'
+
+(plug-in-path "${appimageResynthesizer}/lib/gimp/3.0/plug-ins:''${gimp_dir}/plug-ins:''${gimp_plug_in_dir}/plug-ins")
+EOF
 
       cat > "$out/usr/bin/darktable" <<EOF
 #!/bin/sh

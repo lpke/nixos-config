@@ -93,6 +93,7 @@
       "steam_app_0"
       "steam_app"
       "steam"
+      "adobe dng converter.exe"
     ];
 
     # Start windows with this title as floating (but still manage them)
@@ -102,6 +103,7 @@
       "RuneLite Launcher"
       "Vkcube X11"
       "Battle.net"
+      "Adobe DNG Converter"
     ];
 
     # layout order (0 = disabled completely)

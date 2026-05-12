@@ -5,6 +5,7 @@
 
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
+  adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
@@ -384,6 +385,7 @@ in
     # photo/image editing
     gimpLatest
     darktable
+    adobeDngConverter
     # Global/app FPS limiter / HUD (RTSS alternative)
     mangohud # the actual library
     mangojuice # the GUI for the library

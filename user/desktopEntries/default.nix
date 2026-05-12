@@ -66,4 +66,16 @@
     terminal = false;
     categories = [ "Game" ];
   };
+
+  adobe-dng-converter = {
+    name = "Adobe DNG Converter";
+    genericName = "DNG Converter";
+    comment = "Launch Adobe DNG Converter under Wine";
+    exec = "adobe-dng-converter --gui-launcher";
+    icon = "49AA_Adobe DNG Converter.0";
+    type = "Application";
+    terminal = false;
+    categories = [ "Graphics" "Photography" ];
+    startupNotify = true;
+  };
 }

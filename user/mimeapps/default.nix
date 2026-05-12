@@ -8,6 +8,7 @@ let
   textApps = ["nvim.desktop" "org.kde.kate.desktop" "org.kde.kwrite.desktop" "okularApplication_txt.desktop"];
   browserApps = ["vivaldi-stable.desktop"];
   imageApps = ["org.kde.gwenview.desktop"];
+  rawPhotoApps = ["darktable.desktop"];
   musicApps = ["org.kde.elisa.desktop"];
   pdfApps = ["org.kde.okular.desktop"];
   terminalApps = ["Alacritty.desktop"];
@@ -32,6 +33,7 @@ in {
     "image/svg+xml" = imageApps;
     "image/bmp" = imageApps;
     "image/tiff" = imageApps;
+    "image/x-adobe-dng" = rawPhotoApps;
 
     # Music
     "audio/mpeg" = musicApps;

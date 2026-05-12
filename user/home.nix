@@ -55,6 +55,24 @@ in
   # Custom .desktop files for: ~/.local/share/applications
   xdg.desktopEntries = import ./desktopEntries;
 
+  # Override Wine's generated Adobe DNG Converter launcher. Wine points this
+  # at a .lnk that currently does not show a usable window from KRunner.
+  xdg.dataFile."applications/wine/Programs/Adobe DNG Converter.desktop" = {
+    force = true;
+    text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Adobe DNG Converter
+      GenericName=DNG Converter
+      Comment=Launch Adobe DNG Converter under Wine
+      Exec=adobe-dng-converter --gui-launcher
+      Icon=49AA_Adobe DNG Converter.0
+      Terminal=false
+      Categories=Graphics;Photography;
+      StartupNotify=true
+    '';
+  };
+
   # KDE plasma settings (plasma-manager)
   programs.plasma = lib.recursiveUpdate
     (import ./plasma { inherit lib; })
