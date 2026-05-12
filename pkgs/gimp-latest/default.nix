@@ -1,12 +1,16 @@
 {
   lib,
+  callPackage,
   fetchurl,
   appimageTools,
+  kdePackages,
 }:
 
 let
   pname = "gimp";
   version = "3.2.4";
+  appmenuGtkModule = callPackage ../appmenu-gtk-module {};
+  kdeGtkConfig = kdePackages.kde-gtk-config;
 
   src = fetchurl {
     url = "https://download.gimp.org/gimp/v${lib.versions.majorMinor version}/linux/GIMP-${version}-x86_64.AppImage";
@@ -15,10 +19,34 @@ let
 
   appimageContents = appimageTools.extractType2 {
     inherit pname version src;
+
+    postExtract = ''
+      substituteInPlace $out/AppRun \
+        --replace-fail \
+          'export XDG_DATA_DIRS="''${APPDIR}/usr/share/:$XDG_DATA_DIRS"' \
+          'export XDG_DATA_DIRS="''${APPDIR}/usr/share/:${appmenuGtkModule}/share/gsettings-schemas/${appmenuGtkModule.name}:$XDG_DATA_DIRS"' \
+        --replace-fail \
+          'export GTK_PATH="''${APPDIR}/usr/lib/x86_64-linux-gnu/gtk-3.0"' \
+          'export GTK_PATH="${appmenuGtkModule}/lib/gtk-3.0:${kdeGtkConfig}/lib/gtk-3.0:''${APPDIR}/usr/lib/x86_64-linux-gnu/gtk-3.0"' \
+        --replace-fail \
+          'export GTK_MODULES=""' \
+          'export GTK_MODULES="appmenu-gtk-module"' \
+        --replace-fail \
+          'exec "$APPDIR"/usr/bin/org.gimp.GIMP.Stable "$@"' \
+          'export GDK_BACKEND=x11
+export UBUNTU_MENUPROXY=1
+exec "$APPDIR"/usr/bin/org.gimp.GIMP.Stable "$@"'
+    '';
   };
 in
-appimageTools.wrapType2 {
-  inherit pname version src;
+appimageTools.wrapAppImage {
+  inherit pname version;
+  src = appimageContents;
+
+  extraPkgs = pkgs: [
+    appmenuGtkModule
+    kdeGtkConfig
+  ];
 
   extraInstallCommands = ''
     install -Dm444 ${appimageContents}/org.gimp.GIMP.Stable.desktop \
@@ -27,7 +55,9 @@ appimageTools.wrapType2 {
       $out/share/icons/hicolor/scalable/apps/org.gimp.GIMP.Stable.svg
 
     substituteInPlace $out/share/applications/org.gimp.GIMP.Stable.desktop \
-      --replace-fail "Exec=org.gimp.GIMP.Stable %U" "Exec=gimp %U"
+      --replace-fail "Name=GNU Image Manipulation Program" "Name=GIMP" \
+      --replace-fail "Exec=org.gimp.GIMP.Stable %U" "Exec=gimp %U" \
+      --replace-fail "TryExec=org.gimp.GIMP.Stable" "TryExec=gimp"
   '';
 
   passthru.updateScript = ./update.sh;

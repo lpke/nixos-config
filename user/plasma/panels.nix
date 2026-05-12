@@ -70,9 +70,9 @@ let
         visible = false;
       };
       Substitutions = {
-        subsMatchApp = ''"Telegram Desktop","Gimp-.*","soffice.bin","Spotify.*","Plasma Desktop Workspace","java","bolt"'';
-        subsMatchTitle = ''".*",".*",".*",".*",".*",".*",".*"'';
-        subsReplace = ''"Telegram","Gimp","LibreOffice","Spotify","Desktop Workspace","Java - %w","Bolt Launcher"'';
+        subsMatchApp = ''"Telegram Desktop","Gimp-.*","org.gimp.GIMP.Stable.desktop","soffice.bin","Spotify.*","Plasma Desktop Workspace","java","bolt"'';
+        subsMatchTitle = ''".*",".*",".*",".*",".*",".*",".*",".*"'';
+        subsReplace = ''"Telegram","Gimp","GIMP","LibreOffice","Spotify","Desktop Workspace","Java - %w","Bolt Launcher"'';
       };
     };
   };
