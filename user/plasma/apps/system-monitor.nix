@@ -19,6 +19,7 @@ let
     green = "106,190,48";
     orange = "233,120,61";
     red = "233,61,97";
+    coral = "255,94,79";
     purple = "180,140,255";
     yellow = "245,193,66";
     cyan = "56,189,248";
@@ -142,11 +143,13 @@ let
     , title
     , ids
     , low ? []
+    , sensorColors ? {}
     , sensorLabels ? {}
     , general ? { groupByTotal = false; }
+    , appearance ? {}
     }:
     mkFace {
-      inherit name title sensorLabels general;
+      inherit name title sensorColors sensorLabels general appearance;
       chartFace = "org.kde.ksysguard.textonly";
       sensors = mkSensorConfig { high = ids; inherit low; };
       generalPath = "org.kde.ksysguard.textonly/General";
@@ -223,11 +226,9 @@ let
     // merge (lib.imap0 mkRow rows);
 
   cpuSummaryIds = [
-    "cpu/all/usage"
     "cpu/all/averageTemperature"
     "cpu/all/maximumTemperature"
     "cpu/all/averageFrequency"
-    "cpu/loadaverages/loadaverage1"
   ];
 
   gpuSummaryIds = [
@@ -239,16 +240,22 @@ let
     "gpu/gpu1/power"
   ];
 
+  monitorGpuDetailIds = [
+    "gpu/gpu1/temperature"
+    "gpu/gpu1/coreFrequency"
+    "gpu/gpu1/memoryFrequency"
+    "gpu/gpu1/usedVram"
+    "gpu/gpu1/power"
+  ];
+
   memorySummaryIds = [
-    "memory/physical/usedPercent"
-    "memory/physical/application"
-    "memory/physical/cache"
+    "memory/physical/used"
     "memory/physical/free"
     "memory/swap/usedPercent"
   ];
 
   storageSummaryIds = [
-    "disk/all/usedPercent"
+    "disk/all/used"
     "disk/all/free"
     "disk/all/read"
     "disk/all/write"
@@ -337,6 +344,7 @@ let
 
   krakenSensorPrefix = "lmsensors/z53-hid-[0-9]+-[0-9]+";
   krakenCoolantId = "${krakenSensorPrefix}/temp1";
+  krakenCurrentCoolantId = "lmsensors/z53-hid-3-7/temp1";
   krakenPumpRpmId = "${krakenSensorPrefix}/fan1";
   krakenRadiatorFanRpmId = "${krakenSensorPrefix}/fan2";
 
@@ -368,8 +376,9 @@ let
 
   coolingGraphColors = {
     "cpu/all/averageTemperature" = colors.blue;
-    "gpu/gpu1/temperature" = colors.orange;
-    "${krakenCoolantId}" = colors.cyan;
+    "gpu/gpu1/temperature" = colors.green;
+    "${krakenCurrentCoolantId}" = colors.gray;
+    "${krakenCoolantId}" = colors.gray;
   };
 
   coolingGraphLabels = {
@@ -498,15 +507,29 @@ let
   faces = merge [
     (mkPieFace {
       name = "monitor-cpu-load";
-      title = "CPU Load";
+      title = "CPU";
       ids = [ "cpu/all/usage" ];
       sensorColors = { "cpu/all/usage" = colors.blue; };
+      sensorLabels = {
+        "cpu/all/usage" = "Load";
+      };
     })
 
     (mkTextFace {
       name = "monitor-cpu";
       title = "CPU";
       ids = cpuSummaryIds;
+      appearance = {
+        showTitle = false;
+        title = "CPU Data";
+      };
+      sensorColors = {
+        "cpu/all/averageFrequency" = colors.yellow;
+        "cpu/all/averageTemperature" = colors.coral;
+        "cpu/all/maximumTemperature" = colors.red;
+        "cpu/all/usage" = colors.blue;
+        "cpu/loadaverages/loadaverage1" = colors.green;
+      };
       sensorLabels = {
         "cpu/all/usage" = "Load";
         "cpu/all/averageTemperature" = "Average temp";
@@ -518,9 +541,12 @@ let
 
     (mkPieFace {
       name = "monitor-gpu-load";
-      title = "GPU Load";
+      title = "GPU";
       ids = [ "gpu/gpu1/usage" ];
       sensorColors = { "gpu/gpu1/usage" = colors.green; };
+      sensorLabels = {
+        "gpu/gpu1/usage" = "Load";
+      };
     })
 
     (mkTextFace {
@@ -538,9 +564,58 @@ let
     })
 
     (mkTextFace {
+      name = "monitor-gpu-details";
+      title = "GPU";
+      ids = monitorGpuDetailIds;
+      appearance = {
+        showTitle = false;
+        title = "GPU Data";
+      };
+      sensorColors = {
+        "gpu/gpu1/coreFrequency" = colors.yellow;
+        "gpu/gpu1/memoryFrequency" = colors.yellow;
+        "gpu/gpu1/power" = colors.green;
+        "gpu/gpu1/temperature" = colors.red;
+        "gpu/gpu1/usage" = colors.green;
+        "gpu/gpu1/usedVram" = colors.purple;
+      };
+      sensorLabels = {
+        "gpu/gpu1/usage" = "Load";
+        "gpu/gpu1/temperature" = "Temp";
+        "gpu/gpu1/coreFrequency" = "Core clock";
+        "gpu/gpu1/memoryFrequency" = "Memory clock";
+        "gpu/gpu1/usedVram" = "VRAM used";
+        "gpu/gpu1/power" = "Power";
+      };
+    })
+
+    (mkPieFace {
       name = "monitor-memory";
       title = "RAM";
+      ids = [ "memory/physical/usedPercent" ];
+      sensorColors = { "memory/physical/usedPercent" = colors.purple; };
+      sensorLabels = {
+        "memory/physical/usedPercent" = "Used";
+      };
+    })
+
+    (mkTextFace {
+      name = "monitor-memory-details";
+      title = "RAM";
       ids = memorySummaryIds;
+      appearance = {
+        showTitle = false;
+        title = "RAM Data";
+      };
+      sensorColors = {
+        "disk/all/usedPercent" = colors.cyan;
+        "memory/physical/application" = colors.purple;
+        "memory/physical/cache" = colors.red;
+        "memory/physical/free" = colors.green;
+        "memory/physical/used" = colors.purple;
+        "memory/physical/usedPercent" = colors.blue;
+        "memory/swap/usedPercent" = colors.yellow;
+      };
       sensorLabels = {
         "memory/physical/usedPercent" = "Used";
         "memory/physical/application" = "Applications";
@@ -550,10 +625,31 @@ let
       };
     })
 
-    (mkTextFace {
+    (mkPieFace {
       name = "monitor-storage";
       title = "Storage";
+      ids = [ "disk/all/usedPercent" ];
+      sensorColors = { "disk/all/usedPercent" = colors.yellow; };
+      sensorLabels = {
+        "disk/all/usedPercent" = "Used";
+      };
+    })
+
+    (mkTextFace {
+      name = "monitor-storage-details";
+      title = "Storage";
       ids = storageSummaryIds;
+      appearance = {
+        showTitle = false;
+        title = "Storage Data";
+      };
+      sensorColors = {
+        "disk/all/free" = colors.green;
+        "disk/all/read" = colors.orange;
+        "disk/all/used" = colors.yellow;
+        "disk/all/usedPercent" = colors.blue;
+        "disk/all/write" = colors.orange;
+      };
       sensorLabels = {
         "disk/all/usedPercent" = "Used";
         "disk/all/free" = "Free";
@@ -1031,11 +1127,18 @@ let
       heightMode = "balanced";
       columns = [
         { face = "Face-monitor-cpu-load"; }
-        { face = "Face-monitor-cpu"; }
         { face = "Face-monitor-gpu-load"; }
-        { face = "Face-monitor-gpu"; }
         { face = "Face-monitor-memory"; }
         { face = "Face-monitor-storage"; }
+      ];
+    }
+    {
+      heightMode = "balanced";
+      columns = [
+        { face = "Face-monitor-cpu"; }
+        { face = "Face-monitor-gpu-details"; }
+        { face = "Face-monitor-memory-details"; }
+        { face = "Face-monitor-storage-details"; }
       ];
     }
     {
