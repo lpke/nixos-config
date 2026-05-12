@@ -178,6 +178,11 @@ in
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
+  # Hide Hibernate from Plasma's launcher/session menus.
+  systemd.sleep.extraConfig = ''
+    AllowHibernation=no
+  '';
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "au";
