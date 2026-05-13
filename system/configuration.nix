@@ -365,6 +365,8 @@ in
     liquidctl # fan control for supported devices
     pciutils # provides commands: lspci, setpci
     usbutils # provides command: lsusb
+    lua
+    luarocks # lua package manager
     python313
     nodejs_24
     (pnpm.override { nodejs = nodejs_24; }) # pnpm but using specific version
