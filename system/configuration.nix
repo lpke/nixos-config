@@ -367,6 +367,7 @@ in
     usbutils # provides command: lsusb
     lua
     luarocks # lua package manager
+    gcc # GNU C/C++ Compiler
     python313
     nodejs_24
     (pnpm.override { nodejs = nodejs_24; }) # pnpm but using specific version
