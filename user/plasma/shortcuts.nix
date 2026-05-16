@@ -11,6 +11,7 @@ in lib.foldl' lib.recursiveUpdate {} [
     # all other shortcuts:
     {
       # ====== DISABLED ======
+      plasmashell."activate application launcher" = []; # default/special: Meta, Alt+F1
       org_kde_powerdevil.powerProfile = ["Battery"]; # disabled default Meta+B
       plasmashell.cycle-panels = []; # default: Meta+Alt+p
       kaccess."Toggle Screen Reader On and Off" = [];
@@ -131,8 +132,6 @@ in lib.foldl' lib.recursiveUpdate {} [
       # ====== KEPT DEFAULTS ======
       # alt-tabbing
       kwin."Walk Through Windows" = "Meta+Tab"; # default: alt+tab, meta+tab
-      # launching
-      plasmashell."activate application launcher" = ["Meta" "Alt+F1"];
       # exploded views
       kwin.Overview = "Meta+W";
       kwin."Grid View" = "Meta+G";
