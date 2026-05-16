@@ -359,6 +359,7 @@ in
     gnumake
     zip
     unzip
+    bubblewrap # unprivileged sandboxing tool (used by Codex - codex installed with `npm i -g codex`)
     lm_sensors # sensors, sensors-detect, pwmconfig, fancontrol (you have sensor data but not the CLI tools)
     nvtopPackages.full # terminal GPU/CPU monitor — shows nvidia GPU temp, VRAM, utilisation, fan speed
     hwinfo
