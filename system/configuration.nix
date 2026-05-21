@@ -395,6 +395,7 @@ in
     gimpLatest
     darktable
     adobeDngConverter
+    imagemagick
     # Global/app FPS limiter / HUD (RTSS alternative)
     mangohud # the actual library
     mangojuice # the GUI for the library
