@@ -20,6 +20,7 @@ in
     [
       ./hardware-configuration.nix
       ./fan-control.nix
+      ./helium.nix
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -282,6 +283,13 @@ in
 
   # Install firefox
   programs.firefox.enable = true;
+
+  programs.helium = {
+    enable = true;
+    version = "0.12.4.1";
+    hash = "sha256-OgS8HkLBseFrEhNFJxMwp1bg0gzPdfY1VaySAAp7vq0=";
+    checkForUpdates = true;
+  };
 
   # Install steam
   programs.steam = {
