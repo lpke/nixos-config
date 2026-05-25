@@ -55,6 +55,14 @@
         HideTitleBar = true;
         Mask = 0;
       };
+      "Windeco Exception 3" = {
+        ExceptionPattern = "helium";
+        Enabled = true;
+        BorderSize = 0;
+        ExceptionType = 0;
+        HideTitleBar = true;
+        Mask = 0;
+      };
     };
   };
 }

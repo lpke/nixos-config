@@ -329,6 +329,7 @@ in
       ZDOTDIR = "$HOME/.config/zsh";
       NPM_CONFIG_USERCONFIG = "$HOME/.config/npm/.npmrc";
       PNPM_HOME = "$HOME/.local/share/pnpm";
+      BROWSER = "helium";
     };
 
     sessionVariables = {

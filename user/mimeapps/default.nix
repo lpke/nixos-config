@@ -6,7 +6,7 @@
 
 let
   textApps = ["nvim.desktop" "org.kde.kate.desktop" "org.kde.kwrite.desktop" "okularApplication_txt.desktop"];
-  browserApps = ["vivaldi-stable.desktop"];
+  browserApps = ["helium.desktop"];
   imageApps = ["org.kde.gwenview.desktop"];
   rawPhotoApps = ["darktable.desktop"];
   musicApps = ["org.kde.elisa.desktop"];

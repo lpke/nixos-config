@@ -56,7 +56,8 @@ in lib.foldl' lib.recursiveUpdate {} [
       # ====== ADDED (no default) ======
       # launching
       "services/Alacritty.desktop"._launch = "Meta+M";
-      "services/vivaldi-stable.desktop"._launch = "Meta+N";
+      "services/vivaldi-stable.desktop"._launch = [];
+      "services/helium.desktop"._launch = "Meta+N";
       # window misc
       kwin."Window No Border" = "Meta+D";
       kwin."Window Fullscreen" = "Meta+A"; # real fullscreen (covers panel)
