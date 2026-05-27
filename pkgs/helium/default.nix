@@ -3,6 +3,34 @@
   stdenv,
   fetchurl,
   appimageTools,
+  makeWrapper,
+  alsa-lib,
+  at-spi2-atk,
+  at-spi2-core,
+  cairo,
+  cups,
+  dbus,
+  expat,
+  fontconfig,
+  freetype,
+  gdk-pixbuf,
+  glib,
+  gtk3,
+  libdrm,
+  libgbm,
+  libnotify,
+  libpulseaudio,
+  libsecret,
+  libxkbcommon,
+  mesa,
+  nspr,
+  nss,
+  pango,
+  pipewire,
+  udev,
+  wayland,
+  xdg-utils,
+  xorg,
   version,
   hash,
 }:
@@ -24,59 +52,69 @@ let
   appimageContents = appimageTools.extractType2 {
     inherit pname version src;
   };
+  runtimeLibs = [
+    alsa-lib
+    at-spi2-atk
+    at-spi2-core
+    cairo
+    cups
+    dbus
+    expat
+    fontconfig
+    freetype
+    gdk-pixbuf
+    glib
+    gtk3
+    libdrm
+    libgbm
+    libnotify
+    libpulseaudio
+    libsecret
+    libxkbcommon
+    mesa
+    nspr
+    nss
+    pango
+    pipewire
+    udev
+    wayland
+    xdg-utils
+    xorg.libX11
+    xorg.libXScrnSaver
+    xorg.libXcomposite
+    xorg.libXcursor
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXi
+    xorg.libXrandr
+    xorg.libXrender
+    xorg.libXtst
+    xorg.libxcb
+    xorg.libxshmfence
+  ];
 in
-appimageTools.wrapAppImage {
+stdenv.mkDerivation {
   inherit pname version;
-  src = appimageContents;
 
-  extraPkgs = pkgs:
-    with pkgs; [
-      alsa-lib
-      at-spi2-atk
-      at-spi2-core
-      cairo
-      cups
-      dbus
-      expat
-      fontconfig
-      freetype
-      gdk-pixbuf
-      glib
-      gtk3
-      libdrm
-      libgbm
-      libnotify
-      libpulseaudio
-      libsecret
-      libxkbcommon
-      mesa
-      nspr
-      nss
-      pango
-      pipewire
-      udev
-      wayland
-      xdg-utils
-      xorg.libX11
-      xorg.libXScrnSaver
-      xorg.libXcomposite
-      xorg.libXcursor
-      xorg.libXdamage
-      xorg.libXext
-      xorg.libXfixes
-      xorg.libXi
-      xorg.libXrandr
-      xorg.libXrender
-      xorg.libXtst
-      xorg.libxcb
-      xorg.libxshmfence
-    ];
+  nativeBuildInputs = [ makeWrapper ];
 
-  extraInstallCommands = ''
+  dontUnpack = true;
+
+  installPhase = ''
+    runHook preInstall
+
+    # Avoid appimageTools.wrapAppImage: its bwrap sandbox blocks the setgid
+    # 1Password-BrowserSupport wrapper used by native messaging.
+    makeWrapper ${appimageContents}/AppRun $out/bin/helium \
+      --prefix NIX_LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibs}
+
     install -Dm444 ${appimageContents}/helium.desktop \
       $out/share/applications/helium.desktop
     install -Dm444 ${appimageContents}/helium.png \
       $out/share/icons/hicolor/256x256/apps/helium.png
+
+    runHook postInstall
   '';
 
   passthru.updateScript = ./update.sh;

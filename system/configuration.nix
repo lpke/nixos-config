@@ -284,6 +284,11 @@ in
   # Install firefox
   programs.firefox.enable = true;
 
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "luke" ];
+  };
+
   programs.helium = {
     enable = true;
     version = "0.12.4.1";
@@ -340,6 +345,14 @@ in
         "$HOME/.local/share/pnpm"
       ];
     };
+
+    etc."1password/custom_allowed_browsers" = {
+      text = ''
+        helium
+        vivaldi-bin
+      '';
+      mode = "0644";
+    };
   };
 
   # System packages
@@ -393,7 +406,6 @@ in
     libratbag
     evtest # input event testing
     vivaldi
-    _1password-gui
     spotify
     flatpak
     gdrive3

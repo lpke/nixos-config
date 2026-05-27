@@ -42,6 +42,20 @@ in
     systemMonitor.customSensorConfigFile
     {
       "mimeapps.list".force = true; # fully overwrite mimeapps when building
+      "net.imput.helium/NativeMessagingHosts/com.1password.1password.json".text = builtins.toJSON {
+        name = "com.1password.1password";
+        description = "1Password BrowserSupport";
+        path = "/run/wrappers/bin/1Password-BrowserSupport";
+        type = "stdio";
+        allowed_origins = [
+          "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/"
+          "chrome-extension://bkpbhnjcbehoklfkljkkbbmipaphipgl/"
+          "chrome-extension://gejiddohjgogedgjnonbofjigllpkmbf/"
+          "chrome-extension://khgocmkkpikpnmmkgmdnfckapcdkgfaf/"
+          "chrome-extension://aeblfdkhhhdcdjpifhhbdiojplfjncoa/"
+          "chrome-extension://dppgmdbiimibapkepcbdbmkaabgiofem/"
+        ];
+      } + "\n";
     }
   ];
 
