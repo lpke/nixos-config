@@ -56,6 +56,22 @@
     };
   };
 
+  google-chrome-debug = {
+    name = "Chrome Debug";
+    icon = "google-chrome";
+    genericName = "Web Browser";
+    comment = "Launch Chrome with localhost remote debugging for MCP co-debugging";
+    exec = "chrome-debug %U";
+    type = "Application";
+    terminal = false;
+    categories = [ "Network" "WebBrowser" "Development" ];
+    startupNotify = true;
+
+    settings = {
+      StartupWMClass = "google-chrome";
+    };
+  };
+
   # Battle.net (via Steam)
   battlenet = {
     name = "Battle.net";

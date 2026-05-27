@@ -406,6 +406,7 @@ in
     libratbag
     evtest # input event testing
     vivaldi
+    google-chrome
     spotify
     flatpak
     gdrive3
