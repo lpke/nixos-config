@@ -4,11 +4,20 @@
 { lib, osConfig, pkgs }:
 
 let
-  withDeps = path: import path { inherit lib; };
-  kwinModule = (import ./apps/kwin.nix).kwin;
-  spectacleModule = (import ./apps/spectacle.nix).spectacle;
-  krunnerModule = (import ./apps/krunner.nix).krunner;
-  fontsModule = (import ./apps/fonts.nix).fonts;
+  callWith = deps: module:
+    module (builtins.intersectAttrs (builtins.functionArgs module) deps);
+  appDeps = { inherit lib pkgs; };
+  moduleDeps = appDeps // { inherit osConfig withApp; };
+  withApp = name:
+    let app = import (./apps + "/${name}.nix");
+    in if builtins.isFunction app then callWith appDeps app else app;
+  withDeps = path:
+    let module = import path;
+    in if builtins.isFunction module then callWith moduleDeps module else module;
+  kwinModule = (withApp "kwin").kwin;
+  spectacleModule = (withApp "spectacle").spectacle;
+  krunnerModule = (withApp "krunner").krunner;
+  fontsModule = (withApp "fonts").fonts;
 
 in
   {
@@ -30,6 +39,6 @@ in
 
   # CONFIG CONTROL (low-level handling of KDE config files in nix format)
 
-  configFile = import ./configFile.nix { inherit lib osConfig pkgs; };
+  configFile = withDeps ./configFile.nix;
   dataFile = withDeps ./dataFile.nix;
 }

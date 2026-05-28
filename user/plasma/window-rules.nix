@@ -1,8 +1,8 @@
 # See: https://github.com/nix-community/plasma-manager/blob/trunk/modules/window-rules.nix
-{ lib }:
+{ lib, withApp }:
 
 let
-  windowDecorations = (import ./apps/windowDecorations.nix).window-rules;
+  windowDecorations = (withApp "windowDecorations").window-rules;
 
   mkAdaptiveSyncRule = { description, windowClass, matchType ? "exact" }:
     {

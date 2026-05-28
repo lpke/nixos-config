@@ -1,13 +1,13 @@
-{ lib, osConfig, pkgs }:
+{ lib, osConfig, pkgs, withApp }:
 
 let
-  krohnkite = (import ./apps/krohnkite.nix).configFile;
-  konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).configFile;
-  windowDecorations = (import ./apps/windowDecorations.nix).configFile;
-  kwin = (import ./apps/kwin.nix).configFile;
-  spectacle = (import ./apps/spectacle.nix).configFile;
-  krunner = (import ./apps/krunner.nix).configFile;
-  fonts = (import ./apps/fonts.nix).configFile;
+  krohnkite = (withApp "krohnkite").configFile;
+  konsoleYakuake = (withApp "konsole-yakuake").configFile;
+  windowDecorations = (withApp "windowDecorations").configFile;
+  kwin = (withApp "kwin").configFile;
+  spectacle = (withApp "spectacle").configFile;
+  krunner = (withApp "krunner").configFile;
+  fonts = (withApp "fonts").configFile;
 
   onePasswordAutoLockMins = osConfig.programs._1password-gui.autoLockMins;
   onePasswordRunScript = {

@@ -1,5 +1,5 @@
 # These settings are imported and merged into the rest of the plasma-manager config
-{ lib }:
+{ lib, pkgs }:
 
 let
   rosePineColorscheme = "luke_rose-pine";
@@ -9,6 +9,11 @@ let
   konsoleColorscheme = rosePineBreezeColorscheme;
   yakuakeProfile = "luke_yakuake";
   yakuakeColorscheme = rosePineBreezeColorscheme;
+  zsh = lib.getExe pkgs.zsh;
+  tmux = lib.getExe pkgs.tmux;
+  grep = lib.getExe pkgs.gnugrep;
+  head = lib.getExe' pkgs.coreutils "head";
+  cut = lib.getExe' pkgs.coreutils "cut";
 
   sharedProfile = {
     General = {
@@ -140,7 +145,7 @@ in
     "konsole/${konsoleProfile}.profile" = lib.recursiveUpdate sharedProfile {
       General = {
         Name = konsoleProfile;
-        Command = ''/run/current-system/sw/bin/zsh -c "command -v tmux >/dev/null && { (tmux ls -F '#{session_name}:#{?session_attached,1,0}' 2>/dev/null | grep -q '^main:0$' && tmux attach -t main) || tmux attach -t $(tmux ls -F '#{session_name}:#{?session_attached,attached,detached}' 2>/dev/null | grep ':detached$' | head -1 | cut -d: -f1) 2>/dev/null || tmux new-session; }; exec zsh || exec zsh"'';
+        Command = ''${zsh} -c "{ (${tmux} ls -F '#{session_name}:#{?session_attached,1,0}' 2>/dev/null | ${grep} -q '^main:0$' && ${tmux} attach -t main) || ${tmux} attach -t $(${tmux} ls -F '#{session_name}:#{?session_attached,attached,detached}' 2>/dev/null | ${grep} ':detached$' | ${head} -1 | ${cut} -d: -f1) 2>/dev/null || ${tmux} new-session; }; exec ${zsh}"'';
         Icon = "akonadiconsole-symbolic";
       };
       Appearance = {
@@ -150,7 +155,7 @@ in
     "konsole/${yakuakeProfile}.profile" = lib.recursiveUpdate sharedProfile {
       General = {
         Name = yakuakeProfile;
-        Command = ''/run/current-system/sw/bin/zsh -c "command -v tmux >/dev/null && tmux new-session -A -s yakuake; exec zsh || exec zsh"'';
+        Command = ''${zsh} -c "${tmux} new-session -A -s yakuake; exec ${zsh}"'';
         Icon = "yakuake";
         TerminalCenter = false;
       };

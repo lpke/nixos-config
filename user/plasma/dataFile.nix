@@ -1,8 +1,8 @@
-{ lib }:
+{ lib, withApp }:
 
 let
-  konsoleYakuake = (import ./apps/konsole-yakuake.nix { inherit lib; }).dataFile;
-  systemMonitor = (import ./apps/system-monitor.nix { inherit lib; }).dataFile;
+  konsoleYakuake = (withApp "konsole-yakuake").dataFile;
+  systemMonitor = (withApp "system-monitor").dataFile;
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
