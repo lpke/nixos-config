@@ -18,6 +18,7 @@
   gtk3,
   libdrm,
   libgbm,
+  libglvnd,
   libnotify,
   libpulseaudio,
   libsecret,
@@ -67,6 +68,7 @@ let
     gtk3
     libdrm
     libgbm
+    libglvnd
     libnotify
     libpulseaudio
     libsecret
@@ -107,7 +109,12 @@ stdenv.mkDerivation {
     # Avoid appimageTools.wrapAppImage: its bwrap sandbox blocks the setgid
     # 1Password-BrowserSupport wrapper used by native messaging.
     makeWrapper ${appimageContents}/AppRun $out/bin/helium \
-      --prefix NIX_LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibs}
+      --prefix NIX_LD_LIBRARY_PATH : /run/opengl-driver/lib:/run/opengl-driver-32/lib:${lib.makeLibraryPath runtimeLibs} \
+      --prefix LD_LIBRARY_PATH : /run/opengl-driver/lib:/run/opengl-driver-32/lib:${lib.makeLibraryPath runtimeLibs} \
+      --suffix XDG_DATA_DIRS : /run/opengl-driver/share:/run/opengl-driver-32/share:${mesa}/share \
+      --prefix LIBGL_DRIVERS_PATH : /run/opengl-driver/lib/dri:${mesa}/lib/dri \
+      --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm:${mesa}/lib/gbm \
+      --set-default __EGL_VENDOR_LIBRARY_DIRS /run/opengl-driver/share/glvnd/egl_vendor.d:/run/opengl-driver-32/share/glvnd/egl_vendor.d:${mesa}/share/glvnd/egl_vendor.d
 
     install -Dm444 ${appimageContents}/helium.desktop \
       $out/share/applications/helium.desktop
