@@ -21,6 +21,7 @@ in
       ./hardware-configuration.nix
       ./fan-control.nix
       ./helium.nix
+      ./custom-options.nix
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -287,6 +288,7 @@ in
   programs._1password-gui = {
     enable = true;
     polkitPolicyOwners = [ "luke" ];
+    autoLockMins = 15; # required after changing and building: `systemctl --user restart plasma-powerdevil.service`
   };
 
   programs.helium = {

@@ -1,7 +1,7 @@
 # ══════════════════════════════════════════════════════════════════
 # PLASMA-MANAGER: changes require nixos build and re-log
 # ══════════════════════════════════════════════════════════════════
-{ lib }:
+{ lib, osConfig, pkgs }:
 
 let
   withDeps = path: import path { inherit lib; };
@@ -30,6 +30,6 @@ in
 
   # CONFIG CONTROL (low-level handling of KDE config files in nix format)
 
-  configFile = withDeps ./configFile.nix;
+  configFile = import ./configFile.nix { inherit lib osConfig pkgs; };
   dataFile = withDeps ./dataFile.nix;
 }

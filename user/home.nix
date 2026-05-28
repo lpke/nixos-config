@@ -1,7 +1,7 @@
 # ══════════════════════════════════════════════════════════════════
 # HOME-MANAGER
 # ══════════════════════════════════════════════════════════════════
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, osConfig, ... }:
 
 # `flake.nix` outputs > modules > home-manager.users.luke...
 let
@@ -89,7 +89,7 @@ in
 
   # KDE plasma settings (plasma-manager)
   programs.plasma = lib.recursiveUpdate
-    (import ./plasma { inherit lib; })
+    (import ./plasma { inherit lib osConfig pkgs; })
     {
       enable = true;
     };

@@ -127,6 +127,7 @@ let
         ];
         shown = [
           # always show:
+          "1password"
           "org.kde.plasma.bluetooth"
           "org.kde.plasma.networkmanagement"
         ];

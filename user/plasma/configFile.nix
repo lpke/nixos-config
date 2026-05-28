@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, osConfig, pkgs }:
 
 let
   krohnkite = (import ./apps/krohnkite.nix).configFile;
@@ -8,6 +8,21 @@ let
   spectacle = (import ./apps/spectacle.nix).configFile;
   krunner = (import ./apps/krunner.nix).configFile;
   fonts = (import ./apps/fonts.nix).configFile;
+
+  onePasswordAutoLockMins = osConfig.programs._1password-gui.autoLockMins;
+  onePasswordRunScript = {
+    RunScriptIdleTimeoutSec = onePasswordAutoLockMins * 60;
+    IdleTimeoutCommand = "${lib.getExe pkgs._1password-gui} --lock";
+  };
+  onePasswordAutoLockConfig = lib.optionalAttrs (onePasswordAutoLockMins != null) {
+    # 1Password does not currently expose desktop auto-lock on Plasma
+    # Wayland, so use Plasma's idle detector to lock the integrated app.
+    powerdevilrc = {
+      "AC/RunScript" = onePasswordRunScript;
+      "Battery/RunScript" = onePasswordRunScript;
+      "LowBattery/RunScript" = onePasswordRunScript;
+    };
+  };
 
 in lib.foldl' lib.recursiveUpdate {} [
     # merged-in configs:
@@ -19,6 +34,7 @@ in lib.foldl' lib.recursiveUpdate {} [
     krunner
     fonts
     # all other configs:
+    onePasswordAutoLockConfig
     {
       plasma-localerc.Formats.LANG = "en_AU.UTF-8";
 
@@ -439,4 +455,5 @@ in lib.foldl' lib.recursiveUpdate {} [
           # TypeFormatting = false;
         };
       };
-    }]
+    }
+  ]
