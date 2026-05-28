@@ -418,6 +418,7 @@ in
     darktable
     adobeDngConverter
     imagemagick
+    pdfcpu
     # Global/app FPS limiter / HUD (RTSS alternative)
     mangohud # the actual library
     mangojuice # the GUI for the library
