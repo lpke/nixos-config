@@ -10,9 +10,16 @@ let
   fonts = (withApp "fonts").configFile;
 
   onePasswordAutoLockMins = osConfig.programs._1password-gui.autoLockMins;
+  onePasswordLockIfRunning = pkgs.writeShellScript "1password-lock-if-running" ''
+    if ! ${pkgs.procps}/bin/pgrep -u "$UID" -x 1password >/dev/null; then
+      exit 0
+    fi
+
+    exec ${lib.getExe pkgs._1password-gui} --lock
+  '';
   onePasswordRunScript = {
     RunScriptIdleTimeoutSec = onePasswordAutoLockMins * 60;
-    IdleTimeoutCommand = "${lib.getExe pkgs._1password-gui} --lock";
+    IdleTimeoutCommand = "${onePasswordLockIfRunning}";
   };
   onePasswordAutoLockConfig = lib.optionalAttrs (onePasswordAutoLockMins != null) {
     # 1Password does not currently expose desktop auto-lock on Plasma
