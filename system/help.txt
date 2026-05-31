@@ -1,0 +1,31 @@
+NixOS Custom Help
+=================
+
+Core
+  help                         Show this custom command list.
+  bnix                         Rebuild and switch this NixOS flake.
+  lnix                         List NixOS system generations.
+  dnix                         Garbage collect old Nix store generations.
+
+Services
+  xrs                          Restart the user xremap service.
+  wrs                          Reload the wireless kernel module.
+
+Audio Loopbacks
+  audio-loopback-status        Show managed loopbacks and unmanaged PipeWire loopbacks.
+  audio-loopback-rebind        Rebind active managed loopbacks to current inputs/outputs.
+  audio-loopback-output-toggle Toggle current input to current output loopback.
+  audio-loopback-cubilux-toggle Toggle current input to Cubilux loopback.
+
+Cooling
+  nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
+
+Photo Tools
+  adobe-dng-converter          Launch Adobe DNG Converter via Wine.
+  convert-dng                  Convert DNG files with the configured wrapper.
+
+Config Files
+  system/configuration.nix     Main user-facing NixOS settings.
+  system/audio.nix             Audio routing module logic.
+  system/help.txt              This help text.
+  system/fan-control-config.nix Fan curve and sensor mapping settings.

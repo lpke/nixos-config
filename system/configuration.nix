@@ -19,8 +19,10 @@ in
   imports =
     [
       ./hardware-configuration.nix
+      ./audio.nix
       ./fan-control.nix
       ./helium.nix
+      ./help.nix
       ./custom-options.nix
     ];
 
@@ -204,6 +206,42 @@ in
     pulse.enable = true;
     jack.enable = true;
     wireplumber.enable = true;
+    audioRouting = {
+      enable = true;
+      commands = {
+        outputToggle = "audio-loopback-output-toggle";
+        cubiluxToggle = "audio-loopback-cubilux-toggle";
+        rebind = "audio-loopback-rebind";
+        status = "audio-loopback-status";
+      };
+      outputs = {
+        "DAC" = "alsa_output.usb-JDS_Labs_JDS_Labs_Element_III-00.analog-stereo";
+        "AirPods" = "bluez_output.2C_32_6A_CB_E0_42.1";
+        "Cubilux" = "alsa_output.usb-Generic_USB_Audio-00.analog-stereo";
+      };
+      combinedOutputs = [
+        {
+          name = "DAC + Cubilux";
+          outputs = [ "DAC" "Cubilux" ];
+        }
+        {
+          name = "AirPods + Cubilux";
+          outputs = [ "AirPods" "Cubilux" ];
+        }
+      ];
+      outputLoopback = {
+        service = "audio-loopback-output.service";
+        nodeName = "audio-loopback-output";
+        route = "current input -> current output";
+      };
+      cubiluxLoopback = {
+        enable = true;
+        output = "Cubilux";
+        service = "audio-loopback-cubilux.service";
+        nodeName = "audio-loopback-cubilux";
+        route = "current input -> Cubilux";
+      };
+    };
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -296,6 +334,11 @@ in
     version = "0.12.4.1";
     hash = "sha256-OgS8HkLBseFrEhNFJxMwp1bg0gzPdfY1VaySAAp7vq0=";
     checkForUpdates = true;
+  };
+
+  programs.localHelp = {
+    enable = true;
+    commandName = "help";
   };
 
   # Install steam
