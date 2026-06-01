@@ -16,6 +16,8 @@ Audio Loopbacks
   audio-loopback-rebind        Rebind active managed loopbacks to current inputs/outputs.
   audio-loopback-output-toggle Toggle current input to current output loopback.
   audio-loopback-cubilux-toggle Toggle current input to Cubilux loopback.
+  audio-volume-lock-status     Show enforced PipeWire input/output volume locks.
+  volume locks                 Configure in services.pipewire.audioVolumeLock.
 
 Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
@@ -27,5 +29,7 @@ Photo Tools
 Config Files
   system/configuration.nix     Main user-facing NixOS settings.
   system/audio.nix             Audio routing module logic.
+  system/audio-volume-lock.nix Audio volume lock service logic.
+  system/browser-webrtc-audio.nix Browser WebRTC input-volume fix.
   system/help.txt              This help text.
   system/fan-control-config.nix Fan curve and sensor mapping settings.

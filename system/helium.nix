@@ -5,6 +5,10 @@ let
   helium = pkgs.callPackage ../pkgs/helium {
     inherit (cfg) version hash;
     desktopPointerFix = cfg.fixDesktopPointerDetection;
+    chromiumFlags =
+      cfg.extraChromiumFlags
+      ++ lib.optional cfg.disableWebrtcInputVolumeAdjustment
+        "--disable-features=WebRtcAllowInputVolumeAdjustment";
   };
 in
 {
@@ -31,6 +35,18 @@ in
       type = lib.types.bool;
       default = false;
       description = "Force Chromium desktop pointer media queries for Helium on Wayland sessions where virtual input exposes coarse touch pointers.";
+    };
+
+    disableWebrtcInputVolumeAdjustment = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Disable Chromium WebRTC input volume adjustment for Helium.";
+    };
+
+    extraChromiumFlags = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Extra Chromium flags passed to the Helium wrapper.";
     };
   };
 

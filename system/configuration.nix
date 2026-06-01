@@ -20,9 +20,11 @@ in
     [
       ./hardware-configuration.nix
       ./audio.nix
+      ./audio-volume-lock.nix
       ./fan-control.nix
       ./helium.nix
       ./browser-pointer-fix.nix
+      ./browser-webrtc-audio.nix
       ./help.nix
       ./custom-options.nix
     ];
@@ -243,6 +245,18 @@ in
         route = "current input -> Cubilux";
       };
     };
+    audioVolumeLock = {
+      enable = true;
+      intervalSeconds = "0.25";
+      service = "audio-volume-lock.service";
+      statusCommand = "audio-volume-lock-status";
+      locks = {
+        "NZXT USB MIC Mono" = {
+          nodeName = "alsa_input.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00.mono-fallback";
+          volume = "1.00";
+        };
+      };
+    };
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -339,6 +353,10 @@ in
   # touchscreen due to a virtual device, which in turn caused issues on some
   # websites (eg Notion Calendar).
   programs.browserPointerFix.enable = true;
+
+  # Stops Chromium WebRTC calls from moving the system input volume.
+  # Applies to Vivaldi, Google Chrome, and Helium.
+  programs.browserWebrtcAudioFix.enable = true;
 
   # Install firefox
   programs.firefox.enable = true;

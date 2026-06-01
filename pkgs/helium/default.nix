@@ -35,6 +35,7 @@
   version,
   hash,
   desktopPointerFix ? false,
+  chromiumFlags ? [],
 }:
 
 let
@@ -98,6 +99,12 @@ let
   ];
   desktopPointerFlags =
     "--blink-settings=maxTouchPoints=0,primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4";
+  wrapperFlags =
+    lib.optional desktopPointerFix desktopPointerFlags
+    ++ chromiumFlags;
+  wrapperFlagArgs = lib.concatMapStrings
+    (flag: " \\\n      --add-flags ${lib.escapeShellArg flag}")
+    wrapperFlags;
 in
 stdenv.mkDerivation {
   inherit pname version;
@@ -117,8 +124,7 @@ stdenv.mkDerivation {
       --suffix XDG_DATA_DIRS : /run/opengl-driver/share:/run/opengl-driver-32/share:${mesa}/share \
       --prefix LIBGL_DRIVERS_PATH : /run/opengl-driver/lib/dri:${mesa}/lib/dri \
       --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm:${mesa}/lib/gbm \
-      --set-default __EGL_VENDOR_LIBRARY_DIRS /run/opengl-driver/share/glvnd/egl_vendor.d:/run/opengl-driver-32/share/glvnd/egl_vendor.d:${mesa}/share/glvnd/egl_vendor.d${lib.optionalString desktopPointerFix " \\
-      --add-flags ${lib.escapeShellArg desktopPointerFlags}"}
+      --set-default __EGL_VENDOR_LIBRARY_DIRS /run/opengl-driver/share/glvnd/egl_vendor.d:/run/opengl-driver-32/share/glvnd/egl_vendor.d:${mesa}/share/glvnd/egl_vendor.d${wrapperFlagArgs}
 
     install -Dm444 ${appimageContents}/helium.desktop \
       $out/share/applications/helium.desktop
