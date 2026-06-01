@@ -4,6 +4,7 @@ let
   cfg = config.programs.helium;
   helium = pkgs.callPackage ../pkgs/helium {
     inherit (cfg) version hash;
+    desktopPointerFix = cfg.fixDesktopPointerDetection;
   };
 in
 {
@@ -24,6 +25,12 @@ in
       type = lib.types.bool;
       default = true;
       description = "Check GitHub releases during NixOS activation and print a notice when a newer Helium version exists.";
+    };
+
+    fixDesktopPointerDetection = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Force Chromium desktop pointer media queries for Helium on Wayland sessions where virtual input exposes coarse touch pointers.";
     };
   };
 

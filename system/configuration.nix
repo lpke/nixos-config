@@ -22,6 +22,7 @@ in
       ./audio.nix
       ./fan-control.nix
       ./helium.nix
+      ./browser-pointer-fix.nix
       ./help.nix
       ./custom-options.nix
     ];
@@ -320,9 +321,6 @@ in
     ];
   };
 
-  # Install firefox
-  programs.firefox.enable = true;
-
   programs._1password-gui = {
     enable = true;
     polkitPolicyOwners = [ "luke" ];
@@ -335,6 +333,15 @@ in
     hash = "sha256-OgS8HkLBseFrEhNFJxMwp1bg0gzPdfY1VaySAAp7vq0=";
     checkForUpdates = true;
   };
+
+  # Applies to Vivaldi, Google Chrome, Firefox, and Helium.
+  # Fixes issue where running Synergy caused browsers to think device is
+  # touchscreen due to a virtual device, which in turn caused issues on some
+  # websites (eg Notion Calendar).
+  programs.browserPointerFix.enable = true;
+
+  # Install firefox
+  programs.firefox.enable = true;
 
   programs.localHelp = {
     enable = true;
