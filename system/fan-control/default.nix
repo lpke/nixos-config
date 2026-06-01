@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  fanControl = import ./fan-control-config.nix { inherit lib; };
+  fanControl = import ./config.nix { inherit lib; };
   smoothSourceNames = lib.attrNames fanControl.grid.smoothSources;
   validGridSources = [
     "cpu_hot"
@@ -28,7 +28,7 @@ let
   ];
 
   ksystemstatsCustomSensors =
-    import ../pkgs/ksystemstats-custom-sensors {
+    import ../../pkgs/ksystemstats-custom-sensors {
       inherit lib pkgs;
     };
 

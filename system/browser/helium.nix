@@ -2,13 +2,19 @@
 
 let
   cfg = config.programs.helium;
-  helium = pkgs.callPackage ../pkgs/helium {
+  chromiumWrapper = import ./chromium-wrapper.nix { inherit lib; };
+  inherit (chromiumWrapper) wrapChromiumBrowser;
+
+  heliumPackage = pkgs.callPackage ../../pkgs/helium {
     inherit (cfg) version hash;
-    desktopPointerFix = cfg.fixDesktopPointerDetection;
-    chromiumFlags =
-      cfg.extraChromiumFlags
-      ++ lib.optional cfg.disableWebrtcInputVolumeAdjustment
-        "--disable-features=WebRtcAllowInputVolumeAdjustment";
+  };
+
+  helium = wrapChromiumBrowser pkgs {
+    name = "helium-chromium-flags";
+    package = heliumPackage;
+    binary = "helium";
+    desktopFiles = [ "helium.desktop" ];
+    flags = lib.unique config.programs.chromiumBrowserFlags.flags;
   };
 in
 {
@@ -29,24 +35,6 @@ in
       type = lib.types.bool;
       default = true;
       description = "Check GitHub releases during NixOS activation and print a notice when a newer Helium version exists.";
-    };
-
-    fixDesktopPointerDetection = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Force Chromium desktop pointer media queries for Helium on Wayland sessions where virtual input exposes coarse touch pointers.";
-    };
-
-    disableWebrtcInputVolumeAdjustment = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Disable Chromium WebRTC input volume adjustment for Helium.";
-    };
-
-    extraChromiumFlags = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      description = "Extra Chromium flags passed to the Helium wrapper.";
     };
   };
 

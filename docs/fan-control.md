@@ -6,7 +6,7 @@ This setup keeps fan control in NixOS config and keeps KDE System Monitor mostly
 
 ## Files
 
-- `system/fan-control-config.nix`: fan curves, Grid channel names, Grid sources, smoothing, intervals.
+- `system/fan-control/config.nix`: fan curves, Grid channel names, Grid sources, smoothing, intervals.
 - `system/fan-control.nix`: systemd services, Grid+ V2 daemon, helper scripts, udev rule.
 - `user/plasma/apps/system-monitor.nix`: Monitor/Inspect pages and Grid custom sensor config.
 - `pkgs/ksystemstats-custom-sensors/default.nix`: simple file-backed KSystemStats plugin.

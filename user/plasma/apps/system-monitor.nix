@@ -1,5 +1,5 @@
 { lib
-, fanControl ? import ../../../system/fan-control-config.nix { inherit lib; }
+, fanControl ? import ../../../system/fan-control/config.nix { inherit lib; }
 }:
 
 let

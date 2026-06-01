@@ -28,8 +28,10 @@ Photo Tools
 
 Config Files
   system/configuration.nix     Main user-facing NixOS settings.
-  system/audio.nix             Audio routing module logic.
-  system/audio-volume-lock.nix Audio volume lock service logic.
-  system/browser-webrtc-audio.nix Browser WebRTC input-volume fix.
-  system/help.txt              This help text.
-  system/fan-control-config.nix Fan curve and sensor mapping settings.
+  system/custom-options.nix    Local NixOS option extensions.
+  system/audio/routing.nix     Audio routing module logic.
+  system/audio/volume-lock.nix Audio volume lock service logic.
+  system/browser/chromium-flags.nix Shared Chromium browser flag logic.
+  system/browser/webrtc-audio.nix Browser WebRTC input-volume fix.
+  system/help/help.txt         This help text.
+  system/fan-control/config.nix Fan curve and sensor mapping settings.

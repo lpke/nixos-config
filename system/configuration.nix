@@ -19,13 +19,14 @@ in
   imports =
     [
       ./hardware-configuration.nix
-      ./audio.nix
-      ./audio-volume-lock.nix
-      ./fan-control.nix
-      ./helium.nix
-      ./browser-pointer-fix.nix
-      ./browser-webrtc-audio.nix
-      ./help.nix
+      ./audio/routing.nix
+      ./audio/volume-lock.nix
+      ./fan-control
+      ./browser/chromium-flags.nix
+      ./browser/helium.nix
+      ./browser/pointer-fix.nix
+      ./browser/webrtc-audio.nix
+      ./help
       ./custom-options.nix
     ];
 
