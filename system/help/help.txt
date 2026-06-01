@@ -10,6 +10,7 @@ Core
 Services
   xrs                          Restart the user xremap service.
   wrs                          Reload the wireless kernel module.
+  prs                          Restart Piper, libratbag autostart, and ratbagd.
 
 Audio Loopbacks
   audio-loopback-status        Show managed loopbacks and unmanaged PipeWire loopbacks.

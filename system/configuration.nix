@@ -6,6 +6,9 @@
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
+  piperRestart = pkgs.callPackage ../pkgs/piper-restart {
+    commandName = "prs";
+  };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
@@ -475,6 +478,7 @@ in
     neofetch
     piper # mouse assignments
     libratbag
+    piperRestart # prs: piper restart
     evtest # input event testing
     vivaldi
     google-chrome
