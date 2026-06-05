@@ -9,7 +9,6 @@ let
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
-  nzxtMicGainStatus = pkgs.callPackage ../pkgs/nzxt-mic-gain-status {};
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
@@ -25,6 +24,7 @@ in
       ./hardware-configuration.nix
       ./audio/routing.nix
       ./audio/volume-lock.nix
+      ./audio/nzxt-mic-gain.nix
       ./fan-control
       ./browser/chromium-flags.nix
       ./browser/helium.nix
@@ -286,6 +286,10 @@ in
         };
       };
     };
+    nzxtMicGain = {
+      enable = true;
+      startupGainPercent = 1;
+    };
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -504,7 +508,6 @@ in
     piper # mouse assignments
     libratbag
     piperRestart # prs: piper restart
-    nzxtMicGainStatus
     evtest # input event testing
     vivaldi
     google-chrome
