@@ -18,84 +18,44 @@ let
     name = "audio-volume-lock";
     runtimeInputs = with pkgs; [
       coreutils
-      gnugrep
       jq
+      pipewire
       pulseaudio
+      wireplumber
     ];
     text = ''
       set -euo pipefail
 
       locks_json="${lockConfig}"
       event_delay="${toString cfg.intervalSeconds}"
-      declare -A lock_kinds
 
-      pactl_volume() {
-        case "$1" in
-          *%)
-            printf '%s\n' "$1"
-            ;;
-          *)
-            jq -nr --arg volume "$1" '(($volume | tonumber) * 100 | tostring) + "%"'
-            ;;
-        esac
-      }
+      node_id() {
+        node_name="$1"
 
-      node_exists() {
-        kind="$1"
-        node_name="$2"
-
-        case "$kind" in
-          source)
-            pactl list sources short
-            ;;
-          sink)
-            pactl list sinks short
-            ;;
-          *)
-            return 1
-            ;;
-        esac | cut -f2 | grep -Fxq -- "$node_name"
-      }
-
-      node_kind() {
-        name="$1"
-        node_name="$2"
-        kind="''${lock_kinds[$name]:-}"
-
-        if [ -n "$kind" ] && node_exists "$kind" "$node_name"; then
-          printf '%s\n' "$kind"
-          return 0
-        fi
-
-        if node_exists source "$node_name"; then
-          lock_kinds["$name"]="source"
-          printf '%s\n' "source"
-          return 0
-        fi
-
-        if node_exists sink "$node_name"; then
-          lock_kinds["$name"]="sink"
-          printf '%s\n' "sink"
-          return 0
-        fi
-
-        unset "lock_kinds[$name]"
-        return 1
+        pw-dump | jq -r --arg node_name "$node_name" '
+          .[]
+          | select(.type == "PipeWire:Interface:Node")
+          | select(.info.props."node.name" == $node_name)
+          | select(
+              .info.props."media.class" == "Audio/Source"
+              or .info.props."media.class" == "Audio/Sink"
+            )
+          | .id
+        ' | head -n1
       }
 
       apply_locks() {
         while read -r lock; do
           name="$(jq -r '.name' <<< "$lock")"
           node_name="$(jq -r '.nodeName' <<< "$lock")"
-          volume="$(pactl_volume "$(jq -r '.volume' <<< "$lock")")"
-          kind="$(node_kind "$name" "$node_name" || true)"
+          volume="$(jq -r '.volume' <<< "$lock")"
+          id="$(node_id "$node_name")"
 
-          if [ -z "$kind" ]; then
+          if [ -z "$id" ]; then
             continue
           fi
 
-          pactl "set-$kind-volume" "$node_name" "$volume" || {
-            unset "lock_kinds[$name]"
+          wpctl set-volume -l 1.0 "$id" "$volume" || {
             echo "failed to lock volume for $name ($node_name -> $volume)" >&2
           }
         done < <(jq -c '.[]' "$locks_json")

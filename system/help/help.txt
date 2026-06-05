@@ -18,8 +18,10 @@ Audio
   audio-loopback-output-toggle Toggle current input to current output loopback.
   audio-loopback-cubilux-toggle Toggle current input to Cubilux loopback.
   loopbacks                   Disabled by default; enable with toggle commands.
-  audio-volume-lock-status     Show enforced PipeWire input/output volume locks.
+  audio-volume-lock-status     Show enforced software PipeWire volume locks.
   volume locks                 Configure in services.pipewire.audioVolumeLock.
+  NZXT USB MIC volume          Soft mixer in WirePlumber keeps hardware knobs free.
+  nzxt-mic-gain-status         Show NZXT USB MIC hardware gain knob value.
   AirPods headset audio        Configure in services.pipewire.wireplumber.extraConfig.
 
 Cooling

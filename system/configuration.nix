@@ -9,6 +9,7 @@ let
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
+  nzxtMicGainStatus = pkgs.callPackage ../pkgs/nzxt-mic-gain-status {};
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
@@ -219,6 +220,22 @@ in
           # Keep AirPods in A2DP output mode unless the headset profile is explicitly selected.
           "bluetooth.autoswitch-to-headset-profile" = false;
         };
+      };
+      extraConfig."51-nzxt-usb-mic-soft-mixer" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [
+              {
+                "device.name" = "alsa_card.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00";
+              }
+            ];
+            actions.update-props = {
+              # NZXT reports hardware capture gain up to +79.89 dB. Keep OS volume at
+              # software unity so web apps cannot drive the hardware preamp to max.
+              "api.alsa.soft-mixer" = true;
+            };
+          }
+        ];
       };
     };
     audioRouting = {
@@ -487,6 +504,7 @@ in
     piper # mouse assignments
     libratbag
     piperRestart # prs: piper restart
+    nzxtMicGainStatus
     evtest # input event testing
     vivaldi
     google-chrome
