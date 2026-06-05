@@ -12,13 +12,15 @@ Services
   wrs                          Reload the wireless kernel module.
   prs                          Restart Piper, libratbag autostart, and ratbagd.
 
-Audio Loopbacks
+Audio
   audio-loopback-status        Show managed loopbacks and unmanaged PipeWire loopbacks.
   audio-loopback-rebind        Rebind active managed loopbacks to current inputs/outputs.
   audio-loopback-output-toggle Toggle current input to current output loopback.
   audio-loopback-cubilux-toggle Toggle current input to Cubilux loopback.
+  loopbacks                   Disabled by default; enable with toggle commands.
   audio-volume-lock-status     Show enforced PipeWire input/output volume locks.
   volume locks                 Configure in services.pipewire.audioVolumeLock.
+  AirPods headset audio        Configure in services.pipewire.wireplumber.extraConfig.
 
 Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.

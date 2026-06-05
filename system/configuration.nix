@@ -212,7 +212,15 @@ in
     alsa.support32Bit = true;
     pulse.enable = true;
     jack.enable = true;
-    wireplumber.enable = true;
+    wireplumber = {
+      enable = true;
+      extraConfig."10-bluez-airpods" = {
+        "wireplumber.settings" = {
+          # Keep AirPods in A2DP output mode unless the headset profile is explicitly selected.
+          "bluetooth.autoswitch-to-headset-profile" = false;
+        };
+      };
+    };
     audioRouting = {
       enable = true;
       commands = {
@@ -242,7 +250,7 @@ in
         route = "current input -> current output";
       };
       cubiluxLoopback = {
-        enable = true;
+        enable = false;
         output = "Cubilux";
         service = "audio-loopback-cubilux.service";
         nodeName = "audio-loopback-cubilux";
