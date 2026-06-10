@@ -13,6 +13,7 @@ Services
   prs                          Restart Piper, libratbag autostart, and ratbagd.
 
 Audio
+  ars                          Restart PipeWire/WirePlumber and stale Chromium/Electron audio subprocesses.
   audio-loopback-status        Show managed loopbacks and unmanaged PipeWire loopbacks.
   audio-loopback-rebind        Rebind active managed loopbacks to current inputs/outputs.
   audio-loopback-output-toggle Toggle current input to current output loopback.
@@ -20,9 +21,10 @@ Audio
   loopbacks                   Disabled by default; enable with toggle commands.
   audio-volume-lock-status     Show enforced software PipeWire volume locks.
   volume locks                 Configure in services.pipewire.audioVolumeLock.
-  nzxt-mic-gain                Show or set NZXT USB MIC hardware gain percent (`nzxt-mic-gain <n>`; decimals allowed).
+  nzxt-mic-gain                Show or set NZXT USB MIC hardware gain (`nzxt-mic-gain <n>` manual, `nzxt-mic-gain auto` mode-aware).
   NZXT USB MIC volume          Soft mixer in WirePlumber keeps hardware knobs free.
-  nzxt-mic-gain-status         Show NZXT USB MIC hardware gain knob value.
+  nzxt-mic-gain-status         Show NZXT USB MIC gain, detected mixer-range mode, and configured per-mode gains.
+  NZXT USB MIC modes           extended-range defaults to 1%; compact 0-100 and fallback default to 100%.
   AirPods headset audio        Configure in services.pipewire.wireplumber.extraConfig.
 
 Cooling

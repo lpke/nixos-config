@@ -6,9 +6,23 @@ let
   amixer = "${pkgs.alsa-utils}/bin/amixer";
   nzxtMicGain = pkgs.callPackage ../../pkgs/nzxt-mic-gain {
     commandName = cfg.commandName;
+    inherit (cfg)
+      compactRangeGainPercent
+      compactRangeMax
+      extendedRangeGainPercent
+      extendedRangeMaxes
+      fallbackGainPercent
+      ;
   };
   nzxtMicGainStatus = pkgs.callPackage ../../pkgs/nzxt-mic-gain {
     commandName = cfg.statusCommand;
+    inherit (cfg)
+      compactRangeGainPercent
+      compactRangeMax
+      extendedRangeGainPercent
+      extendedRangeMaxes
+      fallbackGainPercent
+      ;
   };
 
   serviceName = "nzxt-mic-gain-startup";
@@ -17,13 +31,12 @@ let
 
     card="${cfg.card}"
     control="${cfg.control}"
-    target="${toString (cfg.startupGainPercent + 0.0)}"
     setter="${nzxtMicGain}/bin/${cfg.commandName}"
 
     attempts=0
     while [ "$attempts" -lt 30 ]; do
       if ${amixer} -c "$card" sget "$control" >/dev/null 2>&1; then
-        NZXT_MIC_CARD="$card" NZXT_MIC_CONTROL="$control" "$setter" --set "$target"
+        NZXT_MIC_CARD="$card" NZXT_MIC_CONTROL="$control" "$setter" auto
         exit 0
       fi
       attempts=$((attempts + 1))
@@ -50,10 +63,34 @@ in
       description = "ALSA capture control that maps to NZXT USB MIC hardware gain.";
     };
 
-    startupGainPercent = lib.mkOption {
+    extendedRangeMaxes = lib.mkOption {
+      type = lib.types.listOf lib.types.int;
+      default = [ 233 255 ];
+      description = "ALSA Mic Capture Volume max values treated as the extended-range NZXT USB MIC state.";
+    };
+
+    compactRangeMax = lib.mkOption {
+      type = lib.types.int;
+      default = 100;
+      description = "ALSA Mic Capture Volume max value treated as the compact-range NZXT USB MIC state.";
+    };
+
+    extendedRangeGainPercent = lib.mkOption {
       type = lib.types.either lib.types.int lib.types.float;
-      default = 0;
-      description = "Hardware gain percent to set at startup once per user session.";
+      default = 1;
+      description = "Hardware gain percent to apply when the NZXT USB MIC exposes an extended ALSA mixer range.";
+    };
+
+    compactRangeGainPercent = lib.mkOption {
+      type = lib.types.either lib.types.int lib.types.float;
+      default = 100;
+      description = "Hardware gain percent to apply when the NZXT USB MIC exposes the 0-100 ALSA mixer range.";
+    };
+
+    fallbackGainPercent = lib.mkOption {
+      type = lib.types.either lib.types.int lib.types.float;
+      default = 100;
+      description = "Hardware gain percent to apply when the NZXT USB MIC exposes an unexpected ALSA mixer range.";
     };
 
     commandName = lib.mkOption {
@@ -72,8 +109,15 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion = cfg.startupGainPercent >= 0 && cfg.startupGainPercent <= 100;
-        message = "services.pipewire.nzxtMicGain.startupGainPercent must be between 0 and 100.";
+        assertion =
+          cfg.extendedRangeGainPercent >= 0 && cfg.extendedRangeGainPercent <= 100
+          && cfg.compactRangeGainPercent >= 0 && cfg.compactRangeGainPercent <= 100
+          && cfg.fallbackGainPercent >= 0 && cfg.fallbackGainPercent <= 100;
+        message = "services.pipewire.nzxtMicGain gain percentages must be between 0 and 100.";
+      }
+      {
+        assertion = cfg.extendedRangeMaxes != [] && !(builtins.elem cfg.compactRangeMax cfg.extendedRangeMaxes);
+        message = "services.pipewire.nzxtMicGain compactRangeMax must not also appear in extendedRangeMaxes.";
       }
     ];
 

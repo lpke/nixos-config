@@ -6,6 +6,9 @@
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
+  audioRestart = pkgs.callPackage ../pkgs/audio-restart {
+    commandName = "ars";
+  };
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
@@ -288,7 +291,9 @@ in
     };
     nzxtMicGain = {
       enable = true;
-      startupGainPercent = 1;
+      extendedRangeGainPercent = 1;
+      compactRangeGainPercent = 100;
+      fallbackGainPercent = 100;
     };
   };
 
@@ -507,6 +512,7 @@ in
     neofetch
     piper # mouse assignments
     libratbag
+    audioRestart # ars: audio restart
     piperRestart # prs: piper restart
     evtest # input event testing
     vivaldi
