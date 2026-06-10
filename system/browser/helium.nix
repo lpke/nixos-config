@@ -5,6 +5,25 @@ let
   chromiumWrapper = import ./chromium-wrapper.nix { inherit lib; };
   inherit (chromiumWrapper) wrapChromiumBrowser;
 
+  webrtcInputVolumeFeature = "WebRtcAllowInputVolumeAdjustment";
+  disableFeaturesPrefix = "--disable-features=";
+  removeWebrtcInputVolumeFeature = flag:
+    if lib.hasPrefix disableFeaturesPrefix flag then
+      let
+        features = lib.splitString "," (lib.removePrefix disableFeaturesPrefix flag);
+        filteredFeatures = lib.filter (feature: feature != webrtcInputVolumeFeature) features;
+      in
+      if filteredFeatures == [] then null else "${disableFeaturesPrefix}${lib.concatStringsSep "," filteredFeatures}"
+    else
+      flag;
+
+  flags = lib.unique config.programs.chromiumBrowserFlags.flags;
+  flagsWithInputVolumeAdjustment = lib.filter (flag: flag != null) (map removeWebrtcInputVolumeFeature flags);
+  inputVolumeAdjustmentFlagArgs =
+    lib.optionalString (flagsWithInputVolumeAdjustment != []) (
+      " \\\n" + lib.concatMapStringsSep " \\\n" (flag: "        --add-flags ${lib.escapeShellArg flag}") flagsWithInputVolumeAdjustment
+    );
+
   heliumPackage = pkgs.callPackage ../../pkgs/helium {
     inherit (cfg) version hash;
   };
@@ -14,7 +33,81 @@ let
     package = heliumPackage;
     binary = "helium";
     desktopFiles = [ "helium.desktop" ];
-    flags = lib.unique config.programs.chromiumBrowserFlags.flags;
+    inherit flags;
+  };
+
+  seedMicAutoGainProfile = pkgs.writeShellScript "helium-mic-auto-gain-seed-profile" ''
+    set -eu
+
+    configHome="''${XDG_CONFIG_HOME:-$HOME/.config}"
+    sourceDir="$configHome/net.imput.helium"
+    targetDir="$configHome/helium-mic-auto-gain"
+    sourceDefault="$sourceDir/Default"
+    targetDefault="$targetDir/Default"
+
+    [ -d "$sourceDefault" ] || exit 0
+    mkdir -p "$targetDefault"
+
+    # Do not overwrite profile files while the alternate browser is already open.
+    if [ -e "$targetDir/SingletonLock" ] || [ -e "$targetDir/SingletonSocket" ] || [ -e "$targetDir/SingletonCookie" ]; then
+      exit 0
+    fi
+
+    copy_json() {
+      src="$1"
+      dst="$2"
+      [ -f "$src" ] || return 0
+      tmp="$dst.tmp.$$"
+      if cp -f "$src" "$tmp" && ${lib.getExe pkgs.jq} empty "$tmp" >/dev/null 2>&1; then
+        mv -f "$tmp" "$dst"
+      else
+        rm -f "$tmp"
+      fi
+    }
+
+    copy_sqlite() {
+      src="$1"
+      dst="$2"
+      [ -f "$src" ] || return 0
+      tmp="$dst.tmp.$$"
+      rm -f "$tmp"
+      if ${pkgs.sqlite}/bin/sqlite3 "$src" ".timeout 1000" ".backup '$tmp'" >/dev/null 2>&1; then
+        mv -f "$tmp" "$dst"
+      else
+        rm -f "$tmp"
+      fi
+    }
+
+    copy_json "$sourceDefault/Bookmarks" "$targetDefault/Bookmarks"
+    copy_sqlite "$sourceDefault/Shortcuts" "$targetDefault/Shortcuts"
+  '';
+
+  heliumMicAutoGain = pkgs.stdenvNoCC.mkDerivation {
+    pname = "helium-mic-auto-gain";
+    inherit (heliumPackage) version;
+
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      makeWrapper ${heliumPackage}/bin/helium $out/bin/helium-mic-auto-gain \
+        --run '${seedMicAutoGainProfile}; userDataDir="''${XDG_CONFIG_HOME:-$HOME/.config}/helium-mic-auto-gain"; set -- "--user-data-dir=$userDataDir" "$@"'${inputVolumeAdjustmentFlagArgs}
+
+      install -Dm444 ${heliumPackage}/share/applications/helium.desktop \
+        $out/share/applications/helium-mic-auto-gain.desktop
+      substituteInPlace $out/share/applications/helium-mic-auto-gain.desktop \
+        --replace-fail 'Name=Helium' 'Name=Helium (Mic Auto Gain)' \
+        --replace-fail 'Exec=helium' 'Exec=helium-mic-auto-gain'
+
+      runHook postInstall
+    '';
+
+    meta = heliumPackage.meta // {
+      mainProgram = "helium-mic-auto-gain";
+    };
   };
 in
 {
@@ -40,7 +133,10 @@ in
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
     {
-      environment.systemPackages = [ helium ];
+      environment.systemPackages = [
+        helium
+        heliumMicAutoGain
+      ];
     }
 
     (lib.mkIf cfg.checkForUpdates {
