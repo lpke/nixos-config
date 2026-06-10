@@ -16,7 +16,7 @@ Services
 Audio
   audio                        Entrypoint to all custom audio commands. Run alone for help.
   audio ** help                Every command and sub-command can be followed with `help`.
-  audio status                 Show compact custom audio overview.
+  audio status                 Show readable custom audio overview.
   audio list                   List PipeWire nodes and WirePlumber devices.
   audio restart                Restart PipeWire stack and custom audio services.
   audio loopback               Manage configured PipeWire loopbacks.

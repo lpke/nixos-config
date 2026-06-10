@@ -23,7 +23,7 @@ Usage:
   audio help
 
 Commands:
-  status      Compact overview of custom audio state.
+  status      Readable overview of custom audio state.
   list        List PipeWire node names and WirePlumber device names.
   restart     Restart PipeWire stack and custom audio services.
   loopback    Manage configured PipeWire loopbacks.
@@ -38,7 +38,7 @@ EOF
 
 status_help() {
   cat <<'EOF'
-audio status: compact overview of custom audio state
+audio status: readable overview of custom audio state
 
 Usage:
   audio status
@@ -257,7 +257,6 @@ node_description_by_ref() {
 
 list_pipewire_nodes() {
   echo "PipeWire nodes:"
-  echo '  command: pw-dump | jq -r '"'"'.[] | select(.type=="PipeWire:Interface:Node") | .info.props."node.name" // empty'"'"' | sort'
   nodes="$(
     pw-dump 2>/dev/null | jq -r '
       .[]
@@ -274,15 +273,22 @@ list_pipewire_nodes() {
   if [ -z "$nodes" ]; then
     echo "  none"
   else
+    first=true
     printf '%s\n' "$nodes" | while IFS=$'\t' read -r name media_class description; do
-      printf '  %s | %s | %s\n' "$name" "$media_class" "$description"
+      if [ "$first" = "true" ]; then
+        first=false
+      else
+        echo
+      fi
+      printf '  %s:\n' "$name"
+      printf '    class: %s\n' "$media_class"
+      printf '    description: %s\n' "$description"
     done
   fi
 }
 
 list_wireplumber_devices() {
   echo "WirePlumber devices:"
-  echo '  command: pw-dump | jq -r '"'"'.[] | select(.type=="PipeWire:Interface:Device") | .info.props."device.name" // empty'"'"' | sort'
   devices="$(
     pw-dump 2>/dev/null | jq -r '
       .[]
@@ -298,8 +304,15 @@ list_wireplumber_devices() {
   if [ -z "$devices" ]; then
     echo "  none"
   else
+    first=true
     printf '%s\n' "$devices" | while IFS=$'\t' read -r name description; do
-      printf '  %s | %s\n' "$name" "$description"
+      if [ "$first" = "true" ]; then
+        first=false
+      else
+        echo
+      fi
+      printf '  %s:\n' "$name"
+      printf '    description: %s\n' "$description"
     done
   fi
 }
@@ -362,6 +375,49 @@ target_label() {
   else
     echo "$target"
   fi
+}
+
+target_ref_label() {
+  target="$1"
+  case "$target" in
+    DEFAULT_SOURCE|@DEFAULT_AUDIO_SOURCE@)
+      echo "default input"
+      ;;
+    DEFAULT_SINK|@DEFAULT_AUDIO_SINK@)
+      echo "default output"
+      ;;
+    RAW:*)
+      printf 'raw %s\n' "${target#RAW:}"
+      ;;
+    "")
+      echo ""
+      ;;
+    *)
+      echo "$target"
+      ;;
+  esac
+}
+
+target_display() {
+  runtime_target="$1"
+  config_target="$2"
+  label="$(target_label "$runtime_target")"
+  ref="$(target_ref_label "$config_target")"
+
+  if [ -n "$ref" ] && [ "$ref" != "$label" ]; then
+    printf '%s (%s)\n' "$label" "$ref"
+  else
+    printf '%s\n' "$label"
+  fi
+}
+
+display_label() {
+  label="$1"
+  printf '%s\n' "${label// -> / to }"
+}
+
+indent() {
+  sed '/^$/!s/^/  /'
 }
 
 disabled_contains() {
@@ -490,17 +546,43 @@ loopback_config_enabled() {
   jq -r --arg id "$1" '.loopbacks[$id].enable // false' "$routing_config"
 }
 
-loopback_list() {
-  configured_loopbacks | while IFS=$'\t' read -r id enabled description service input_target output_target _input _output; do
+loopback_item_status() {
+  wanted_id="$1"
+  configured_loopbacks | while IFS=$'\t' read -r id enabled description service input_target output_target input output; do
+    if [ "$id" != "$wanted_id" ]; then
+      continue
+    fi
     state="$(service_state "$service")"
-    printf '%s | config=%s | runtime=%s | %s -> %s | %s\n' \
-      "$id" "$enabled" "$state" "$(target_label "$input_target")" "$(target_label "$output_target")" "$description"
+    printf '%s: config=%s, runtime=%s\n' "$id" "$enabled" "$state"
+    printf '  label: %s\n' "$(display_label "$description")"
+    printf '  input: %s\n' "$(target_display "$input_target" "$input")"
+    printf '  output: %s\n' "$(target_display "$output_target" "$output")"
+    return
+  done
+}
+
+loopback_list() {
+  ids="$(loopback_ids)"
+  if [ -z "$ids" ]; then
+    echo "none"
+    return
+  fi
+
+  first=true
+  printf '%s\n' "$ids" | while read -r id; do
+    if [ "$first" = "true" ]; then
+      first=false
+    else
+      echo
+    fi
+    loopback_item_status "$id"
   done
 }
 
 loopback_status() {
   echo "configured loopbacks:"
-  loopback_list
+  loopback_list | indent
+  echo
   echo "runtime loopback nodes:"
   unmanaged="$(
     pw-dump 2>/dev/null | jq -r '
@@ -508,13 +590,28 @@ loopback_status() {
       | select(.type == "PipeWire:Interface:Node")
       | .info.props as $p
       | select((($p."node.link-group" // $p."node.group" // "") | startswith("loopback-")) or (($p."node.name" // "") | test("loopback")))
-      | "\($p."node.name" // "-") | \($p."media.class" // "-") | \($p."node.description" // "-")"
+      | [
+          ($p."node.name" // "-"),
+          ($p."media.class" // "-"),
+          ($p."node.description" // "-")
+        ]
+      | @tsv
     ' || true
   )"
   if [ -z "$unmanaged" ]; then
-    echo "none"
+    echo "  none"
   else
-    echo "$unmanaged"
+    first=true
+    printf '%s\n' "$unmanaged" | while IFS=$'\t' read -r name media_class description; do
+      if [ "$first" = "true" ]; then
+        first=false
+      else
+        echo
+      fi
+      printf '  %s:\n' "$name"
+      printf '    class: %s\n' "$media_class"
+      printf '    description: %s\n' "$description"
+    done
   fi
 }
 
@@ -547,7 +644,7 @@ loopback_set_state() {
       ;;
   esac
 
-  loopback_list | grep -E "^${id}[[:space:]]*\\|" || true
+  loopback_item_status "$id"
 }
 
 loopback_active_ids() {
@@ -626,23 +723,41 @@ locks_apply_all() {
   done
 }
 
+lock_item_status() {
+  id="$1"
+  enabled="$(lock_field "$id" enable)"
+  runtime="$(runtime_word "$enabled" "$locks_disabled_file" "$id")"
+  description="$(lock_field "$id" description)"
+  node_ref="$(lock_field "$id" nodeName)"
+  node_name="$(lock_field "$id" nodeTarget)"
+  volume="$(lock_field "$id" volume)"
+  node_id="$(node_id_by_name "$node_name" || true)"
+  if [ -n "$node_id" ]; then
+    current="$(wpctl get-volume "$node_id" 2>/dev/null || true)"
+    current="${current#Volume: }"
+  else
+    current="missing"
+  fi
+  printf '%s: config=%s, runtime=%s\n' "$id" "$enabled" "$runtime"
+  printf '  label: %s\n' "$(display_label "$description")"
+  printf '  device: %s\n' "$(target_display "$node_name" "$node_ref")"
+  printf '  target volume: %s\n' "$volume"
+  printf '  current volume: %s\n' "$current"
+}
+
 locks_status() {
   service="$(jq -r '.service' "$locks_config")"
-  echo "service: $service ($(service_state "$service"))"
-  lock_ids | while read -r id; do
-    enabled="$(lock_field "$id" enable)"
-    runtime="$(runtime_word "$enabled" "$locks_disabled_file" "$id")"
-    description="$(lock_field "$id" description)"
-    node_name="$(lock_field "$id" nodeTarget)"
-    volume="$(lock_field "$id" volume)"
-    node_id="$(node_id_by_name "$node_name" || true)"
-    if [ -n "$node_id" ]; then
-      current="$(wpctl get-volume "$node_id" 2>/dev/null || true)"
-      current="${current#Volume: }"
-    else
-      current="missing"
-    fi
-    printf '%s | %s | target=%s | current=%s | %s\n' "$id" "$runtime" "$volume" "$current" "$description"
+  echo "service: $service, runtime=$(service_state "$service")"
+  ids="$(lock_ids)"
+  if [ -z "$ids" ]; then
+    echo
+    echo "none"
+    return
+  fi
+
+  printf '%s\n' "$ids" | while read -r id; do
+    echo
+    lock_item_status "$id"
   done
 }
 
@@ -850,38 +965,91 @@ gains_apply_all() {
   done
 }
 
+gain_item_status() {
+  id="$1"
+  enabled="$(gain_field "$id" enable)"
+  runtime="$(runtime_word "$enabled" "$gains_disabled_file" "$id")"
+  description="$(gain_field "$id" description)"
+  target="$(gain_effective_target "$id")"
+  override="$(gain_override_value "$id")"
+  target_note=""
+  if [ -n "$override" ]; then
+    target_note=" (runtime override)"
+  fi
+
+  printf '%s: config=%s, runtime=%s\n' "$id" "$enabled" "$runtime"
+  printf '  label: %s\n' "$(display_label "$description")"
+  printf '  mixer: card=%s, control=%s\n' "$(gain_field "$id" cardTarget)" "$(gain_field "$id" control)"
+  printf '  target: %s%s\n' "$target" "$target_note"
+
+  if output="$(gain_output "$id" 2>/dev/null)"; then
+    limits="$(gain_limits "$output")"
+    line="$(gain_line "$output")"
+    raw="$(gain_raw "$line")"
+    percent="$(gain_driver_percent "$line")"
+    max="$(gain_max "$limits")"
+    type="$(gain_field "$id" type)"
+    if [ "$type" = "nzxt-usb-mic" ] && [ -n "$max" ]; then
+      mode="$(gain_nzxt_mode "$id" "$max")"
+      auto_target="$(gain_nzxt_target_for_mode "$id" "$mode")"
+      printf '  detected mode: %s\n' "$mode"
+      printf '  auto target now: %s\n' "$auto_target"
+    fi
+    printf '  range: %s\n' "${limits:-unknown}"
+    printf '  current: %s%% (raw %s)\n' "${percent:-?}" "${raw:-?}"
+  else
+    printf '  current: missing\n'
+  fi
+}
+
 gain_status() {
   service="$(jq -r '.service' "$gains_config")"
-  echo "service: $service ($(service_state "$service"))"
-  gain_ids | while read -r id; do
-    enabled="$(gain_field "$id" enable)"
-    runtime="$(runtime_word "$enabled" "$gains_disabled_file" "$id")"
-    description="$(gain_field "$id" description)"
-    target="$(gain_effective_target "$id")"
-    override="$(gain_override_value "$id")"
-    if [ -n "$override" ]; then
-      target="$target override"
-    fi
+  echo "service: $service, runtime=$(service_state "$service")"
+  ids="$(gain_ids)"
+  if [ -z "$ids" ]; then
+    echo
+    echo "none"
+    return
+  fi
 
-    if output="$(gain_output "$id" 2>/dev/null)"; then
-      limits="$(gain_limits "$output")"
-      line="$(gain_line "$output")"
-      raw="$(gain_raw "$line")"
-      percent="$(gain_driver_percent "$line")"
-      max="$(gain_max "$limits")"
-      type="$(gain_field "$id" type)"
-      if [ "$type" = "nzxt-usb-mic" ] && [ -n "$max" ]; then
-        mode="$(gain_nzxt_mode "$id" "$max")"
-        auto_target="$(gain_nzxt_target_for_mode "$id" "$mode")"
-        detail="mode=$mode range=$limits target=$target auto=$auto_target current=${percent:-?}% raw=${raw:-?}"
-      else
-        detail="range=$limits target=$target current=${percent:-?}% raw=${raw:-?}"
-      fi
+  printf '%s\n' "$ids" | while read -r id; do
+    echo
+    gain_item_status "$id"
+  done
+}
+
+combined_outputs_status() {
+  outputs="$(
+    jq -r '.combinedOutputs | to_entries[] | [
+      .key,
+      (.value.enable | tostring),
+      .value.description,
+      .value.nodeName,
+      (.value.outputs | join(", "))
+    ] | @tsv' "$routing_config"
+  )"
+
+  if [ -z "$outputs" ]; then
+    echo "none"
+    return
+  fi
+
+  first=true
+  printf '%s\n' "$outputs" | while IFS=$'\t' read -r id enabled description node_name output_names; do
+    if [ "$first" = "true" ]; then
+      first=false
     else
-      detail="missing"
+      echo
     fi
-
-    printf '%s | %s | %s | %s\n' "$id" "$runtime" "$detail" "$description"
+    node_id="$(node_id_by_name "$node_name" || true)"
+    if [ -n "$node_id" ]; then
+      runtime="present"
+    else
+      runtime="missing"
+    fi
+    printf '%s: config=%s, runtime=%s\n' "$id" "$enabled" "$runtime"
+    printf '  label: %s\n' "$(display_label "$description")"
+    printf '  outputs: %s\n' "$output_names"
   done
 }
 
@@ -901,7 +1069,7 @@ gain_set() {
   printf '%s\n' "$value" > "$(gain_override_file "$id")"
   enable_item "$gains_disabled_file" "$id"
   gain_apply "$id"
-  gain_status | grep -E "^${id}[[:space:]]*\\|" || true
+  gain_item_status "$id"
 }
 
 gain_enable() {
@@ -910,14 +1078,14 @@ gain_enable() {
   enable_item "$gains_disabled_file" "$id"
   rm -f "$(gain_override_file "$id")"
   gain_apply "$id"
-  gain_status | grep -E "^${id}[[:space:]]*\\|" || true
+  gain_item_status "$id"
 }
 
 gain_disable() {
   id="$1"
   gain_exists "$id" || die "unknown gain: $id"
   disable_item "$gains_disabled_file" "$id"
-  gain_status | grep -E "^${id}[[:space:]]*\\|" || true
+  gain_item_status "$id"
 }
 
 gains_watch() {
@@ -967,33 +1135,25 @@ wait_for_audio_graph() {
 }
 
 audio_status() {
-  echo "defaults | input=$(target_label @DEFAULT_AUDIO_SOURCE@) | output=$(target_label @DEFAULT_AUDIO_SINK@)"
+  echo "defaults:"
+  printf '  input: %s\n' "$(target_label @DEFAULT_AUDIO_SOURCE@)"
+  printf '  output: %s\n' "$(target_label @DEFAULT_AUDIO_SINK@)"
+  echo
 
   echo "combined outputs:"
-  jq -r '.combinedOutputs | to_entries[] | [
-    .key,
-    (.value.enable | tostring),
-    .value.description,
-    .value.nodeName,
-    (.value.outputs | join("+"))
-  ] | @tsv' "$routing_config" | while IFS=$'\t' read -r id enabled description node_name outputs; do
-    node_id="$(node_id_by_name "$node_name" || true)"
-    if [ -n "$node_id" ]; then
-      runtime="present"
-    else
-      runtime="missing"
-    fi
-    printf '%s | config=%s | runtime=%s | outputs=%s | %s\n' "$id" "$enabled" "$runtime" "$outputs" "$description"
-  done
+  combined_outputs_status | indent
+  echo
 
   echo "loopbacks:"
-  loopback_list
+  loopback_list | indent
+  echo
 
   echo "locks:"
-  locks_status | sed 's/^/  /'
+  locks_status | indent
+  echo
 
   echo "gains:"
-  gain_status | sed 's/^/  /'
+  gain_status | indent
 }
 
 audio_restart() {
@@ -1117,7 +1277,7 @@ case "${1:-}" in
         lock_exists "$3" || die "unknown lock: $3"
         enable_item "$locks_disabled_file" "$3"
         lock_apply "$3"
-        locks_status | grep -E "^${3}[[:space:]]*\\|" || true
+        lock_item_status "$3"
         ;;
       unlock)
         if has_help_arg "${@:3}"; then
@@ -1127,7 +1287,7 @@ case "${1:-}" in
         [ -n "${3:-}" ] || die "missing lock id"
         lock_exists "$3" || die "unknown lock: $3"
         disable_item "$locks_disabled_file" "$3"
-        locks_status | grep -E "^${3}[[:space:]]*\\|" || true
+        lock_item_status "$3"
         ;;
       watch)
         if has_help_arg "${@:3}"; then

@@ -237,7 +237,7 @@ in
       # In custom audio config, use these friendly names, or RAW:<raw-id> to bypass the map.
       pipewireNodes = {
         "DAC" = "alsa_output.usb-JDS_Labs_JDS_Labs_Element_III-00.analog-stereo";
-        "AirPods" = "bluez_output.2C_32_6A_CB_E0_42.1";
+        "airpods" = "bluez_output.2C_32_6A_CB_E0_42.1";
         "Cubilux" = "alsa_output.usb-Generic_USB_Audio-00.analog-stereo";
         "nzxt-mic" = "alsa_input.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00.mono-fallback";
       };
@@ -261,10 +261,10 @@ in
             description = "DAC_Cubilux";
             outputs = [ "DAC" "Cubilux" ];
           };
-          "AirPods_Cubilux" = {
+          "AP_Cubilux" = {
             enable = true;
-            description = "AirPods_Cubilux";
-            outputs = [ "AirPods" "Cubilux" ];
+            description = "AP_Cubilux";
+            outputs = [ "airpods" "Cubilux" ];
           };
         };
       };
