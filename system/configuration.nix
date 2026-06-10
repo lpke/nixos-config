@@ -281,7 +281,7 @@ in
           };
           "cubilux" = {
             enable = true;
-            startByDefault = false;
+            startByDefault = true;
             description = "default input -> Cubilux";
             input = "DEFAULT_SOURCE";
             output = "Cubilux";

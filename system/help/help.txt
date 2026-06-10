@@ -29,3 +29,6 @@ Cooling
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.
   convert-dng                  Convert DNG files with the configured wrapper.
+
+Other
+  cmhelp                       Show non-NixOS chezmoi help.

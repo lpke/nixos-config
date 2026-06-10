@@ -466,6 +466,7 @@ configured_loopbacks() {
   jq -r '.loopbacks | to_entries[] | [
     .key,
     (.value.enable | tostring),
+    (.value.startByDefault | tostring),
     .value.description,
     .value.service,
     .value.inputTarget,
@@ -473,6 +474,14 @@ configured_loopbacks() {
     .value.input,
     .value.output
   ] | @tsv' "$routing_config"
+}
+
+on_off() {
+  if [ "$1" = "true" ]; then
+    echo "on"
+  else
+    echo "off"
+  fi
 }
 
 loopback_ids() {
@@ -507,7 +516,7 @@ loopback_match() {
   if [ "$count" = "0" ]; then
     lower_query="${query,,}"
     runtime_matches="$(
-      configured_loopbacks | while IFS=$'\t' read -r id enabled description _service input_target output_target _input _output; do
+      configured_loopbacks | while IFS=$'\t' read -r id enabled _start_by_default description _service input_target output_target _input _output; do
         if [ "$enabled" != "true" ]; then
           continue
         fi
@@ -548,12 +557,12 @@ loopback_config_enabled() {
 
 loopback_item_status() {
   wanted_id="$1"
-  configured_loopbacks | while IFS=$'\t' read -r id enabled description service input_target output_target input output; do
+  configured_loopbacks | while IFS=$'\t' read -r id enabled start_by_default description service input_target output_target input output; do
     if [ "$id" != "$wanted_id" ]; then
       continue
     fi
     state="$(service_state "$service")"
-    printf '%s: config=%s, runtime=%s\n' "$id" "$enabled" "$state"
+    printf '%s: config=%s, default=%s, runtime=%s\n' "$id" "$enabled" "$(on_off "$start_by_default")" "$state"
     printf '  label: %s\n' "$(display_label "$description")"
     printf '  input: %s\n' "$(target_display "$input_target" "$input")"
     printf '  output: %s\n' "$(target_display "$output_target" "$output")"
@@ -648,7 +657,7 @@ loopback_set_state() {
 }
 
 loopback_active_ids() {
-  configured_loopbacks | while IFS=$'\t' read -r id enabled _description service _input_target _output_target _input _output; do
+  configured_loopbacks | while IFS=$'\t' read -r id enabled _start_by_default _description service _input_target _output_target _input _output; do
     if [ "$enabled" = "true" ] && systemctl --user is-active --quiet "$service"; then
       echo "$id"
     fi
@@ -657,7 +666,7 @@ loopback_active_ids() {
 
 loopback_rebind() {
   active="$(loopback_active_ids || true)"
-  services="$(configured_loopbacks | while IFS=$'\t' read -r _id enabled _description service _input_target _output_target _input _output; do
+  services="$(configured_loopbacks | while IFS=$'\t' read -r _id enabled _start_by_default _description service _input_target _output_target _input _output; do
     if [ "$enabled" = "true" ]; then
       echo "$service"
     fi
