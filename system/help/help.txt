@@ -11,21 +11,17 @@ Services
   xrs                          Restart the user xremap service.
   wrs                          Reload the wireless kernel module.
   prs                          Restart Piper, libratbag autostart, and ratbagd.
+  ars                          Restart custom audio services.
 
 Audio
-  ars                          Restart PipeWire/WirePlumber and stale Chromium/Electron audio subprocesses.
-  audio-loopback-status        Show managed loopbacks and unmanaged PipeWire loopbacks.
-  audio-loopback-rebind        Rebind active managed loopbacks to current inputs/outputs.
-  audio-loopback-output-toggle Toggle current input to current output loopback.
-  audio-loopback-cubilux-toggle Toggle current input to Cubilux loopback.
-  loopbacks                   Disabled by default; enable with toggle commands.
-  audio-volume-lock-status     Show enforced software PipeWire volume locks.
-  volume locks                 Configure in services.pipewire.audioVolumeLock.
-  nzxt-mic-gain                Show or set NZXT USB MIC hardware gain (`nzxt-mic-gain <n>` manual, `nzxt-mic-gain auto` mode-aware).
-  NZXT USB MIC volume          Soft mixer in WirePlumber keeps hardware knobs free.
-  nzxt-mic-gain-status         Show NZXT USB MIC gain, detected mixer-range mode, and configured per-mode gains.
-  NZXT USB MIC modes           extended-range defaults to 1%; compact 0-100 and fallback default to 100%.
-  AirPods headset audio        Configure in services.pipewire.wireplumber.extraConfig.
+  audio                        Entrypoint to all custom audio commands. Run alone for help.
+  audio ** help                Every command and sub-command can be followed with `help`.
+  audio status                 Show compact custom audio overview.
+  audio list                   List PipeWire nodes and WirePlumber devices.
+  audio restart                Restart PipeWire stack and custom audio services.
+  audio loopback               Manage configured PipeWire loopbacks.
+  audio locks                  Manage configured software volume locks.
+  audio gain                   Manage configured ALSA hardware gain targets.
 
 Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
@@ -33,13 +29,3 @@ Cooling
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.
   convert-dng                  Convert DNG files with the configured wrapper.
-
-Config Files
-  system/configuration.nix     Main user-facing NixOS settings.
-  system/custom-options.nix    Local NixOS option extensions.
-  system/audio/routing.nix     Audio routing module logic.
-  system/audio/volume-lock.nix Audio volume lock service logic.
-  system/browser/chromium-flags.nix Shared Chromium browser flag logic.
-  system/browser/webrtc-audio.nix Browser WebRTC input-volume fix.
-  system/help/help.txt         This help text.
-  system/fan-control/config.nix Fan curve and sensor mapping settings.

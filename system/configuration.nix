@@ -6,9 +6,6 @@
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
-  audioRestart = pkgs.callPackage ../pkgs/audio-restart {
-    commandName = "ars";
-  };
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
@@ -21,13 +18,16 @@ let
     ];
   });
 in
-{
+  {
   imports =
     [
       ./hardware-configuration.nix
       ./audio/routing.nix
       ./audio/volume-lock.nix
-      ./audio/nzxt-mic-gain.nix
+      ./audio/gains.nix
+      ./audio/cli.nix
+      ./audio/wireplumber-policy.nix
+      ./audio/devices-map.nix
       ./fan-control
       ./browser/chromium-flags.nix
       ./browser/helium.nix
@@ -218,82 +218,105 @@ in
     jack.enable = true;
     wireplumber = {
       enable = true;
-      extraConfig."10-bluez-airpods" = {
-        "wireplumber.settings" = {
-          # Keep AirPods in A2DP output mode unless the headset profile is explicitly selected.
-          "bluetooth.autoswitch-to-headset-profile" = false;
-        };
-      };
-      extraConfig."51-nzxt-usb-mic-soft-mixer" = {
-        "monitor.alsa.rules" = [
-          {
-            matches = [
-              {
-                "device.name" = "alsa_card.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00";
-              }
-            ];
-            actions.update-props = {
-              # NZXT reports hardware capture gain up to +79.89 dB. Keep OS volume at
-              # software unity so web apps cannot drive the hardware preamp to max.
-              "api.alsa.soft-mixer" = true;
-            };
-          }
-        ];
-      };
     };
-    audioRouting = {
+
+    audioBluetoothPolicy = {
       enable = true;
-      commands = {
-        outputToggle = "audio-loopback-output-toggle";
-        cubiluxToggle = "audio-loopback-cubilux-toggle";
-        rebind = "audio-loopback-rebind";
-        status = "audio-loopback-status";
-      };
-      outputs = {
+      autoswitchToHeadsetProfile = false; # Keep Bluetooth devices in high-quality output mode unless headset profile is explicitly selected.
+    };
+
+    nzxtMicSoftMixer = {
+      enable = true;
+      wireplumberDeviceName = "nzxt-mic"; # audioDevicesMap.wireplumberDevices key used for this WirePlumber card rule.
+    };
+
+    audioDevicesMap = {
+      # PipeWire stream endpoints used for routing/locks. Find them with:
+      # pw-dump | jq -r '.[] | select(.type=="PipeWire:Interface:Node") | .info.props."node.name" // empty' | sort
+      # (or my own `audio list --pipewire`)
+      # In custom audio config, use these friendly names, or RAW:<raw-id> to bypass the map.
+      pipewireNodes = {
         "DAC" = "alsa_output.usb-JDS_Labs_JDS_Labs_Element_III-00.analog-stereo";
         "AirPods" = "bluez_output.2C_32_6A_CB_E0_42.1";
         "Cubilux" = "alsa_output.usb-Generic_USB_Audio-00.analog-stereo";
+        "nzxt-mic" = "alsa_input.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00.mono-fallback";
       };
-      combinedOutputs = [
-        {
-          name = "DAC + Cubilux";
-          outputs = [ "DAC" "Cubilux" ];
-        }
-        {
-          name = "AirPods + Cubilux";
-          outputs = [ "AirPods" "Cubilux" ];
-        }
-      ];
-      outputLoopback = {
-        service = "audio-loopback-output.service";
-        nodeName = "audio-loopback-output";
-        route = "current input -> current output";
-      };
-      cubiluxLoopback = {
-        enable = false;
-        output = "Cubilux";
-        service = "audio-loopback-cubilux.service";
-        nodeName = "audio-loopback-cubilux";
-        route = "current input -> Cubilux";
+      # Card-level WirePlumber device names used for device rules. Find them with:
+      # pw-dump | jq -r '.[] | select(.type=="PipeWire:Interface:Device") | .info.props."device.name" // empty' | sort
+      # (or my own `audio list --wireplumber`)
+      # In custom audio config, use these friendly names, or RAW:<raw-id> to bypass the map.
+      wireplumberDevices = {
+        "nzxt-mic" = "alsa_card.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00";
       };
     };
-    audioVolumeLock = {
+
+    audioRouting = {
+      enable = true;
+
+      combinedOutputs = {
+        enable = true;
+        outputs = {
+          "DAC_Cubilux" = {
+            enable = true;
+            description = "DAC_Cubilux";
+            outputs = [ "DAC" "Cubilux" ];
+          };
+          "AirPods_Cubilux" = {
+            enable = true;
+            description = "AirPods_Cubilux";
+            outputs = [ "AirPods" "Cubilux" ];
+          };
+        };
+      };
+
+      loopbacks = {
+        enable = true;
+        items = {
+          "output" = {
+            enable = true;
+            startByDefault = false;
+            description = "default input -> default output";
+            input = "DEFAULT_SOURCE";
+            output = "DEFAULT_SINK";
+          };
+          "cubilux" = {
+            enable = true;
+            startByDefault = false;
+            description = "default input -> Cubilux";
+            input = "DEFAULT_SOURCE";
+            output = "Cubilux";
+          };
+        };
+      };
+    };
+
+    audioVolumeLocks = {
       enable = true;
       intervalSeconds = "0.25";
-      service = "audio-volume-lock.service";
-      statusCommand = "audio-volume-lock-status";
       locks = {
-        "NZXT USB MIC Mono" = {
-          nodeName = "alsa_input.usb-NZXT_NZXT_USB_MIC_A00017_15_54-00.mono-fallback";
+        "nzxt-mic" = {
+          enable = true;
+          description = "NZXT USB MIC Mono";
+          nodeName = "nzxt-mic";
           volume = "1.00";
         };
       };
     };
-    nzxtMicGain = {
+
+    audioGains = {
       enable = true;
-      extendedRangeGainPercent = 1;
-      compactRangeGainPercent = 100;
-      fallbackGainPercent = 100;
+      gains = {
+        "nzxt-mic" = {
+          enable = true;
+          description = "NZXT USB MIC hardware gain";
+          type = "nzxt-usb-mic";
+          card = "MIC"; # ALSA card ID from `/proc/asound/cards`, used by `amixer -c <card> ...`
+          control = "Mic"; # ALSA mixer knob used by `amixer -c <card> sget/sset <control>`
+          extendedRangeGainPercent = 1; # Gain when ALSA exposes the expected 0-233 NZXT range.
+          compactRangeGainPercent = 100; # Gain when ALSA exposes the 0-100 NZXT range.
+          fallbackGainPercent = 100; # Gain when ALSA exposes an unexpected range.
+        };
+      };
     };
   };
 
@@ -512,7 +535,6 @@ in
     neofetch
     piper # mouse assignments
     libratbag
-    audioRestart # ars: audio restart
     piperRestart # prs: piper restart
     evtest # input event testing
     vivaldi
