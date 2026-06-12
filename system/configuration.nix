@@ -189,6 +189,30 @@ in
   # ZSA Moonlander Keyboard - Enable flashing
   hardware.keyboard.zsa.enable = true;
 
+  systemd.services.nzxt-kraken-z53-lcd = {
+    description = "Set NZXT Kraken Z53 LCD to liquid temperature screen";
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "systemd-udev-settle.service" ];
+    after = [
+      "systemd-udev-settle.service"
+      "nzxt-kraken-z53-fan-control.service"
+    ];
+
+    path = [ pkgs.liquidctl ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+
+    script = ''
+      set -euo pipefail
+
+      liquidctl --match "Kraken Z" initialize
+      liquidctl --match "Kraken Z" set lcd screen liquid
+    '';
+  };
+
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
