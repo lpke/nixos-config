@@ -27,6 +27,7 @@
     # Global Theme > Window Decorations > Breeze > Edit
     "breezerc" = {
       Common = {
+        OutlineEnabled = false;
         OutlineIntensity = "OutlineOff";
         ShadowSize = "ShadowVeryLarge";
       };
