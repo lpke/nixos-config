@@ -9,6 +9,7 @@ Core
   bnix cuda                    Rebuild CUDA Ollama config without readiness prompt. Alias: --cuda.
   lnix                         List NixOS system generations.
   dnix                         Garbage collect old Nix store generations.
+  update-helium                Update the pinned Helium version and hash.
 
 Services
   xrs                          Restart the user xremap service.

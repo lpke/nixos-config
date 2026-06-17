@@ -154,8 +154,12 @@ in
         )"
 
         if [ -n "$latest" ] && [ "$latest" != "$current" ]; then
-          echo "Helium update available: $current -> $latest" >&2
-          echo "Update pin: pkgs/helium/update.sh $latest" >&2
+          {
+            printf '\033[33m'
+            printf 'Helium update available: %s -> %s\n' "$current" "$latest"
+            printf 'To update the pinned version, run: update-helium %s\n' "$latest"
+            printf '\033[0m'
+          } >&2
         fi
       '';
     })
