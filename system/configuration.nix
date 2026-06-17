@@ -14,6 +14,7 @@ let
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
+  tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
       ../patches/krohnkite-unmaximize-before-tiling.patch
@@ -494,6 +495,7 @@ in
     };
 
     sessionVariables = {
+      TESSDATA_PREFIX = "${tesseractOcr}/share/tessdata";
       PATH = [
         "$HOME/.local/bin"
         "$HOME/bin"
@@ -524,7 +526,7 @@ in
     krohnkitePatched # tiling window manager
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
-    (tesseract.override { enableLanguages = [ "eng" ]; }) # OCR engine + English language data for Spectacle
+    tesseractOcr # OCR engine + English language data for Spectacle
     git
     delta # syntax highlighting pager for git
     alacritty
