@@ -183,7 +183,7 @@ in
   # Local LLM AI
   services.ollama = {
     enable = true;
-    acceleration = "cuda";
+    package = pkgs.ollama-cuda;
   };
 
   # ZSA Moonlander Keyboard - Enable flashing
@@ -218,9 +218,7 @@ in
   services.desktopManager.plasma6.enable = true;
 
   # Hide Hibernate from Plasma's launcher/session menus.
-  systemd.sleep.extraConfig = ''
-    AllowHibernation=no
-  '';
+  systemd.sleep.settings.Sleep.AllowHibernation = "no";
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -464,9 +462,9 @@ in
       stdenv.cc.cc.lib
       zlib openssl curl
       glib nss nspr atk at-spi2-atk at-spi2-core cups dbus
-      libdrm expat xorg.libX11 xorg.libXcomposite xorg.libXdamage
-      xorg.libXext xorg.libXfixes xorg.libXrandr xorg.libXcursor
-      xorg.libXi xorg.libxcb xorg.libXrender libxkbcommon
+      libdrm expat libx11 libxcomposite libxdamage
+      libxext libxfixes libxrandr libxcursor
+      libxi libxcb libxrender libxkbcommon
       mesa pango cairo alsa-lib
       gtk3 gdk-pixbuf freetype fontconfig
       libgbm libnotify
@@ -512,7 +510,7 @@ in
 
   # System packages
   # see `flake.nix` for how to configure a custom package version
-  # eg neovim is using `pkgs-neovim.neovim`
+  # eg neovim is using `pkgs-neovim.neovim-unwrapped`
   environment.systemPackages = with pkgs; [
     kdePackages.kate
     kdePackages.krunner
@@ -529,7 +527,6 @@ in
     chezmoi
     oh-my-posh
     tmux
-    pkgs-neovim.neovim
     ranger
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)
@@ -556,7 +553,7 @@ in
     file # shows the type of files
     bat # cat clone with syntax highlighting and git integration
     clang # C language
-    neofetch
+    fastfetch
     piper # mouse assignments
     libratbag
     piperRestart # prs: piper restart
@@ -580,13 +577,13 @@ in
     mangohud # the actual library
     mangojuice # the GUI for the library
     # windows compatibility
-    winePackages.waylandFull
-    wineWowPackages.waylandFull
+    wineWow64Packages.waylandFull
     winetricks
   ];
 
   programs.neovim = {
     enable = true;
+    package = pkgs-neovim.neovim-unwrapped; # "unwrapped" required as `programs.neovim` wraps it
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;

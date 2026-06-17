@@ -25,7 +25,7 @@ in
 
   home.activation.resetGeneratedSystemMonitorPages =
     lib.hm.dag.entryBefore [ "configure-plasma" ] ''
-      $DRY_RUN_CMD rm -f \
+      run rm -f \
         ${config.xdg.dataHome}/plasma-systemmonitor/monitor.page \
         ${config.xdg.dataHome}/plasma-systemmonitor/inspect.page
     '';
@@ -33,7 +33,7 @@ in
   # Avoid stale compiled KWin scripts after Krohnkite patch changes.
   home.activation.resetKwinQmlCache =
     lib.hm.dag.entryBefore [ "configure-plasma" ] ''
-      $DRY_RUN_CMD rm -rf ${config.xdg.cacheHome}/kwin/qmlcache
+      run rm -rf ${config.xdg.cacheHome}/kwin/qmlcache
     '';
 
   xdg.configFile = lib.foldl' lib.recursiveUpdate {} [

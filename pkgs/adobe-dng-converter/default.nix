@@ -5,7 +5,7 @@ let
     coreutils
     curl
     kdePackages.konsole
-    wineWowPackages.waylandFull
+    wineWow64Packages.waylandFull
   ];
 
   convertInputs = with pkgs; [
@@ -13,7 +13,7 @@ let
     curl
     exiftool
     jq
-    wineWowPackages.waylandFull
+    wineWow64Packages.waylandFull
   ];
 
   adobeDngConverter = pkgs.writeShellApplication {
