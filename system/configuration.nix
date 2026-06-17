@@ -6,6 +6,11 @@
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
+  bnix = pkgs.callPackage ../pkgs/bnix {
+    flakePath = "/etc/nixos";
+    baseConfig = "lpnix";
+    cudaConfig = "lpnix-llm-cuda";
+  };
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
@@ -34,6 +39,7 @@ in
       ./browser/pointer-fix.nix
       ./browser/webrtc-audio.nix
       ./help
+      ./local-llm.nix
       ./custom-options.nix
     ];
 
@@ -179,12 +185,6 @@ in
     open = false;
   };
   hardware.graphics.enable = true;
-
-  # Local LLM AI
-  services.ollama = {
-    enable = true;
-    package = pkgs.ollama-cuda;
-  };
 
   # ZSA Moonlander Keyboard - Enable flashing
   hardware.keyboard.zsa.enable = true;
@@ -366,7 +366,6 @@ in
       zshrs = "echo 'Reloading using: \`source $ZDOTDIR/.zshrc\` ...' && source $ZDOTDIR/.zshrc && clear";
       r = "ranger --choosedir=$HOME/.config/ranger/lastdir; LASTDIR=`cat $HOME/.config/ranger/lastdir`; cd \"$LASTDIR\"";
       enix = "nvim ~/.config/nixos/configuration.nix";
-      bnix = "sudo nixos-rebuild switch --flake /etc/nixos#lpnix";
       bnixnf = "sudo nixos-rebuild switch";
       lnix = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
       dnix = "sudo nix-collect-garbage --delete-older-than 14d && nix-collect-garbage --delete-older-than 14d";
@@ -532,6 +531,7 @@ in
     chezmoi
     oh-my-posh
     tmux
+    bnix # guarded NixOS rebuild command
     ranger
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)

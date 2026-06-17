@@ -55,29 +55,34 @@
       # these will be made available in configuration.nix via specialArgs
       pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
       pkgs-neovim = nixpkgs-neovim-pin.legacyPackages.${system};
+      mkLpnix = extraModules: nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit pkgs-unstable pkgs-neovim; };
+        modules = [
+          # base config
+          ./system/configuration.nix
+          # enable home manager
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.luke = import ./user/home.nix;
+            # pass `inputs` to `home.nix` for access to modules like `xremap-flake`
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            # modules enabled for all users
+            home-manager.sharedModules = [
+              plasma-manager.homeModules.plasma-manager
+            ];
+          }
+        ] ++ extraModules;
+      };
     in {
       nixosConfigurations = {
-        lpnix = nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = { inherit pkgs-unstable pkgs-neovim; };
-          modules = [
-            # base config
-            ./system/configuration.nix
-            # enable home manager
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.luke = import ./user/home.nix;
-              # pass `inputs` to `home.nix` for access to modules like `xremap-flake`
-              home-manager.extraSpecialArgs = { inherit inputs; };
-              # modules enabled for all users
-              home-manager.sharedModules = [
-                plasma-manager.homeModules.plasma-manager
-              ];
-            }
-          ];
-        };
+        lpnix = mkLpnix [];
+
+        lpnix-llm-cuda = mkLpnix [
+          { services.localOllama.cuda.enable = true; }
+        ];
       };
     };
 }

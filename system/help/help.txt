@@ -3,7 +3,10 @@ NixOS Custom Help
 
 Core
   help                         Show this custom command list.
-  bnix                         Rebuild and switch this NixOS flake.
+  bnix                         Rebuild with guarded CUDA Ollama selection.
+  bnix status                  Show current Ollama mode, service status, and CUDA readiness.
+  bnix cpu                     Rebuild CPU Ollama config. Alias: --cpu.
+  bnix cuda                    Rebuild CUDA Ollama config without readiness prompt. Alias: --cuda.
   lnix                         List NixOS system generations.
   dnix                         Garbage collect old Nix store generations.
 
