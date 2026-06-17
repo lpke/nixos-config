@@ -570,7 +570,6 @@ in
     spotify
     flatpak
     gdrive3
-    normcap # OCR image to text based on screen selection
     libnotify # required for desktop notifications for some apps (eg my own tool, aspyn)
     jq # json parser
     # photo/image editing
