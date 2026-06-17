@@ -454,6 +454,12 @@ in
     commandName = "help";
   };
 
+  programs.ssh = {
+    startAgent = true;
+    agentTimeout = "8h";
+    askPassword = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
+  };
+
   # Install steam
   programs.steam = {
     enable = true;
