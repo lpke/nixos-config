@@ -430,8 +430,8 @@ in
 
   programs.helium = {
     enable = true;
-    version = "0.13.2.1";
-    hash = "sha256-I9VqXE20FNjEz9FyvcCZ8ZqRZbPIU+QtGPblAdwJRk8=";
+    version = "0.13.3.1";
+    hash = "sha256-RS+Sn42V+HjCw41N1zayMVIqlgH+i2B2IdVJwBPmw00=";
     checkForUpdates = true;
   };
 
