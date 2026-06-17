@@ -456,7 +456,7 @@ in
 
   programs.ssh = {
     startAgent = true;
-    agentTimeout = "8h";
+    agentTimeout = "12h";
     askPassword = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
   };
 
