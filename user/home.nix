@@ -6,6 +6,7 @@
 # `flake.nix` outputs > modules > home-manager.users.luke...
 let
   systemMonitor = import ./plasma/apps/system-monitor.nix { inherit lib; };
+  windowTitleApplet = pkgs.callPackage ../pkgs/window-title-applet {};
 in
 {
   imports = [
@@ -34,6 +35,15 @@ in
   home.activation.resetKwinQmlCache =
     lib.hm.dag.entryBefore [ "configure-plasma" ] ''
       run rm -rf ${config.xdg.cacheHome}/kwin/qmlcache
+    '';
+
+  # Replace the KDE Store copy with the patched Home Manager-managed applet.
+  home.activation.removeUnmanagedWindowTitleApplet =
+    lib.hm.dag.entryBefore [ "linkGeneration" ] ''
+      target="${config.xdg.dataHome}/plasma/plasmoids/org.kde.windowtitle"
+      if [ -d "$target" ] && [ ! -L "$target" ]; then
+        run rm -rf "$target"
+      fi
     '';
 
   xdg.configFile = lib.foldl' lib.recursiveUpdate {} [
@@ -68,6 +78,12 @@ in
 
   # Custom .desktop files for: ~/.local/share/applications
   xdg.desktopEntries = import ./desktopEntries;
+
+  # Plasma 6.6 removed the private appmenu QML module imported by upstream 0.9.0.
+  xdg.dataFile."plasma/plasmoids/org.kde.windowtitle" = {
+    force = true;
+    source = "${windowTitleApplet}/share/plasma/plasmoids/org.kde.windowtitle";
+  };
 
   # Override Wine's generated Adobe DNG Converter launcher. Wine points this
   # at a .lnk that currently does not show a usable window from KRunner.
