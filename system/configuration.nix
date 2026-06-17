@@ -520,6 +520,7 @@ in
     kdePackages.kate
     kdePackages.krunner
     kdePackages.yakuake
+    kdePackages.ksshaskpass # KDE SSH agent passphrase helper
     kdePackages.kfind
     kdePackages.filelight
     kdePackages.accessibility-inspector
