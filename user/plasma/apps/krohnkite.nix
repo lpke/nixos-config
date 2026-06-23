@@ -94,6 +94,7 @@
       "steam_app"
       "steam"
       "adobe dng converter.exe"
+      "Voquill-desktop"
     ];
 
     # Start windows with this title as floating (but still manage them)

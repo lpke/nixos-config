@@ -124,6 +124,8 @@ let
           "org.kde.plasma.brightness"
           "org.kde.plasma.battery"
           "JavaEmbeddedFrame" # RuneLite
+          "tray-icon tray app main" # Voquill
+          "voquill-desktop" # Voquill fallback title
         ];
         shown = [
           # always show:

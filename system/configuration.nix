@@ -6,6 +6,10 @@
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
+  voquill = pkgs.callPackage ../pkgs/voquill {
+    version = "0.0.644";
+    hash = "sha256-5vYImGJoI1E1km5LKFgF336QnSUeN2HWkuzjSOOl9D8=";
+  };
   bnix = pkgs.callPackage ../pkgs/bnix {
     flakePath = "/etc/nixos";
     baseConfig = "lpnix";
@@ -402,6 +406,16 @@ in
   hardware.uinput.enable = true;
   users.groups.uinput.members = [ "luke" ];
 
+  # for voquill
+  systemd.user.services.ydotoold = {
+    description = "ydotool Wayland input daemon";
+    wantedBy = [ "default.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.ydotool}/bin/ydotoold";
+      Restart = "on-failure";
+    };
+  };
+
   users.defaultUserShell = pkgs.zsh;
   users.users.luke = {
     isNormalUser = true;
@@ -579,10 +593,13 @@ in
     vivaldi
     google-chrome
     spotify
+    voquill
     flatpak
     gdrive3
     libnotify # required for desktop notifications for some apps (eg my own tool, aspyn)
     jq # json parser
+    ydotool # Voquill Wayland paste support
+    wtype # Voquill Wayland paste fallback
     # photo/image editing
     gimpLatest
     darktable

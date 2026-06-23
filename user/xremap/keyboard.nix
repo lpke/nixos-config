@@ -13,6 +13,18 @@ in
   # for anything with sequences
   keymap = [
     (noMouse {
+      name = "Voquill dictate";
+      remap = {
+        "F18" = {
+          launch = [
+            "/home/luke/.config/com.voquill.desktop/trigger-hotkey.sh"
+            "dictate"
+          ];
+        };
+      };
+    })
+
+    (noMouse {
       name = "Minecraft";
       application = {
         only = [ "/Minecraft/" ];
