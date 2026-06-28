@@ -238,7 +238,10 @@ in
   };
 
   # Enable CUPS to print documents.
-  services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    drivers = [ pkgs.hplip ];
+  };
 
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
