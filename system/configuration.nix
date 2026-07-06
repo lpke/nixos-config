@@ -451,8 +451,8 @@ in
 
   programs.helium = {
     enable = true;
-    version = "0.13.4.1";
-    hash = "sha256-z23up+T6bj6F+cQslmI92bEksIAw1OQHRIrmQSaaxY8=";
+    version = "0.14.3.1";
+    hash = "sha256-umRDXcHlDRDWpdP4wxr81q+cUXkjiIxyg2AcJRFQaMA=";
     checkForUpdates = true;
   };
 
@@ -585,6 +585,7 @@ in
     fzf # CLI fuzzy finding
     fd # much faster version of `find`
     ripgrep # much faster version of `grep`
+    elinks # text browser/HTML converter used by apidocs.nvim
     file # shows the type of files
     bat # cat clone with syntax highlighting and git integration
     clang # C language

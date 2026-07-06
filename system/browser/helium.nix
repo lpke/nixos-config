@@ -157,7 +157,7 @@ in
           {
             printf '\033[33m'
             printf 'Helium update available: %s -> %s\n' "$current" "$latest"
-            printf 'To update the pinned version, run: update-helium %s\n' "$latest"
+            printf 'To update the pinned version, run: update-helium (latest | %s)\n' "$latest"
             printf '\033[0m'
           } >&2
         fi
