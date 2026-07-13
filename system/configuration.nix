@@ -554,6 +554,7 @@ in
     krohnkitePatched # tiling window manager
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
+    kdePackages.kclock # simple clock/timer app
     tesseractOcr # OCR engine + English language data for Spectacle
     git
     delta # syntax highlighting pager for git
