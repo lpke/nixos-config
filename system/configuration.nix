@@ -599,6 +599,7 @@ in
     google-chrome
     spotify
     voquill
+    postman
     flatpak
     gdrive3
     libnotify # required for desktop notifications for some apps (eg my own tool, aspyn)
