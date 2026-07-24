@@ -619,6 +619,8 @@ in
     # windows compatibility
     wineWow64Packages.waylandFull
     winetricks
+    # macos ssh control
+    tigervnc
   ];
 
   programs.neovim = {
