@@ -11,6 +11,7 @@ in
 {
   imports = [
     inputs.xremap-flake.homeManagerModules.default
+    ./xremap/mode-controller.nix
   ];
 
   home.stateVersion = "25.11";
