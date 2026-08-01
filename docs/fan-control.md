@@ -27,7 +27,7 @@ Not controlled:
 ## What Is Monitored
 
 Native KDE sensors provide CPU, GPU, RAM, NVMe, motherboard, Kraken coolant, and Kraken RPM data.
-Some native `lmsensors` IDs use regex patterns in the page config so RAM/Kraken bus renumbering is less likely to create missing sensors after reboot.
+Some native `lmsensors` IDs use regex patterns in the page config so RAM/Kraken bus renumbering is less likely to create missing sensors after reboot. Kraken HID addresses may contain hexadecimal digits.
 
 Custom Grid+ V2 sensors provide:
 

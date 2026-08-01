@@ -342,9 +342,8 @@ let
     "customsensorrc".text = lib.concatStringsSep "\n" gridSensorBlocks;
   };
 
-  krakenSensorPrefix = "lmsensors/z53-hid-[0-9]+-[0-9]+";
+  krakenSensorPrefix = "lmsensors/z53-hid-[0-9]+-[0-9a-f]+";
   krakenCoolantId = "${krakenSensorPrefix}/temp1";
-  krakenCurrentCoolantId = "lmsensors/z53-hid-3-7/temp1";
   krakenPumpRpmId = "${krakenSensorPrefix}/fan1";
   krakenRadiatorFanRpmId = "${krakenSensorPrefix}/fan2";
 
@@ -377,7 +376,6 @@ let
   coolingGraphColors = {
     "cpu/all/averageTemperature" = colors.blue;
     "gpu/gpu1/temperature" = colors.green;
-    "${krakenCurrentCoolantId}" = colors.gray;
     "${krakenCoolantId}" = colors.gray;
   };
 
