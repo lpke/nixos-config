@@ -451,8 +451,8 @@ in
 
   programs.helium = {
     enable = true;
-    version = "0.14.7.1";
-    hash = "sha256-JPsCvue71hlyS9woHsauX5xM/2PUJ+n8VEjOFquUDno=";
+    version = "0.15.1.1";
+    hash = "sha256-qz3w+nnvBgkpHT3E34dv4DvFuYlyzTAyg9tPYJFWs3o=";
     checkForUpdates = true;
   };
 
