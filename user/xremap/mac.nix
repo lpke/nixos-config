@@ -1,3 +1,19 @@
+let
+  synergyHyper = key: [
+    { press = "CTRL_L"; }
+    { press = "ALT_L"; }
+    { press = "SHIFT_L"; }
+    { press = "SUPER_L"; }
+    { sleep = 10; }
+    { press = key; }
+    { release = key; }
+    { sleep = 10; }
+    { release = "SUPER_L"; }
+    { release = "SHIFT_L"; }
+    { release = "ALT_L"; }
+    { release = "CTRL_L"; }
+  ];
+in
 {
   modeSwitchInternalKeymap = [
     {
@@ -88,9 +104,9 @@
       mode = [ "mac" "mac-super-left" "mac-super-right" ];
       device.only = [ "Logitech G903" ];
       remap = {
-        "BTN_FORWARD" = "C-ALT-S-SUPER-k"; # right front: Mission Control
-        "BTN_TASK" = "C-ALT-S-SUPER-h"; # wheel left: desktop left
-        "KEY_F23" = "C-ALT-S-SUPER-l"; # wheel right: desktop right
+        "BTN_FORWARD" = synergyHyper "k"; # right front: Mission Control
+        "BTN_TASK" = synergyHyper "h"; # wheel left: desktop left
+        "KEY_F23" = synergyHyper "l"; # wheel right: desktop right
       };
     }
 
@@ -107,7 +123,10 @@
         "SUPER-space" = "C-space";
         "C-a" = "SUPER-a";
         "C-f" = "SUPER-f";
+        "C-r" = "SUPER-r";
+        "C-t" = "SUPER-t";
         "C-w" = "SUPER-w";
+        "C-enter" = "SUPER-enter";
 
         # word/line navigation
         "C-left" = "ALT-left";
