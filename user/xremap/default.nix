@@ -16,7 +16,7 @@ in
   # put default/generic remaps lower than app overrides
   config = {
     default_mode = "local";
-    modmap = mouse.modmap ++ keyboard.modmap;
+    modmap = mac.modmap ++ mouse.modmap ++ keyboard.modmap;
     keymap = mac.modeSwitchInternalKeymap ++ mac.keymap ++ mouse.keymap ++ keyboard.keymap;
   };
 }
