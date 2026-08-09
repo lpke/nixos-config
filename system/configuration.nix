@@ -45,6 +45,7 @@ in
       ./browser/webrtc-audio.nix
       ./help
       ./local-llm.nix
+      ./postman.nix
       ./custom-options.nix
     ];
 
@@ -381,6 +382,7 @@ in
       dnix = "sudo nix-collect-garbage --delete-older-than 14d && nix-collect-garbage --delete-older-than 14d";
       cdnix = "cd ~/.config/nixos";
       "update-helium" = "/home/luke/.config/nixos/pkgs/helium/update.sh";
+      "update-postman" = "/home/luke/.config/nixos/pkgs/postman/update.sh";
       xrs = "systemctl --user restart xremap"; # "xremap restart"
       wrs = "sudo modprobe -r iwlwifi 2>/dev/null; sudo modprobe iwlwifi"; # "wifi restart" (unloads/loads iwlwifi kernel module, fixes no wifi issue)
     };
@@ -451,8 +453,15 @@ in
 
   programs.helium = {
     enable = true;
-    version = "0.15.1.1";
-    hash = "sha256-qz3w+nnvBgkpHT3E34dv4DvFuYlyzTAyg9tPYJFWs3o=";
+    version = "0.15.3.1";
+    hash = "sha256-ZCCm/prkgYgbDHW6OBPWvoIE77g7IYQpYdqc/PnIrSU=";
+    checkForUpdates = true;
+  };
+
+  programs.postman = {
+    enable = true;
+    version = "12.22.8";
+    hash = "sha256-UDvu+BWHcu3qgHUX+IIgtO0uKJHfq1pKsBgdkGv3ng4=";
     checkForUpdates = true;
   };
 
@@ -599,7 +608,6 @@ in
     google-chrome
     spotify
     voquill
-    postman
     flatpak
     gdrive3
     libnotify # required for desktop notifications for some apps (eg my own tool, aspyn)
