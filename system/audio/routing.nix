@@ -36,11 +36,6 @@ let
     else if isDefaultTarget value then defaultTarget
     else devicesMap.pipewireNodes.${value};
 
-  resolvePulseSourceTarget = value:
-    if isRaw value then rawNode value
-    else if isDefaultSource value then "@DEFAULT_SOURCE@"
-    else devicesMap.pipewireNodes.${value};
-
   combinedOutputSpecs = lib.concatMap (output: output.outputs) (lib.attrValues cfg.combinedOutputs.outputs);
   loopbackTargetSpecs = lib.concatMap (loopback: [ loopback.input loopback.output ]) (lib.attrValues cfg.loopbacks.items);
   mixedCaptureTargetSpecs = lib.optionals mixedCapture.enable [ mixedCapture.microphone mixedCapture.systemOutput ];
@@ -63,17 +58,12 @@ let
   mixedCapturePulseCommands = [
     {
       cmd = "load-module";
-      args = "module-null-sink sink_name=${mixedCaptureBusName} sink_properties=device.description=Mixed-Capture-Bus rate=48000 channels=2 channel_map=front-left,front-right";
+      args = ''module-null-sink sink_name=${mixedCaptureBusName} sink_properties="device.description=Mixed-Capture-Bus node.pause-on-idle=true" rate=48000 channels=2 channel_map=front-left,front-right'';
       flags = [];
     }
     {
       cmd = "load-module";
-      args = "module-loopback source=${resolvePulseSourceTarget mixedCapture.microphone} sink=${mixedCaptureBusName} latency_msec=${toString mixedCapture.latencyMs} source_dont_move=true sink_dont_move=true";
-      flags = [];
-    }
-    {
-      cmd = "load-module";
-      args = "module-remap-source master=${mixedCaptureBusName}.monitor source_name=${mixedCapture.nodeName} source_properties=device.description=Mixed-Capture channels=2 channel_map=front-left,front-right master_channel_map=front-left,front-right";
+      args = ''module-remap-source master=${mixedCaptureBusName}.monitor source_name=${mixedCapture.nodeName} source_properties="device.description=Mixed-Capture node.pause-on-idle=true" channels=2 channel_map=front-left,front-right master_channel_map=front-left,front-right'';
       flags = [];
     }
   ];
@@ -90,6 +80,7 @@ let
       "target.delay.sec" = mixedCapture.latencyMs / 1000.0;
       "capture.props" = {
         "node.name" = "input.${mixedCapture.nodeName}_system_audio";
+        "node.passive" = true;
         "stream.capture.sink" = true;
       } // lib.optionalAttrs (!isDefaultSink mixedCapture.systemOutput) {
         "target.object" = resolveOutputTarget mixedCapture.systemOutput;
@@ -101,6 +92,30 @@ let
         "target.object" = mixedCaptureBusName;
         "node.dont-fallback" = true;
         "node.linger" = true;
+        "node.passive" = true;
+      };
+    };
+  };
+
+  mixedCaptureMicrophoneModule = {
+    name = "libpipewire-module-loopback";
+    args = {
+      "node.description" = "${mixedCapture.description} microphone";
+      "target.delay.sec" = mixedCapture.latencyMs / 1000.0;
+      "capture.props" = {
+        "node.name" = "input.${mixedCapture.nodeName}_microphone";
+        "target.object" = resolveLoopbackTarget "@DEFAULT_AUDIO_SOURCE@" mixedCapture.microphone;
+        "node.passive" = true;
+      } // lib.optionalAttrs (!isDefaultSource mixedCapture.microphone) {
+        "node.dont-fallback" = true;
+        "node.linger" = true;
+      };
+      "playback.props" = {
+        "node.name" = "output.${mixedCapture.nodeName}_microphone";
+        "target.object" = mixedCaptureBusName;
+        "node.dont-fallback" = true;
+        "node.linger" = true;
+        "node.passive" = true;
       };
     };
   };
@@ -118,6 +133,7 @@ let
       };
       "stream.props" = {
         "stream.dont-remix" = true;
+        "node.pause-on-idle" = true;
       };
       "stream.rules" = map (output: {
         matches = [
@@ -325,7 +341,10 @@ in
     };
 
     services.pipewire.extraConfig.pipewire-pulse."20-mixed-capture" = lib.mkIf mixedCapture.enable {
-      "context.modules" = [ mixedCaptureSystemMonitorModule ];
+      "context.modules" = [
+        mixedCaptureSystemMonitorModule
+        mixedCaptureMicrophoneModule
+      ];
       "pulse.cmd" = mixedCapturePulseCommands;
     };
 
