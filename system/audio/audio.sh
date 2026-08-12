@@ -1062,6 +1062,32 @@ combined_outputs_status() {
   done
 }
 
+mixed_capture_status() {
+  enabled="$(jq -r '.mixedCapture.enable' "$routing_config")"
+  description="$(jq -r '.mixedCapture.description' "$routing_config")"
+  node_name="$(jq -r '.mixedCapture.nodeName' "$routing_config")"
+  bus_node_name="$(jq -r '.mixedCapture.busNodeName' "$routing_config")"
+  microphone="$(jq -r '.mixedCapture.microphone' "$routing_config")"
+  microphone_target="$(jq -r '.mixedCapture.microphoneTarget' "$routing_config")"
+  system_output="$(jq -r '.mixedCapture.systemOutput' "$routing_config")"
+  system_output_target="$(jq -r '.mixedCapture.systemOutputTarget' "$routing_config")"
+
+  source_id="$(node_id_by_name "$node_name" || true)"
+  bus_id="$(node_id_by_name "$bus_node_name" || true)"
+  if [ -n "$source_id" ] && [ -n "$bus_id" ]; then
+    runtime="present"
+  else
+    runtime="missing"
+  fi
+
+  printf 'config=%s, runtime=%s\n' "$enabled" "$runtime"
+  printf '  label: %s\n' "$(display_label "$description")"
+  printf '  source: %s\n' "$node_name"
+  printf '  microphone: %s\n' "$(target_display "$microphone_target" "$microphone")"
+  printf '  system audio: %s monitor\n' "$(target_display "$system_output_target" "$system_output")"
+  printf '  latency: %sms\n' "$(jq -r '.mixedCapture.latencyMs' "$routing_config")"
+}
+
 gain_set() {
   id="$1"
   value="$2"
@@ -1151,6 +1177,10 @@ audio_status() {
 
   echo "combined outputs:"
   combined_outputs_status | indent
+  echo
+
+  echo "mixed capture:"
+  mixed_capture_status | indent
   echo
 
   echo "loopbacks:"

@@ -33,6 +33,12 @@ let
   routingConfig = pkgs.writeText "audio-routing.json" (builtins.toJSON {
     enable = routing.enable;
     devicesMap = devicesMap.pipewireNodes;
+    mixedCapture = {
+      inherit (routing.mixedCapture) enable description nodeName microphone systemOutput latencyMs;
+      busNodeName = "${routing.mixedCapture.nodeName}_bus";
+      microphoneTarget = resolveLoopbackTarget "@DEFAULT_AUDIO_SOURCE@" routing.mixedCapture.microphone;
+      systemOutputTarget = resolveLoopbackTarget "@DEFAULT_AUDIO_SINK@" routing.mixedCapture.systemOutput;
+    };
     combinedOutputs = lib.mapAttrs (id: output: {
       inherit (output) enable description outputs;
       nodeName = "combined_${outputId id}";
@@ -45,6 +51,13 @@ let
       inputTarget = resolveLoopbackTarget "@DEFAULT_AUDIO_SOURCE@" loopback.input;
       outputTarget = resolveLoopbackTarget "@DEFAULT_AUDIO_SINK@" loopback.output;
     }) routing.loopbacks.items;
+  });
+
+  mixedCaptureRestartToken = pkgs.writeText "mixed-capture-restart-token" (builtins.toJSON {
+    inherit (routing.mixedCapture) enable nodeName microphone systemOutput latencyMs;
+    microphoneTarget = resolveLoopbackTarget "@DEFAULT_AUDIO_SOURCE@" routing.mixedCapture.microphone;
+    systemOutputTarget = resolveLoopbackTarget "@DEFAULT_AUDIO_SINK@" routing.mixedCapture.systemOutput;
+    pulseConfig = config.services.pipewire.extraConfig.pipewire-pulse."20-mixed-capture" or {};
   });
 
   locksConfig = pkgs.writeText "audio-locks.json" (builtins.toJSON {
@@ -131,6 +144,14 @@ in
     system.userActivationScripts.audioCustomServices = {
       deps = [];
       text = ''
+        mixed_capture_state_dir="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
+        mixed_capture_state="$mixed_capture_state_dir/audio-mixed-capture-config"
+        if ! ${pkgs.diffutils}/bin/cmp -s ${mixedCaptureRestartToken} "$mixed_capture_state"; then
+          ${pkgs.systemd}/bin/systemctl --user try-restart pipewire-pulse.service 2>/dev/null || true
+          ${pkgs.procps}/bin/pkill -TERM -u "$(${pkgs.coreutils}/bin/id -u)" -f -- '--utility-sub-type=audio.mojom.AudioService' 2>/dev/null || true
+          ${pkgs.coreutils}/bin/install -Dm600 ${mixedCaptureRestartToken} "$mixed_capture_state"
+        fi
+
         ${pkgs.systemd}/bin/systemctl --user stop audio-volume-lock.service nzxt-mic-gain-startup.service 2>/dev/null || true
         ${pkgs.systemd}/bin/systemctl --user reset-failed audio-volume-lock.service nzxt-mic-gain-startup.service 2>/dev/null || true
 

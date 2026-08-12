@@ -290,6 +290,15 @@ in
     audioRouting = {
       enable = true;
 
+      mixedCapture = {
+        enable = true;
+        description = "Mixed Capture";
+        nodeName = "mixed_capture";
+        microphone = "nzxt-mic";
+        systemOutput = "DEFAULT_SINK";
+        latencyMs = 50;
+      };
+
       combinedOutputs = {
         enable = true;
         outputs = {
@@ -460,8 +469,8 @@ in
 
   programs.postman = {
     enable = true;
-    version = "12.22.8";
-    hash = "sha256-UDvu+BWHcu3qgHUX+IIgtO0uKJHfq1pKsBgdkGv3ng4=";
+    version = "12.23.2";
+    hash = "sha256-zW57Y3lgpe8aWPCrgnKTYL1sjz6nadqZOFTKNrHlu1A=";
     checkForUpdates = true;
   };
 
