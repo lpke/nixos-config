@@ -11,6 +11,7 @@ Core
   dnix                         Garbage collect old Nix store generations.
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
+  update-t3code                Update the pinned T3 Code version and hash.
 
 Services
   xrs                          Restart the user xremap service.

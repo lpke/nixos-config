@@ -46,6 +46,7 @@ in
       ./help
       ./local-llm.nix
       ./postman.nix
+      ./t3code.nix
       ./custom-options.nix
     ];
 
@@ -392,6 +393,7 @@ in
       cdnix = "cd ~/.config/nixos";
       "update-helium" = "/home/luke/.config/nixos/pkgs/helium/update.sh";
       "update-postman" = "/home/luke/.config/nixos/pkgs/postman/update.sh";
+      "update-t3code" = "/home/luke/.config/nixos/pkgs/t3code/update.sh";
       xrs = "systemctl --user restart xremap"; # "xremap restart"
       wrs = "sudo modprobe -r iwlwifi 2>/dev/null; sudo modprobe iwlwifi"; # "wifi restart" (unloads/loads iwlwifi kernel module, fixes no wifi issue)
     };
@@ -471,6 +473,13 @@ in
     enable = true;
     version = "12.23.2";
     hash = "sha256-zW57Y3lgpe8aWPCrgnKTYL1sjz6nadqZOFTKNrHlu1A=";
+    checkForUpdates = true;
+  };
+
+  programs.t3code = {
+    enable = true;
+    version = "0.0.33";
+    hash = "sha256-QVyGSPQ8PSLVcvJ/LFD9yMMQ6n/N6VN7kD4eLxyHdaE=";
     checkForUpdates = true;
   };
 
