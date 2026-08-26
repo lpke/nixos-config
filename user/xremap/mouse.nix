@@ -49,7 +49,7 @@ in
       };
       remap = {
         "BTN_EXTRA" = "n"; # left front - n
-        "BTN_SIDE" = "ESC"; # left back - esc
+        "BTN_SIDE" = "TAB"; # left back - tab
         "BTN_FORWARD" = "BTN_RIGHT"; # right front - right click
       };
     })
@@ -70,9 +70,22 @@ in
   # for anything with sequences
   keymap = [
     (mouseOnly {
+      name = "G903 WoW - right back";
+      window = {
+        only = [ "/World of Warcraft/" ];
+      };
+      remap = {
+        "C-m" = "ESC"; # right back - esc
+      };
+    })
+
+    (mouseOnly {
       name = "G903 Default - right back";
       application = {
         not = [ "/runelite/" ];
+      };
+      window = {
+        not = [ "/World of Warcraft/" ];
       };
       remap = {
         "C-m" = "KEY_RESERVED"; # right back - disabled
