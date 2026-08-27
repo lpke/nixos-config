@@ -464,22 +464,22 @@ in
 
   programs.helium = {
     enable = true;
-    version = "0.15.3.1";
-    hash = "sha256-ZCCm/prkgYgbDHW6OBPWvoIE77g7IYQpYdqc/PnIrSU=";
+    version = "0.15.7.1";
+    hash = "sha256-+zGEGfhIiZWE8mUYb3HrkoM7reFBMdfXlgw3KWT0T98=";
     checkForUpdates = true;
   };
 
   programs.postman = {
     enable = true;
-    version = "12.23.2";
-    hash = "sha256-zW57Y3lgpe8aWPCrgnKTYL1sjz6nadqZOFTKNrHlu1A=";
+    version = "12.25.6";
+    hash = "sha256-/oFJtvC+NfFL2s66zTe6hPJxtVSluo5Jpm8isLVy37A=";
     checkForUpdates = true;
   };
 
   programs.t3code = {
     enable = true;
-    version = "0.0.33";
-    hash = "sha256-QVyGSPQ8PSLVcvJ/LFD9yMMQ6n/N6VN7kD4eLxyHdaE=";
+    version = "0.0.35";
+    hash = "sha256-l1ZNib2y0bRfL7GRYYPznUo4Q0nex4jV+2+yxkOuB5Q=";
     checkForUpdates = true;
   };
 

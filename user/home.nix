@@ -7,6 +7,45 @@
 let
   systemMonitor = import ./plasma/apps/system-monitor.nix { inherit lib; };
   windowTitleApplet = pkgs.callPackage ../pkgs/window-title-applet {};
+  synergyTrayIconPadder = pkgs.writeShellApplication {
+    name = "synergy-tray-icon-padder";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.imagemagick
+      pkgs.inotify-tools
+    ];
+    text = ''
+      tray_dir="$XDG_RUNTIME_DIR/tray-icon"
+      icon_path="$tray_dir/tray-icon-2-0.png"
+
+      pad_icon() {
+        local content_bounds
+        local padded_icon="$tray_dir/.tray-icon-2-0.padded.png"
+
+        [ -f "$icon_path" ] || return 0
+        content_bounds=$(magick identify -format '%@' "$icon_path")
+        [ "$content_bounds" != "24x24+4+4" ] || return 0
+
+        magick "$icon_path" \
+          -resize 24x24 \
+          -gravity center \
+          -background none \
+          -extent 32x32 \
+          "$padded_icon"
+        mv -- "$padded_icon" "$icon_path"
+      }
+
+      mkdir -p -- "$tray_dir"
+      pad_icon
+
+      inotifywait --monitor --quiet --event close_write --format '%f' "$tray_dir" |
+        while IFS= read -r changed_file; do
+          if [ "$changed_file" = "tray-icon-2-0.png" ]; then
+            pad_icon
+          fi
+        done
+    '';
+  };
 in
 {
   imports = [
@@ -84,6 +123,32 @@ in
   xdg.dataFile."plasma/plasmoids/org.kde.windowtitle" = {
     force = true;
     source = "${windowTitleApplet}/share/plasma/plasmoids/org.kde.windowtitle";
+  };
+
+  # Synergy's Flatpak tray process uses AppIndicator. It must reach KDE's
+  # StatusNotifier watcher and place its generated icon where Plasma can read it.
+  xdg.dataFile."flatpak/overrides/com.symless.synergy" = {
+    force = true;
+    text = ''
+      [Context]
+      filesystems=xdg-run/tray-icon:create;
+
+      [Session Bus Policy]
+      org.kde.StatusNotifierWatcher=talk
+    '';
+  };
+
+  systemd.user.services.synergy-tray-icon-padder = {
+    Unit = {
+      Description = "Add padding to Synergy's tray icon";
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${synergyTrayIconPadder}/bin/synergy-tray-icon-padder";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # Override Wine's generated Adobe DNG Converter launcher. Wine points this
