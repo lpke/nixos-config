@@ -50,6 +50,7 @@ in
 {
   imports = [
     inputs.xremap-flake.homeManagerModules.default
+    ./kglance.nix
     ./xremap/mode-controller.nix
   ];
 

@@ -90,6 +90,7 @@
       "org.kde.dolphin"
       "io.github.radiolamp.mangojuice"
       "org.kde.gwenview"
+      "kglance"
       "steam_app_0"
       "steam_app"
       "steam"

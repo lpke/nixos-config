@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!DOCTYPE gui SYSTEM "kpartgui.dtd">
+<gui name="dolphin" version="48">
+ <ActionProperties scheme="Default">
+  <Action name="toggle_selection_mode" shortcut=""/>
+  <Action name="servicemenu_kglance-rust.desktop::previewWithRust" shortcut="Space"/>
+ </ActionProperties>
+</gui>
