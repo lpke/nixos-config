@@ -584,6 +584,7 @@ in
     kdePackages.kclock # simple clock/timer app
     tesseractOcr # OCR engine + English language data for Spectacle
     git
+    gh # official GitHub CLI
     delta # syntax highlighting pager for git
     alacritty
     chezmoi
