@@ -30,6 +30,13 @@
 
       # disable screen edge activation
       Plugins.screenedgeEnabled = false;
+      Plugins.desktoprefreshEnabled = true;
+      "Effect-desktoprefresh" = {
+        Output = "AW3926QW"; # monitor model, independent of which cable/port is used
+        ExcludedClasses = "wowclassic.exe,wow.exe";
+        # Steam gives WoW and Battle.net the same window class; match WoW's title too.
+        ExcludedTitles = "World of Warcraft";
+      };
       "Effect-overview".BorderActivate = 9; # disable screen edge activation
 
       # SYSTEM SETTINGS > WINDOW BEHAVIOR...

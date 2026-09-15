@@ -1,0 +1,11 @@
+{
+  "KPlugin": {
+    "Id": "desktoprefresh",
+    "Name": "Steady desktop refresh",
+    "Description": "Keep the desktop refreshing at the display rate, with exceptions for selected apps",
+    "Category": "Tools",
+    "License": "GPL-2.0-or-later",
+    "Version": "1.0.1",
+    "EnabledByDefault": false
+  }
+}

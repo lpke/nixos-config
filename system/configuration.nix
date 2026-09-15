@@ -18,6 +18,7 @@ let
   piperRestart = pkgs.callPackage ../pkgs/piper-restart {
     commandName = "prs";
   };
+  desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
   tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
@@ -579,6 +580,7 @@ in
     kdePackages.filelight
     kdePackages.accessibility-inspector
     krohnkitePatched # tiling window manager
+    desktopRefresh # steady desktop refresh while Adaptive Sync stays enabled
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
     kdePackages.kclock # simple clock/timer app
