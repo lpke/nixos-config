@@ -17,7 +17,12 @@ let
     else
       flag;
 
-  flags = lib.unique config.programs.chromiumBrowserFlags.flags;
+  # On native Wayland this overrides the extra GTK font/UI scale while
+  # preserving each monitor's compositor scale. Plasma also publishes its
+  # XWayland DPI through GTK, which otherwise scales Helium a second time.
+  flags = lib.unique (config.programs.chromiumBrowserFlags.flags ++ [
+    "--force-device-scale-factor=1"
+  ]);
   flagsWithInputVolumeAdjustment = lib.filter (flag: flag != null) (map removeWebrtcInputVolumeFeature flags);
   inputVolumeAdjustmentFlagArgs =
     lib.optionalString (flagsWithInputVolumeAdjustment != []) (
