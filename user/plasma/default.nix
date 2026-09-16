@@ -30,6 +30,11 @@ in
   };
 
   shortcuts = withDeps ./shortcuts.nix;
+  hotkeys.commands.display-brightness-toggle = {
+    name = "Toggle primary display brightness";
+    key = "Meta+Ctrl+Alt+Shift+D";
+    command = "/run/current-system/sw/bin/display-brightness-toggle";
+  };
   panels = withDeps ./panels.nix;
   window-rules = withDeps ./window-rules.nix;
   fonts = fontsModule;

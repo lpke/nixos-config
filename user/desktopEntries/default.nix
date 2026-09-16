@@ -9,6 +9,9 @@
 # https://specifications.freedesktop.org/desktop-entry/latest/
 
 {
+  # The brightness hotkey runs through Plasma Manager's command launcher.
+  plasma-manager-commands.startupNotify = false;
+
   # Vivaldi with X11 backend
   # (fixes rendering bugs on Wayland and webcam issues)
   vivaldi-stable = {

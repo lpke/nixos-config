@@ -32,6 +32,9 @@ Audio
 Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
 
+Display
+  display-brightness-toggle     Toggle primary display brightness between 0% and 100%.
+
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.
   convert-dng                  Convert DNG files with the configured wrapper.

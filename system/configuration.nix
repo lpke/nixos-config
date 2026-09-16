@@ -19,6 +19,7 @@ let
     commandName = "prs";
   };
   desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
+  displayBrightnessToggle = pkgs.callPackage ../pkgs/display-brightness-toggle {};
   tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
@@ -581,6 +582,7 @@ in
     kdePackages.accessibility-inspector
     krohnkitePatched # tiling window manager
     desktopRefresh # steady desktop refresh while Adaptive Sync stays enabled
+    displayBrightnessToggle # toggle primary display brightness between 0% and 100%
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
     kdePackages.kclock # simple clock/timer app
