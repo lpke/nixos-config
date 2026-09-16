@@ -20,10 +20,17 @@ postman.overrideAttrs (oldAttrs: {
     updateScript = ./update.sh;
   };
 
-  # Electron loads this dynamically when KDE's global menu registrar exists.
-  # Without it, Electron falls back to drawing the menu inside the window.
-  postFixup = (oldAttrs.postFixup or "") + ''
-    patchelf --add-rpath ${lib.makeLibraryPath [ libdbusmenu ]} \
-      $out/share/postman/postman
-  '';
+  postFixup =
+    # Postman 12 also bundles a shell script named postman. The inherited
+    # RPATH loop matches it by name, but patchelf only accepts ELF files.
+    lib.replaceStrings
+      [ "  patchelf --add-rpath" ]
+      [ "  isELF \"$file\" || continue\n  patchelf --add-rpath" ]
+      (oldAttrs.postFixup or "")
+    + ''
+      # Electron loads this dynamically when KDE's global menu registrar exists.
+      # Without it, Electron falls back to drawing the menu inside the window.
+      patchelf --add-rpath ${lib.makeLibraryPath [ libdbusmenu ]} \
+        $out/share/postman/postman
+    '';
 })
