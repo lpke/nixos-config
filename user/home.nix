@@ -183,6 +183,7 @@ in
     {
       enable = true;
       withKDE = true;
+      watch = true; # Reattach keyboard and mouse when the USB switch returns to this PC.
       debug = false; # journalctl --user -u xremap.service -f
     }; 
 }
