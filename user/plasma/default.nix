@@ -31,7 +31,7 @@ in
 
   shortcuts = withDeps ./shortcuts.nix;
   hotkeys.commands.display-brightness-toggle = {
-    name = "Toggle primary display brightness";
+    name = "Toggle primary display blackout";
     key = "Meta+Ctrl+Alt+Shift+D";
     command = "/run/current-system/sw/bin/display-brightness-toggle";
   };

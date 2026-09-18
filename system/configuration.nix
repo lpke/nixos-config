@@ -582,7 +582,7 @@ in
     kdePackages.accessibility-inspector
     krohnkitePatched # tiling window manager
     desktopRefresh # steady desktop refresh while Adaptive Sync stays enabled
-    displayBrightnessToggle # toggle primary display brightness between 0% and 100%
+    displayBrightnessToggle # toggle a black overlay on the primary display
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
     kdePackages.kclock # simple clock/timer app

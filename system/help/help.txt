@@ -33,7 +33,7 @@ Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
 
 Display
-  display-brightness-toggle     Toggle primary display brightness between 0% and 100%.
+  display-brightness-toggle     Fade primary display to black at 0%; restore at 100% brightness.
 
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.
