@@ -26,9 +26,22 @@ in
   windowDecorations ++
 # all other configs:
 [
-  (mkAdaptiveSyncRule {
+  (lib.recursiveUpdate (mkAdaptiveSyncRule {
     description = "Minecraft Beta - GSync";
     windowClass = "Minecraft Minecraft Beta 1.7.3";
+  }) {
+    # LWJGL uses the same versioned string for both resource name and class.
+    match.window-class.match-whole = false;
+    # Ignore LWJGL's position hint, which otherwise overrides the initial screen.
+    apply.ignoregeometry = {
+      value = true;
+      apply = "force";
+    };
+    apply.screen = {
+      # KWin 6.6 output index: HDMI-A-1 (Alienware), zero-based.
+      value = 2;
+      apply = "initially";
+    };
   })
 
   (mkAdaptiveSyncRule {
