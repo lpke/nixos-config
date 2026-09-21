@@ -51,6 +51,7 @@ in
   imports = [
     inputs.xremap-flake.homeManagerModules.default
     ./kglance.nix
+    ./plasma/minecraft-primary-screen.nix
     ./xremap/mode-controller.nix
   ];
 

@@ -37,11 +37,7 @@ in
       value = true;
       apply = "force";
     };
-    apply.screen = {
-      # KWin 6.6 output index: HDMI-A-1 (Alienware), zero-based.
-      value = 2;
-      apply = "initially";
-    };
+    # Screen placement follows KDE's primary output in minecraft-primary-screen.js.
   })
 
   (mkAdaptiveSyncRule {
