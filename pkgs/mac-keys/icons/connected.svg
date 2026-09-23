@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 24px outer diameter matches the padded Synergy tray icon. -->
+  <g fill="none" stroke-width="2.8" stroke-linecap="round">
+    <path stroke="#2cba97" d="M 18.74 5.76 A 10.6 10.6 0 0 1 26.24 18.74"/>
+    <path stroke="#2eacc4" d="M 26.24 18.74 A 10.6 10.6 0 0 1 13.26 26.24"/>
+    <path stroke="#88d32f" d="M 13.26 26.24 A 10.6 10.6 0 0 1 5.76 13.26"/>
+    <path stroke="#3968d3" d="M 5.76 13.26 A 10.6 10.6 0 0 1 18.74 5.76"/>
+  </g>
+  <path fill="white" d="M 11.5 9.3 L 21.4 17.1 L 17.1 17.7 L 19.2 22 L 16.9 23.1 L 14.8 18.8 L 11.5 22 Z"/>
+</svg>

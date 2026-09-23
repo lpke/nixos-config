@@ -20,6 +20,7 @@ let
   };
   desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
   displayBrightnessToggle = pkgs.callPackage ../pkgs/display-brightness-toggle {};
+  macKeys = pkgs.callPackage ../pkgs/mac-keys {};
   tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
@@ -586,6 +587,7 @@ in
     oh-my-posh
     tmux
     bnix # guarded NixOS rebuild command
+    macKeys # Synergy Mac keyboard status and controls
     ranger
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)
@@ -642,7 +644,6 @@ in
     wineWow64Packages.waylandFull
     winetricks
     # macos ssh control
-    tigervnc
   ];
 
   programs.neovim = {

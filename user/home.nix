@@ -52,7 +52,7 @@ in
     inputs.xremap-flake.homeManagerModules.default
     ./kglance.nix
     ./plasma/minecraft-primary-screen.nix
-    ./xremap/mode-controller.nix
+    ./xremap/mac-keys.nix
   ];
 
   home.stateVersion = "25.11";

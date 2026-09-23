@@ -18,6 +18,14 @@ Services
   prs                          Restart Piper, libratbag autostart, and ratbagd.
   ars                          Restart custom audio services.
 
+Synergy Mac Keys
+  mac-keys                     Show SSH, focused Mac app, and keyboard mapping status.
+  mac-keys start               Start app detection with one SSH connection attempt.
+  mac-keys stop                Stop detection; keep SSH cached and preserve Mac terminal Ctrl keys.
+  mac-keys retry               Retry SSH once after enabling access on the Mac.
+  mac-keys logs                Show controller, tray, and SSH logs.
+  mac-keys --help              Show commands and Mac SSH recovery steps.
+
 Audio
   audio                        Entrypoint to all custom audio commands. Run alone for help.
   audio ** help                Every command and sub-command can be followed with `help`.
