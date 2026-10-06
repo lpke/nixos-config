@@ -70,6 +70,16 @@ in
   # for anything with sequences
   keymap = [
     (mouseOnly {
+      name = "G903 Minecraft - right back";
+      application = {
+        only = [ "/Minecraft/" ];
+      };
+      remap = {
+        "C-m" = "F10"; # right back - F10
+      };
+    })
+
+    (mouseOnly {
       name = "G903 WoW - right back";
       window = {
         only = [ "/World of Warcraft/" ];
