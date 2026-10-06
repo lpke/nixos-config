@@ -6,10 +6,10 @@ let
     } // (map.device or {});
   };
 in
-  {
+{
   # Logitech G903 buttons (piper setting / xremap value):
   #   left-front: Forward/BTN_EXTRA | left-back: Backward/BTN_SIDE
-  #   right-front: Button 5/BTN_FORWARD, right-back: ctrl+m/C-m
+  #   right-front: Button 5/BTN_FORWARD, right-back: F20/KEY_F20
   #   wheel-left: Button 7/BTN_TASK, wheel-right: F23/KEY_F23
 
   # for key-to-key remaps (no combos/sequences)
@@ -23,6 +23,7 @@ in
         "BTN_EXTRA" = "i"; # left front - i
         "BTN_SIDE" = "s"; # left back - walk backward
         "BTN_FORWARD" = "KEY_F5"; # right front - third person
+        "KEY_F20" = "KEY_F10"; # right back - F10
       };
     })
 
@@ -39,6 +40,7 @@ in
         };
         "BTN_SIDE" = "ESC"; # left back - esc
         "BTN_FORWARD" = "BTN_MIDDLE"; # right front - middle mouse
+        "KEY_F20" = [ "CTRL_L" "m" ]; # right back - retain RuneLite Ctrl+M
       };
     })
 
@@ -51,6 +53,7 @@ in
         "BTN_EXTRA" = "n"; # left front - n
         "BTN_SIDE" = "TAB"; # left back - tab
         "BTN_FORWARD" = "BTN_RIGHT"; # right front - right click
+        "KEY_F20" = "ESC"; # right back - esc
       };
     })
 
@@ -63,45 +66,13 @@ in
           alone_timeout_millis = 20;
         };
         "BTN_SIDE" = "BTN_SIDE"; # left back - backward
+        "KEY_F20" = []; # right back - disabled
       };
     })
   ];
 
-  # for anything with sequences
+  # for shortcuts with modifiers
   keymap = [
-    (mouseOnly {
-      name = "G903 Minecraft - right back";
-      application = {
-        only = [ "/Minecraft/" ];
-      };
-      remap = {
-        "C-m" = "F10"; # right back - F10
-      };
-    })
-
-    (mouseOnly {
-      name = "G903 WoW - right back";
-      window = {
-        only = [ "/World of Warcraft/" ];
-      };
-      remap = {
-        "C-m" = "ESC"; # right back - esc
-      };
-    })
-
-    (mouseOnly {
-      name = "G903 Default - right back";
-      application = {
-        not = [ "/runelite/" ];
-      };
-      window = {
-        not = [ "/World of Warcraft/" ];
-      };
-      remap = {
-        "C-m" = "KEY_RESERVED"; # right back - disabled
-      };
-    })
-
     (mouseOnly {
       name = "G903 Default";
       remap = {
