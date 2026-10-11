@@ -1,0 +1,188 @@
+comdlg32: return portal file types, notify clients, and use home for Wine-internal defaults.
+
+--- a/dlls/comdlg32/portal_dbus.c
++++ b/dlls/comdlg32/portal_dbus.c
+@@ -122,6 +122,9 @@
+     UINT response_code;         /* 0=success, 1=cancelled, 2=error */
+     char **result_uris;         /* file:// URIs from portal */
+     UINT result_uri_count;
++    const char *filters_blob;
++    UINT filters_len, filter_count;
++    UINT *filter_index;
+     struct portal_choices *choices; /* custom controls, selected values filled from the response */
+ };
+ 
+@@ -423,7 +426,31 @@
+     }
+ }
+ 
+-/* Signal filter to capture Response from portal */
++/* FileChooser returns the selected format separately from its URI. */
++static void parse_filter_result(struct portal_context *ctx, DBusMessageIter *variant)
++{
++    DBusMessageIter fields;
++    const char *selected, *cursor = ctx->filters_blob, *end;
++    const char *name, *pattern;
++    UINT index;
++
++    if (!ctx->filter_index || !cursor || p_dbus_message_iter_get_arg_type(variant) != DBUS_TYPE_STRUCT) return;
++    end = cursor + ctx->filters_len;
++    p_dbus_message_iter_recurse(variant, &fields);
++    if (p_dbus_message_iter_get_arg_type(&fields) != DBUS_TYPE_STRING) return;
++    p_dbus_message_iter_get_basic(&fields, &selected);
++    for (index = 1; index <= ctx->filter_count; index++)
++    {
++        if (!get_next_filter_pair(&cursor, end, &name, &pattern)) break;
++        if (!strcmp(name, selected))
++        {
++            *ctx->filter_index = index;
++            return;
++        }
++    }
++}
++
++/* Signal filter to capture Response from portal. */
+ static DBusHandlerResult portal_response_filter(DBusConnection *conn, DBusMessage *msg, void *user_data)
+ {
+     struct portal_context *ctx = user_data;
+@@ -483,7 +510,7 @@
+         p_dbus_message_iter_recurse(&args, &dict);
+ 
+         /* custom control values; the URI loop below stops at the first URI key */
+-        if (ctx->choices)
++        if (ctx->choices || ctx->filter_index)
+         {
+             DBusMessageIter scan = dict;
+ 
+@@ -493,11 +520,12 @@
+                 if (p_dbus_message_iter_get_arg_type(&entry) == DBUS_TYPE_STRING)
+                 {
+                     p_dbus_message_iter_get_basic(&entry, &key);
+-                    if (!strcmp(key, "choices") && p_dbus_message_iter_next(&entry) &&
++                    if (p_dbus_message_iter_next(&entry) &&
+                         p_dbus_message_iter_get_arg_type(&entry) == DBUS_TYPE_VARIANT)
+                     {
+                         p_dbus_message_iter_recurse(&entry, &variant);
+-                        parse_choices_result(ctx, &variant);
++                        if (!strcmp(key, "choices")) parse_choices_result(ctx, &variant);
++                        if (!strcmp(key, "current_filter")) parse_filter_result(ctx, &variant);
+                     }
+                 }
+                 p_dbus_message_iter_next(&scan);
+@@ -762,7 +790,7 @@
+                                       const char *filters_blob,
+                                       UINT filters_len,
+                                       UINT filter_count,
+-                                      UINT current_filter_index,
++                                      UINT *current_filter_index,
+                                       DWORD flags,
+                                       struct portal_choices *choices)
+ {
+@@ -816,6 +844,18 @@
+ 			append_boolean_option(&options_dict, "directory", TRUE);
+     }
+ 
++    /* A Wine-internal default is not a useful starting directory in a native
++     * chooser. Preserve remembered host directories and explicit file names. */
++    {
++        const char *home = getenv("HOME"), *prefix = getenv("WINEPREFIX");
++        size_t prefix_len = prefix ? strlen(prefix) : 0;
++        if (home && *home && (!initial_dir_utf8 || !*initial_dir_utf8 ||
++            !strcmp(initial_dir_utf8, "/") || (prefix_len &&
++            !strncmp(initial_dir_utf8, prefix, prefix_len) &&
++            (!initial_dir_utf8[prefix_len] || initial_dir_utf8[prefix_len] == '/'))))
++            initial_dir_utf8 = home;
++    }
++
+ 	/* 3. Directory (current_folder expects 'ay' - array of bytes) */
+ 		if (initial_dir_utf8 && initial_dir_utf8[0])
+ 		{
+@@ -870,12 +910,16 @@
+ 	/* 6. Filters */
+ 	if (filters_blob && filters_len && filter_count)
+     {
+-		append_filters_option(&options_dict, filters_blob, filters_len, filter_count, current_filter_index);
++		append_filters_option(&options_dict, filters_blob, filters_len, filter_count, *current_filter_index);
+     }
+ 
+     /* 7. Custom controls */
+     append_choices_option(&options_dict, choices);
+     ctx->choices = choices;
++    ctx->filters_blob = filters_blob;
++    ctx->filters_len = filters_len;
++    ctx->filter_count = filter_count;
++    ctx->filter_index = current_filter_index;
+ 
+ 	p_dbus_message_iter_close_container(&args, &options_dict);
+ 
+@@ -1093,7 +1137,7 @@
+                                   params->filters_blob,
+                                   params->filters_blob_len,
+                                   params->filter_count,
+-                                  params->current_filter_index,
++                                  &params->current_filter_index,
+                                   params->flags,
+                                   &params->choices);
+     TRACE("portal_open_file: portal_call_and_wait returned 0x%08x\n", (unsigned int)status);
+@@ -1265,7 +1309,7 @@
+                                   params->filters_blob,
+                                   params->filters_blob_len,
+                                   params->filter_count,
+-                                  params->current_filter_index,
++                                  &params->current_filter_index,
+                                   params->flags,
+                                   &params->choices);
+     TRACE("portal_save_file: portal_call_and_wait returned 0x%08x\n", (unsigned int)status);
+--- a/dlls/comdlg32/filedlg.c
++++ b/dlls/comdlg32/filedlg.c
+@@ -4652,6 +4652,7 @@
+ 
+         TRACE("Calling unix_portal_open_file...\n");
+         status = call_unix_portal(unix_portal_open_file, params);
++        if (status == STATUS_SUCCESS) ofn->nFilterIndex = params->current_filter_index;
+         TRACE("Portal returned status: 0x%08lx\n", (long)status);
+ 
+         if (status == STATUS_BUFFER_TOO_SMALL)
+@@ -4896,6 +4897,7 @@
+ 
+         TRACE("Calling unix_portal_save_file...\n");
+         status = call_unix_portal(unix_portal_save_file, params);
++        if (status == STATUS_SUCCESS) ofn->nFilterIndex = params->current_filter_index;
+         TRACE("Portal returned status: 0x%08lx\n", (unsigned long)status);
+ 
+         if (status == STATUS_BUFFER_TOO_SMALL)
+--- a/dlls/comdlg32/itemdlg.c
++++ b/dlls/comdlg32/itemdlg.c
+@@ -3074,6 +3074,14 @@
+     }
+ }
+ 
++static void portal_apply_filter(FileDialogImpl *This, UINT index)
++{
++    if (!index || index > This->filterspec_count || index - 1 == This->filetypeindex) return;
++    This->filetypeindex = index - 1;
++    set_current_filter(This, This->filterspecs[This->filetypeindex].pszSpec);
++    events_OnTypeChange(This);
++}
++
+ static HRESULT try_portal_itemdlg(FileDialogImpl *This, HWND hwndOwner)
+ {
+     struct portal_open_file_params *open_params = NULL;
+@@ -3136,6 +3144,7 @@
+         {
+             const WCHAR *buf = open_params->result_buffer;
+ 
++            portal_apply_filter(This, open_params->current_filter_index);
+             portal_apply_choices(This, &open_params->choices, choice_map);
+ 
+             if (!(open_params->flags & PORTAL_OPEN_FLAG_MULTIPLE) || open_params->result_count == 1)
+@@ -3305,7 +3314,8 @@
+ 			PIDLIST_ABSOLUTE pidl = NULL;
+ 			HRESULT hr_array;
+ 
+-			portal_apply_choices(This, &save_params->choices, choice_map);
++            portal_apply_filter(This, save_params->current_filter_index);
++            portal_apply_choices(This, &save_params->choices, choice_map);
+ 
+ 			if (This->psia_results)
+ 			{

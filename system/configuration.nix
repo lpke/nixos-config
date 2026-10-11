@@ -6,6 +6,7 @@
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
+  adobePhotoshop = pkgs.callPackage ../pkgs/adobe-photoshop {};
   voquill = pkgs.callPackage ../pkgs/voquill {
     version = "0.0.644";
     hash = "sha256-5vYImGJoI1E1km5LKFgF336QnSUeN2HWkuzjSOOl9D8=";
@@ -634,6 +635,7 @@ in
     gimpLatest
     darktable
     adobeDngConverter
+    adobePhotoshop
     imagemagick
     ffmpeg-full
     pdfcpu

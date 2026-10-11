@@ -77,6 +77,11 @@
         ] ++ extraModules;
       };
     in {
+      packages.${system}.adobe-photoshop = nixpkgs.legacyPackages.${system}.callPackage
+        ./pkgs/adobe-photoshop {
+          pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
+        };
+
       nixosConfigurations = {
         lpnix = mkLpnix [];
 

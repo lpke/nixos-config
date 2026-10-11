@@ -45,6 +45,16 @@ Display
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.
   convert-dng                  Convert DNG files with the configured wrapper.
+  adobe-photoshop setup        Open Creative Cloud setup; sign in through your default browser.
+  adobe-photoshop cloud        Open Creative Cloud to install licensed Adobe apps.
+  adobe-creative-cloud         Open the installed Creative Cloud desktop app.
+  adobe-photoshop run          Open installed Photoshop.
+  adobe-photoshop repair       Repair Adobe compatibility fonts and runtimes.
+  adobe-photoshop scale 150    Set Adobe UI scaling (100–300 percent; stop Adobe then relaunch).
+  adobe-photoshop file-picker kde|wine  Choose KDE or Wine file dialogs.
+  adobe-photoshop stop         Close all Adobe apps and background services; save work first.
+  adobe-photoshop status       Show the isolated Wine runtime and installation paths.
+  adobe-photoshop --help       Show Adobe launcher usage (-h also works).
 
 Other
   cmhelp                       Show non-NixOS chezmoi help.

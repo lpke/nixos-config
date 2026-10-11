@@ -1,0 +1,20 @@
+win32u: avoid blocking a nested offscreen repaint on the client-surface lock.
+
+--- a/dlls/win32u/window.c
++++ b/dlls/win32u/window.c
+@@ -464,7 +464,14 @@
+     if (disabled) return;
+     if (InterlockedCompareExchange( &presenting, 1, 0 )) return;
+ 
+-    pthread_mutex_lock( &surfaces_lock );
++    /* Flushing a GDI surface can re-enter here while the caller already owns
++     * surfaces_lock. This refresh is optional: the in-flight presentation will
++     * provide the pixels. Never block the window thread waiting on that lock. */
++    if (pthread_mutex_trylock( &surfaces_lock ))
++    {
++        InterlockedExchange( &presenting, 0 );
++        return;
++    }
+     LIST_FOR_EACH_ENTRY( surface, &client_surfaces, struct client_surface, entry )
+     {
+         if (!surface->hwnd || !surface->offscreen || surface->toplevel != toplevel) continue;
