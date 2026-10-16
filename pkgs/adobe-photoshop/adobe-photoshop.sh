@@ -14,7 +14,7 @@ adobe-photoshop run       Open installed Photoshop. Optional file paths follow.
 adobe-creative-cloud      Open Creative Cloud (same as adobe-photoshop cloud).
 adobe-photoshop repair    Reinstall compatibility fonts and runtimes.
 adobe-photoshop scale N   Set UI size to N percent (100–300; default 150).
-adobe-photoshop file-picker kde|wine  Choose file dialogs (default kde).
+adobe-photoshop file-picker kde|wine  Prefer KDE or use Wine dialogs (default kde).
 adobe-photoshop stop      Close ALL Adobe apps and background services. Save first.
 adobe-photoshop status    Show runtime, prefix and installed application paths.
 adobe-photoshop --help    Show this help (-h also works).

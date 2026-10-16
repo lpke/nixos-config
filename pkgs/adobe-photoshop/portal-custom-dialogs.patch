@@ -1,0 +1,33 @@
+comdlg32: preserve hooks and templates even when native portals are preferred.
+
+The portal cannot host an application's Windows dialog template or deliver its
+hook notifications. Forcing such dialogs through the portal can return success
+without the application accepting or writing the file, as in Save for Web.
+
+--- a/dlls/comdlg32/filedlg.c
++++ b/dlls/comdlg32/filedlg.c
+@@ -4554,17 +4554,17 @@
+     TRACE("should_use_portal: Checking portal eligibility: flags=0x%08lx\n", (unsigned long)ofn->Flags);
+ 
+     policy = get_portal_policy();
++    /* A native chooser cannot implement application hooks or templates. */
++    if (ofn->Flags & (OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_ENABLETEMPLATEHANDLE))
++    {
++        TRACE("Portal disabled: hooks/templates present (flags=0x%08lx)\n", (unsigned long)ofn->Flags);
++        return FALSE;
++    }
++
+     if (policy == PORTAL_POLICY_FORCE)
+         return TRUE;
+     if (policy == PORTAL_POLICY_NEVER)
+         return FALSE;
+-
+-    /* Don't use portal if hooks or templates are present */
+-    if (ofn->Flags & (OFN_ENABLEHOOK | OFN_ENABLETEMPLATE | OFN_ENABLETEMPLATEHANDLE))
+-    {
+-        TRACE("Portal disabled: hooks/templates present (flags=0x%08lx)\n", (unsigned long)ofn->Flags);
+-        return FALSE;
+-    }
+ 
+     /* Only use for Explorer-style dialogs */
+     if (!(ofn->Flags & OFN_EXPLORER))

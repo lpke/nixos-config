@@ -49,6 +49,7 @@ Helium. The launcher does not change browser associations.
 | Photoshop stopped tiling after restart or resizing | Wine marked its screen-sized startup window as fullscreen. A KWin rule keeps its normal window outside fullscreen, including after resizing. Photoshop's own screen modes remain available, but compositor fullscreen is intentionally blocked for tiling stability. |
 | Resizing could leave a blank or frozen window | Remove the duplicate window-manager decoration, prevent Wine from switching the window into compositor fullscreen, and make AdobeWine's extra offscreen repaint skip a busy client-surface mutex. This avoids a possible nested-lock deadlock while retaining canvas repaint. The combined changes passed 60 consecutive geometry changes with a layered document. |
 | KDE save format did not match the filename | The upstream portal patch ignored the returned `current_filter`. Pass it back into Wine and notify Adobe before accepting the save. Verified by switching PNG to PSD and reopening the resulting layered PSD. |
+| Save for Web returned to its preview without exporting | The forced KDE portal bypassed the legacy Save Optimized As dialog's Windows hook and custom template. Such dialogs now automatically use Wine's complete dialog so Adobe receives its callbacks and custom export options. Standard dialogs retain KDE integration. |
 
 The preparation step also registers `windows.ui.dll`, sets Photoshop's Windows
 version to Windows 10, keeps WebView2's D3D11/DXGI implementation builtin for
@@ -85,10 +86,23 @@ existing background processes retain their loaded copies.
   and exported the document correctly.
   After another fresh launch, 12 further cycles with the native Plasma panel
   active also passed, followed by another successful export.
+- On 2026-10-16, reproduced Save for Web returning success from KDE without
+  creating a file. Its legacy dialog requested both a hook and a custom template
+  with flags `0x008888a4`. The patched build, with KDE still enabled, exported
+  JPEG and PNG images at 320×240 with the expected blue rectangle and white
+  border. Cancelling overwrite preserved the existing file; confirming overwrite
+  replaced it. Standard Save As and Open still used KDE, and a saved PSD reopened
+  at 320×240 with both layers intact. These tests ran in a copied prefix with
+  private KWin, XWayland and D-Bus, without host windows or audio. The updated
+  package and full CUDA system configuration both built successfully.
 
 Open and Save use KDE's native file dialog, the same file-browser components as
 Dolphin. Adobe's custom export settings remain Adobe dialogs; their standard
-file-location chooser can use the portal. `adobe-photoshop file-picker wine`
+file-location chooser can use the portal. Dialogs with Windows hooks or custom
+templates, including Save for Web's Save Optimized As, use Wine's dialog
+automatically because the portal cannot deliver Windows
+[hook notifications](https://learn.microsoft.com/en-us/windows/win32/dlgbox/cdn-fileok)
+or host application dialog templates. `adobe-photoshop file-picker wine`
 restores Wine dialogs for workflows that need Adobe-specific controls the portal
 does not support. Remote KIO locations were not tested.
 
@@ -191,7 +205,7 @@ No third-party Photoshop repacks or activation bypasses were used.
 | `pkgs/adobe-photoshop/adobe-photoshop.sh` | Dedicated prefix, setup/cloud/run/repair/scale/file-picker/stop/status commands, browser integration and logging. |
 | `pkgs/adobe-photoshop/prepare-prefix.sh` | Idempotent compatibility repairs, backups and DPI configuration. |
 | `pkgs/adobe-photoshop/install-icons.sh` | Extracts icons from the installed Adobe applications. |
-| `pkgs/adobe-photoshop/file-dialogs.nix`, `portal-file-type.patch` | Rebuild Wine's dialog module with native picker format selection and home-directory defaults. |
+| `pkgs/adobe-photoshop/file-dialogs.nix`, `portal-file-type.patch`, `portal-custom-dialogs.patch` | Rebuild Wine's dialog module with native picker format selection, home-directory defaults and complete Windows dialogs for hooks/templates. |
 | `pkgs/adobe-photoshop/repaint.nix`, `resize-repaint.patch` | Rebuild Wine's window module with a nonblocking guard for its extra offscreen repaint. |
 | `pkgs/adobe-photoshop/show-installer.c` | Earlier installer window-placement repair. |
 | `flake.nix`, `system/configuration.nix` | Earlier standalone package exposure and system package integration. |
@@ -234,7 +248,8 @@ Runtime changes outside the repository:
 - `~/.local/share/adobe-photoshop/prefix/dosdevices/h:`: home-directory drive mapping. Existing prefix documents are preserved.
 - `~/.local/share/adobe-photoshop/launcher`: link to the current built package.
 - `~/.local/share/adobe-photoshop/logs/`: launch/repair logs and a private
-  `verification-20261011/` and `verification-polish-20261011/` directories with
+  `verification-20261011/`, `verification-polish-20261011/` and
+  `verification-save-for-web-20261016/` directories with
   test documents, exports, results, screenshots and build evidence. No account data is committed to Git.
 - `~/.local/share/icons/hicolor/256x256/apps/adobe-{photoshop,creative-cloud}.png`:
   Adobe application icons.

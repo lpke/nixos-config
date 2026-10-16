@@ -2,7 +2,7 @@
 
 wine.sourceBuild.overrideAttrs (old: {
   pname = "adobe-file-dialogs";
-  patches = old.patches ++ [ ./portal-file-type.patch ];
+  patches = old.patches ++ [ ./portal-file-type.patch ./portal-custom-dialogs.patch ];
   # Build only the matching dialog module and its build tools/import libraries.
   buildPhase = ''
     runHook preBuild
