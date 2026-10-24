@@ -449,6 +449,7 @@ in
       (prismlauncher.override {
         additionalPrograms = [];
         jdks = [
+          pkgs.jdk25
           pkgs.jdk21
           pkgs.jdk17
           pkgs.jdk8
