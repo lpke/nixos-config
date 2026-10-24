@@ -236,10 +236,12 @@ in
   # Hide Hibernate from Plasma's launcher/session menus.
   systemd.sleep.settings.Sleep.AllowHibernation = "no";
 
-  # Configure keymap in X11
+  # Default keymap for X11 and Wayland compositors.
   services.xserver.xkb = {
     layout = "au";
     variant = "";
+    # Keep F13-F24 as function keys instead of XF86 media/launcher keys.
+    options = "terminate:ctrl_alt_bksp,fkeys:basic_13-24";
   };
 
   # Enable CUPS to print documents.

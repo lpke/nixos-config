@@ -29,6 +29,8 @@ in
     wallpaper = null; # set non-declaratively
   };
 
+  input.keyboard.options = lib.splitString "," osConfig.services.xserver.xkb.options;
+
   shortcuts = withDeps ./shortcuts.nix;
   hotkeys.commands.display-brightness-toggle = {
     name = "Toggle primary display blackout";
