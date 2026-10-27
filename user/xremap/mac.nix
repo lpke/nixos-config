@@ -1,4 +1,6 @@
 let
+  macModes = [ "mac" "mac-super-left" "mac-super-right"
+    "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
   synergyHyper = key: [
     { press = "CTRL_L"; }
     { press = "ALT_L"; }
@@ -102,8 +104,7 @@ in
   keymap = [
     {
       name = "Synergy directional window focus";
-      mode = [ "mac" "mac-super-left" "mac-super-right"
-        "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
+      mode = macModes;
       device.not = [ "Logitech G903" ];
       exact_match = true;
       # Synergy bypasses Karabiner and its Mac client drops F17-F20. Use
@@ -122,9 +123,22 @@ in
     }
 
     {
+      name = "Synergy hovered window stacking";
+      mode = macModes;
+      exact_match = true;
+      # Keyboard relays preserve the Mac's existing hovered-window/burst logic.
+      # Handle both wheel streams; repeated relays keep the same burst target.
+      remap = {
+        "SUPER-XUPSCROLL" = "C-ALT-SHIFT-SUPER_R-F11";
+        "SUPER-XDOWNSCROLL" = "C-ALT-SHIFT-SUPER_R-F12";
+        "SUPER-XHIRES_UPSCROLL" = "C-ALT-SHIFT-SUPER_R-F11";
+        "SUPER-XHIRES_DOWNSCROLL" = "C-ALT-SHIFT-SUPER_R-F12";
+      };
+    }
+
+    {
       name = "mac mouse shortcuts";
-      mode = [ "mac" "mac-super-left" "mac-super-right"
-        "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
+      mode = macModes;
       device.only = [ "Logitech G903" ];
       remap = {
         "BTN_FORWARD" = synergyHyper "k"; # right front: Mission Control
