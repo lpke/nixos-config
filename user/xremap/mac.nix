@@ -101,6 +101,22 @@ in
   # Add only shortcuts that should differ while controlling macOS.
   keymap = [
     {
+      name = "Synergy literal Control hjkl";
+      mode = [ "mac" "mac-super-left" "mac-super-right"
+        "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
+      device.not = [ "Logitech G903" ];
+      exact_match = true;
+      # PC Super is Command on the Mac. Emit literal Ctrl for app/terminal
+      # bindings; output events bypass the window-focus relay below.
+      remap = {
+        "SUPER-h" = "C-h";
+        "SUPER-j" = "C-j";
+        "SUPER-k" = "C-k";
+        "SUPER-l" = "C-l";
+      };
+    }
+
+    {
       name = "Synergy directional window focus";
       mode = [ "mac" "synergy-terminal" ];
       device.not = [ "Logitech G903" ];
