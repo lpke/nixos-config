@@ -33,12 +33,17 @@ def captures_mode_device():
                 continue
             if (process / "comm").read_text().strip() != "xremap":
                 continue
+            descriptors = set()
             for descriptor in (process / "fd").iterdir():
                 try:
-                    if os.readlink(descriptor) in paths:
-                        return True
+                    descriptors.add(os.readlink(descriptor))
                 except OSError:
                     continue
+            # xremap opens devices while enumerating, then reopens the selected
+            # ones. Only after that does it create its uinput output. Sending a
+            # mode key during enumeration can reach an fd that is then closed.
+            if descriptors & paths and "/dev/uinput" in descriptors:
+                return True
         except OSError:
             continue
     return False

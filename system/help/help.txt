@@ -13,7 +13,7 @@ Core
   update-postman               Update the pinned Postman version and hash.
 
 Services
-  xrs                          Restart the user xremap service.
+  xrs                          Restart xremap and restore current Synergy Mac mappings.
   wrs                          Reload the wireless kernel module.
   prs                          Restart Piper, libratbag autostart, and ratbagd.
   ars                          Restart custom audio services.

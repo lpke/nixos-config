@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import AsyncMock, patch
 
 from mac_keys.controller import AttemptState, Controller
-from mac_keys.modes import selected_mode
+from mac_keys.modes import captures_mode_device, selected_mode
 from mac_keys.observer import Observer
 from mac_keys.synergy import ScreenState
 
@@ -51,6 +51,24 @@ class ModeTests(unittest.TestCase):
 
     def test_app_list_is_configurable(self):
         self.assertEqual(selected_mode(True, "custom.terminal", ["custom.terminal"]), "synergy-terminal")
+
+    def test_mode_switch_waits_for_device_selection_to_finish(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            device = root / "sys/class/input/event15/device"
+            device.mkdir(parents=True)
+            (device / "name").write_text("ydotoold virtual device\n")
+            process = root / "proc/123"
+            descriptors = process / "fd"
+            descriptors.mkdir(parents=True)
+            (process / "comm").write_text("xremap\n")
+            (descriptors / "5").symlink_to("/dev/input/event15")
+            with patch("mac_keys.modes.Path", side_effect=lambda path: root / path.lstrip("/")):
+                self.assertFalse(captures_mode_device(), "enumeration must not count as ready")
+                (descriptors / "6").symlink_to("/dev/uinput")
+                self.assertTrue(captures_mode_device())
+                (descriptors / "5").unlink()
+                self.assertFalse(captures_mode_device(), "the mode device must still be captured")
 
 
 class ScreenTests(unittest.TestCase):

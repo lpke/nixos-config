@@ -101,6 +101,21 @@ in
   # Add only shortcuts that should differ while controlling macOS.
   keymap = [
     {
+      name = "Synergy directional window focus";
+      mode = [ "mac" "synergy-terminal" ];
+      device.not = [ "Logitech G903" ];
+      exact_match = true;
+      # Synergy bypasses Karabiner and its Mac client drops F17-F20. Use
+      # Hammerspoon's Hyper+F13-F16 relay before terminal Ctrl passthrough.
+      remap = {
+        "C-h" = "C-ALT-SHIFT-SUPER_R-F13";
+        "C-j" = "C-ALT-SHIFT-SUPER_R-F14";
+        "C-k" = "C-ALT-SHIFT-SUPER_R-F15";
+        "C-l" = "C-ALT-SHIFT-SUPER_R-F16";
+      };
+    }
+
+    {
       name = "mac mouse shortcuts";
       mode = [ "mac" "mac-super-left" "mac-super-right"
         "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
