@@ -101,33 +101,23 @@ in
   # Add only shortcuts that should differ while controlling macOS.
   keymap = [
     {
-      name = "Synergy literal Control hjkl";
+      name = "Synergy directional window focus";
       mode = [ "mac" "mac-super-left" "mac-super-right"
         "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
       device.not = [ "Logitech G903" ];
       exact_match = true;
-      # PC Super is Command on the Mac. Emit literal Ctrl for app/terminal
-      # bindings; output events bypass the window-focus relay below.
-      remap = {
-        "SUPER-h" = "C-h";
-        "SUPER-j" = "C-j";
-        "SUPER-k" = "C-k";
-        "SUPER-l" = "C-l";
-      };
-    }
-
-    {
-      name = "Synergy directional window focus";
-      mode = [ "mac" "synergy-terminal" ];
-      device.not = [ "Logitech G903" ];
-      exact_match = true;
       # Synergy bypasses Karabiner and its Mac client drops F17-F20. Use
-      # Hammerspoon's Hyper+F13-F16 relay before terminal Ctrl passthrough.
+      # Hammerspoon's Hyper+F13-F16 relay for both Ctrl and PC Command/Super,
+      # matching physical Mac Ctrl+hjkl before terminal Ctrl passthrough.
       remap = {
         "C-h" = "C-ALT-SHIFT-SUPER_R-F13";
         "C-j" = "C-ALT-SHIFT-SUPER_R-F14";
         "C-k" = "C-ALT-SHIFT-SUPER_R-F15";
         "C-l" = "C-ALT-SHIFT-SUPER_R-F16";
+        "SUPER-h" = "C-ALT-SHIFT-SUPER_R-F13";
+        "SUPER-j" = "C-ALT-SHIFT-SUPER_R-F14";
+        "SUPER-k" = "C-ALT-SHIFT-SUPER_R-F15";
+        "SUPER-l" = "C-ALT-SHIFT-SUPER_R-F16";
       };
     }
 
