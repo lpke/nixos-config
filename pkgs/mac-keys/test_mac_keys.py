@@ -145,6 +145,32 @@ class ControllerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.controller.desired_mode, "synergy-terminal")
         self.assertEqual(self.controller.state()["screen"], "Mac")
 
+    async def test_mac_local_context_never_creates_ssh_observer(self):
+        self.controller.config["app_context"] = "mac"
+        self.controller.remote = True
+        with patch("mac_keys.controller.Observer") as observer:
+            self.assertIn("disabled", self.controller.connect())
+            self.assertIn("disabled", self.controller.connect(manual=True))
+            observer.assert_not_called()
+        self.assertEqual(self.controller.desired_mode, "mac")
+        self.assertEqual(self.controller.status, "Mac receiver (no SSH)")
+        self.assertIsNone(self.controller.observer_task)
+        self.assertEqual(self.controller.state()["app_context"], "mac")
+
+    async def test_mac_local_context_ignores_stale_apps_and_saved_pause(self):
+        self.controller.config["app_context"] = "mac"
+        self.controller.attempt.pause()
+        for app in [None, *ModeTests.terminals, "com.apple.finder"]:
+            self.controller.application = app
+            self.controller.remote = True
+            self.assertEqual(self.controller.desired_mode, "mac")
+            self.controller.remote = False
+            self.assertEqual(self.controller.desired_mode, "local")
+        self.controller.remote = True
+        message = await self.controller.stop_detection()
+        self.assertIn("remains active", message)
+        self.assertEqual(self.controller.desired_mode, "mac")
+
     async def test_keyboard_failure_is_reported_and_recovers(self):
         self.controller.changed.set()
         apply = AsyncMock(side_effect=[OSError("device missing"), None])

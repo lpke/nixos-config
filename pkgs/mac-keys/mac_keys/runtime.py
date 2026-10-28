@@ -65,7 +65,8 @@ def request(command):
 def describe(state):
     lines = [state.get("status", "Controller unavailable")]
     lines.append(f"Screen: {state.get('screen', 'unknown')}")
-    lines.append(f"Mac app: {state.get('application') or 'unknown'}")
+    lines.append("App context: Mac-local; no SSH" if state.get("app_context") == "mac" else
+                 f"Mac app: {state.get('application') or 'unknown'}")
     lines.append(f"Mappings: {state.get('applied_mode') or 'pending'}")
     if state.get("error"):
         lines.append(state["error"])

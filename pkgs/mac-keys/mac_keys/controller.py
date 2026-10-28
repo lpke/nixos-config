@@ -42,7 +42,8 @@ class Controller:
         self.attempt = AttemptState(directory() / "attempt.json", snapshot["session"])
         self.remote = False
         self.application = None
-        self.status = "Detection stopped" if self.attempt.value["paused"] else "Waiting for Mac SSH"
+        self.status = ("Mac receiver (no SSH)" if self.local_context else
+                       "Detection stopped" if self.attempt.value["paused"] else "Waiting for Mac SSH")
         self.error = None
         self.mode_error = None
         self.screen_error = None
@@ -53,11 +54,18 @@ class Controller:
         self.group = None
 
     @property
+    def local_context(self):
+        return self.config.get("app_context", "ssh") == "mac"
+
+    @property
     def desired_mode(self):
+        if self.local_context:
+            return "mac" if self.remote else "local"
         return modes.selected_mode(self.remote, self.application, self.config["terminal_applications"])
 
     def state(self):
         return {"status": self.status, "screen": "Mac" if self.remote else "PC",
+                "app_context": self.config.get("app_context", "ssh"),
                 "application": self.application, "desired_mode": self.desired_mode,
                 "applied_mode": self.applied_mode, "updated": time.time(),
                 "error": self.mode_error or self.screen_error or self.error}
@@ -73,6 +81,9 @@ class Controller:
         self.publish()
 
     def connect(self, manual=False):
+        if self.local_context:
+            self.update("Mac receiver (no SSH)", None, None)
+            return "Mac app handling is local; SSH app detection is disabled"
         if self.observer_task and not self.observer_task.done():
             return "Detection is already running"
         if not self.attempt.claim(manual):
@@ -81,11 +92,14 @@ class Controller:
         return "Connecting to Mac"
 
     async def stop_detection(self):
+        if self.local_context:
+            return "No SSH app detection is running; local screen detection remains active"
         self.attempt.pause()
         if self.observer_task:
             self.observer_task.cancel()
             await asyncio.gather(self.observer_task, return_exceptions=True)
         self.update("Detection stopped", None, None)
+        return "Detection stopped; SSH remains cached"
 
     async def handle_command(self, reader, writer):
         try:
@@ -95,8 +109,7 @@ class Controller:
             elif command in {"start", "retry"}:
                 response = {"message": self.connect(manual=True)}
             elif command == "stop":
-                await self.stop_detection()
-                response = {"message": "Detection stopped; SSH remains cached"}
+                response = {"message": await self.stop_detection()}
             elif command == "reapply":
                 self.applied_mode = None
                 self.changed.set()

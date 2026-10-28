@@ -19,12 +19,12 @@ Services
   ars                          Restart custom audio services.
 
 Synergy Mac Keys
-  mac-keys                     Show SSH, focused Mac app, and keyboard mapping status.
-  mac-keys start               Start app detection with one SSH connection attempt.
-  mac-keys stop                Stop detection; keep SSH cached and preserve Mac terminal Ctrl keys.
-  mac-keys retry               Retry SSH once after enabling access on the Mac.
-  mac-keys logs                Show controller, tray, and SSH logs.
-  mac-keys --help              Show commands and Mac SSH recovery steps.
+  mac-keys                     Show Synergy screen and Mac-local keyboard mapping status.
+  mac-keys start               Start or refresh local Synergy screen detection.
+  mac-keys stop                Show that SSH app polling is disabled; keep screen detection active.
+  mac-keys retry               Refresh local detection; retry SSH only in the legacy backend.
+  mac-keys logs                Show screen-controller and tray logs.
+  mac-keys --help              Show commands for the active keyboard mapping backend.
 
 Audio
   audio                        Entrypoint to all custom audio commands. Run alone for help.

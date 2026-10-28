@@ -6,6 +6,7 @@ in
 {
   xdg.configFile."mac-keys/config.json".text = builtins.toJSON {
     inherit host;
+    app_context = import ./backend.nix;
     local_screen = "lpnix-1d83cd06";
     synergy_log = "${config.home.homeDirectory}/.var/app/com.symless.synergy/.local/state/Synergy/synergy.log";
     terminal_applications = [ "org.alacritty" "com.googlecode.iterm2" ];
@@ -28,7 +29,7 @@ in
 
   systemd.user.services.mac-keys-controller = {
     Unit = {
-      Description = "Synergy Mac keyboard mappings and app detection";
+      Description = "Synergy screen detection and Mac keyboard mappings";
       After = [ "xremap.service" "ydotoold.service" ];
       Wants = [ "xremap.service" "ydotoold.service" ];
       PartOf = [ "graphical-session.target" "mac-keys-tray.service" ];
@@ -72,4 +73,7 @@ in
   # Reassert mappings after an xremap restart without attempting SSH again.
   systemd.user.services.xremap.Service.ExecStartPost =
     "${macKeys}/bin/mac-keys --reapply";
+
+  # Keep the interactive command aligned with targeted user-service activations.
+  home.file.".local/bin/mac-keys".source = "${macKeys}/bin/mac-keys";
 }

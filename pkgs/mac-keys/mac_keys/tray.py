@@ -10,7 +10,7 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from . import synergy
-from .runtime import CONTROLLER_UNIT, describe, directory, read_json
+from .runtime import CONTROLLER_UNIT, configuration, describe, directory, read_json
 
 
 class Tray:
@@ -26,14 +26,16 @@ class Tray:
         self.detail = self.menu.addAction("Mappings: pending")
         self.detail.setEnabled(False)
         self.menu.addSeparator()
-        for label, command in (("Start detection", "start"), ("Retry SSH", "retry"),
-                               ("Stop detection", "stop")):
+        local_context = configuration().get("app_context", "ssh") == "mac"
+        commands = (("Refresh screen detection", "start"),) if local_context else (
+            ("Start detection", "start"), ("Retry SSH", "retry"), ("Stop detection", "stop"))
+        for label, command in commands:
             action = QAction(label, self.menu)
             action.triggered.connect(lambda checked=False, command=command: self.command("mac-keys", [command]))
             self.menu.addAction(action)
         self.menu.addSeparator()
         self.menu.addAction("Show logs", lambda: self.command("konsole", ["--hold", "-e", "mac-keys", "logs"]))
-        self.menu.addAction("SSH recovery commands", lambda: self.command("konsole", ["--hold", "-e", "mac-keys", "--help"]))
+        self.menu.addAction("Command help", lambda: self.command("konsole", ["--hold", "-e", "mac-keys", "--help"]))
         self.tray.setContextMenu(self.menu)
         assets = Path(__file__).parent.parent / "icons"
         self.icons = {name: QIcon(str(assets / f"{name}.svg")) for name in ("connected", "error")}
@@ -85,11 +87,12 @@ class Tray:
             state = {"status": "Controller unavailable", "error": "Run mac-keys start or check mac-keys logs"}
         if self.lifecycle_error:
             state = {**state, "error": self.lifecycle_error}
-        healthy = state.get("status") == "Connected" and not state.get("error")
+        healthy = state.get("status") in {"Connected", "Mac receiver (no SSH)"} and not state.get("error")
         self.tray.setIcon(self.icons["connected" if healthy else "error"])
         self.tray.setToolTip("Mac keys\n" + describe(state))
         self.summary.setText(state.get("status", "Controller unavailable"))
-        self.detail.setText(f"{state.get('application') or 'App unknown'} · {state.get('applied_mode') or 'Mappings pending'}")
+        context = "Mac-local app context" if state.get("app_context") == "mac" else state.get("application") or "App unknown"
+        self.detail.setText(f"{context} · {state.get('applied_mode') or 'Mappings pending'}")
 
 
 def main():

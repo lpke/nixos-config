@@ -28,15 +28,19 @@ Then retry on the PC: mac-keys retry
 
 
 def main():
+    local_context = configuration().get("app_context", "ssh") == "mac"
     parser = argparse.ArgumentParser(
         prog="mac-keys",
-        description="Control Mac app detection for Synergy.",
-        epilog=RECOVERY.format(host=configuration()["host"]),
+        description="Inspect Synergy screen detection and Mac keyboard mappings.",
+        epilog=("App shortcuts are resolved by Hammerspoon on the Mac. No SSH app polling is used.\n"
+                "start/retry refresh the local controller; stop leaves screen detection running."
+                if local_context else RECOVERY.format(host=configuration()["host"])),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("command", nargs="?", default="status",
                         choices=["status", "start", "stop", "retry", "logs"],
-                        help="start/retry: connect once; stop: pause detection; status/logs: inspect")
+                        help=("start/retry: refresh controller; stop: show local-context status; status/logs: inspect"
+                              if local_context else "start/retry: connect once; stop: pause detection; status/logs: inspect"))
     parser.add_argument("--reapply", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--reset-local", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -54,8 +58,9 @@ def main():
             return 1
         return 0
     if args.command == "logs":
-        os.execvp("journalctl", ["journalctl", "--user", "-u", CONTROLLER_UNIT,
-                               "-u", SSH_UNIT, "-u", TRAY_UNIT, "-n", "60", "--no-pager"])
+        units = [CONTROLLER_UNIT, TRAY_UNIT] + ([] if local_context else [SSH_UNIT])
+        os.execvp("journalctl", ["journalctl", "--user", *[argument for unit in units for argument in ("-u", unit)],
+                               "-n", "60", "--no-pager"])
     if not synergy.processes()["running"]:
         print("Synergy is stopped. Start Synergy sharing first.")
         return 0 if args.command == "status" else 1
