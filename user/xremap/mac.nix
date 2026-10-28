@@ -1,6 +1,8 @@
 let
-  macModes = [ "mac" "mac-super-left" "mac-super-right"
-    "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
+  modesFor = base: [ base "${base}-super-left" "${base}-super-right" ];
+  appModes = modesFor "mac";
+  terminalModes = modesFor "synergy-terminal";
+  macModes = appModes ++ terminalModes;
   synergyHyper = key: [
     { press = "CTRL_L"; }
     { press = "ALT_L"; }
@@ -30,6 +32,18 @@ in
 {
   modeSwitchInternalKeymap = [
     {
+      name = "Internal mode switch with held Super";
+      device.only = [ "ydotoold virtual device" ];
+      # App detection can change the base mode during a window gesture.
+      # Match held modifiers before the unconditional mode-switch keymap.
+      remap = {
+        "SUPER_L-KEY_F24".set_mode = "mac-super-left";
+        "SUPER_R-KEY_F24".set_mode = "mac-super-right";
+        "SUPER_L-KEY_F21".set_mode = "synergy-terminal-super-left";
+        "SUPER_R-KEY_F21".set_mode = "synergy-terminal-super-right";
+      };
+    }
+    {
       name = "Internal mode switch";
       device.only = [ "ydotoold virtual device" ];
       remap = {
@@ -43,7 +57,7 @@ in
   modmap = builtins.concatMap (base: [
     {
       name = "mac Super state";
-      mode = [ base "${base}-super-left" "${base}-super-right" ];
+      mode = modesFor base;
       remap = {
         "SUPER_L" = {
           press.set_mode = "${base}-super-left";
@@ -78,7 +92,7 @@ in
   keymap = [
     {
       name = "Synergy Ctrl+L";
-      mode = [ "mac" "mac-super-left" "mac-super-right" ];
+      mode = appModes;
       device.not = [ "Logitech G903" ];
       exact_match = true;
       # Terminal modes retain Ctrl+L for clearing/redrawing the terminal.
@@ -118,6 +132,18 @@ in
     }
 
     {
+      name = "Synergy window growth";
+      mode = macModes;
+      device.not = [ "Logitech G903" ];
+      exact_match = true;
+      # Linux pinky+Alt+V/B matches native Mac Control+Alt+V/B.
+      remap = {
+        "SUPER-ALT-v" = "C-ALT-SHIFT-SUPER_R-F9";
+        "SUPER-ALT-b" = "C-ALT-SHIFT-SUPER_R-F10";
+      };
+    }
+
+    {
       name = "Synergy hovered window stacking";
       mode = macModes;
       exact_match = true;
@@ -144,7 +170,7 @@ in
 
     {
       name = "Synergy terminal shortcuts";
-      mode = [ "synergy-terminal" "synergy-terminal-super-left" "synergy-terminal-super-right" ];
+      mode = terminalModes;
       device.not = [ "Logitech G903" ];
       # Identity mappings stop the PC's focused app rules from handling these
       # keys while Alacritty or iTerm has focus on the Mac. Keep native Ctrl bindings.
@@ -169,7 +195,7 @@ in
 
     {
       name = "mac shortcuts";
-      mode = [ "mac" "mac-super-left" "mac-super-right" ];
+      mode = appModes;
       device.not = [ "Logitech G903" ];
       remap = {
         "C-c" = "SUPER-c";
