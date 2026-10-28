@@ -103,6 +103,27 @@ in
   # Add only shortcuts that should differ while controlling macOS.
   keymap = [
     {
+      name = "Synergy Ctrl+L";
+      mode = [ "mac" "mac-super-left" "mac-super-right" ];
+      device.not = [ "Logitech G903" ];
+      exact_match = true;
+      # Terminal modes retain Ctrl+L for clearing/redrawing the terminal.
+      remap."C-l" = "SUPER_R-l";
+    }
+
+    {
+      name = "Synergy app launchers";
+      mode = macModes;
+      device.not = [ "Logitech G903" ];
+      exact_match = true;
+      # Synergy bypasses Karabiner; Hammerspoon handles these launch relays.
+      remap = {
+        "SUPER-m" = "C-ALT-SHIFT-SUPER_R-m";
+        "SUPER-n" = "C-ALT-SHIFT-SUPER_R-n";
+      };
+    }
+
+    {
       name = "Synergy directional window focus";
       mode = macModes;
       device.not = [ "Logitech G903" ];
@@ -114,7 +135,6 @@ in
         "C-h" = "C-ALT-SHIFT-SUPER_R-F13";
         "C-j" = "C-ALT-SHIFT-SUPER_R-F14";
         "C-k" = "C-ALT-SHIFT-SUPER_R-F15";
-        "C-l" = "C-ALT-SHIFT-SUPER_R-F16";
         "SUPER-h" = "C-ALT-SHIFT-SUPER_R-F13";
         "SUPER-j" = "C-ALT-SHIFT-SUPER_R-F14";
         "SUPER-k" = "C-ALT-SHIFT-SUPER_R-F15";
