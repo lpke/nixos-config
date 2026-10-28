@@ -91,12 +91,12 @@ in
   # Add only shortcuts that should differ while controlling macOS.
   keymap = [
     {
-      name = "Synergy Ctrl+L";
-      mode = appModes;
+      name = "Synergy thumb+L pilot";
+      mode = macModes;
       device.not = [ "Logitech G903" ];
       exact_match = true;
-      # Terminal modes retain Ctrl+L for clearing/redrawing the terminal.
-      remap."C-l" = "SUPER_R-l";
+      # One app-independent intent token; Hammerspoon chooses Ctrl/Cmd locally.
+      remap."C-l" = "C-ALT-SHIFT-SUPER_R-F8";
     }
 
     {
