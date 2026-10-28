@@ -15,6 +15,17 @@ let
     { release = "ALT_L"; }
     { release = "CTRL_L"; }
   ];
+  mouseGesture = button: before: after: {
+    skip_key_event = true;
+    press = before ++ [
+      { press = "CTRL_L"; }
+      { press = button; }
+    ];
+    release = [
+      { release = button; }
+      { release = "CTRL_L"; }
+    ] ++ after;
+  };
 in
 {
   modeSwitchInternalKeymap = [
@@ -46,58 +57,21 @@ in
     }
 
     {
-      name = "mac window drag";
+      name = "mac window move";
       mode = [ "${base}-super-left" "${base}-super-right" ];
-      remap = {
-        "BTN_LEFT" = {
-          skip_key_event = true;
-          press = [
-            { press = "CTRL_L"; }
-            { press = "BTN_LEFT"; }
-          ];
-          release = [
-            { release = "BTN_LEFT"; }
-            { release = "CTRL_L"; }
-          ];
-        };
-      };
+      # macOS native window movement uses Command+Control+left drag.
+      remap."BTN_LEFT" = mouseGesture "BTN_LEFT" [] [];
     }
-
-    {
-      name = "mac right-button drag with left Super";
-      mode = "${base}-super-left";
-      remap."BTN_RIGHT" = {
-        skip_key_event = true;
-        press = [
-          { release = "SUPER_L"; }
-          { press = "CTRL_L"; }
-          { press = "BTN_RIGHT"; }
-        ];
-        release = [
-          { release = "BTN_RIGHT"; }
-          { release = "CTRL_L"; }
-          { press = "SUPER_L"; }
-        ];
-      };
-    }
-
-    {
-      name = "mac right-button drag with right Super";
-      mode = "${base}-super-right";
-      remap."BTN_RIGHT" = {
-        skip_key_event = true;
-        press = [
-          { release = "SUPER_R"; }
-          { press = "CTRL_L"; }
-          { press = "BTN_RIGHT"; }
-        ];
-        release = [
-          { release = "BTN_RIGHT"; }
-          { release = "CTRL_L"; }
-          { press = "SUPER_R"; }
-        ];
-      };
-    }
+  ] ++ map (super: {
+    name = "mac window resize with ${super.key}";
+    mode = "${base}-super-${super.side}";
+    # The live Easy Move+Resize setup is Control-only and resize-only.
+    # Restore Command on release so another gesture can use the held Super key.
+    remap."BTN_RIGHT" = mouseGesture "BTN_RIGHT"
+      [ { release = super.key; } ] [ { press = super.key; } ];
+  }) [
+    { side = "left"; key = "SUPER_L"; }
+    { side = "right"; key = "SUPER_R"; }
   ]) [ "mac" "synergy-terminal" ];
 
   # Add only shortcuts that should differ while controlling macOS.
@@ -112,14 +86,15 @@ in
     }
 
     {
-      name = "Synergy app launchers";
+      name = "Synergy Mac actions";
       mode = macModes;
       device.not = [ "Logitech G903" ];
       exact_match = true;
-      # Synergy bypasses Karabiner; Hammerspoon handles these launch relays.
+      # Synergy bypasses Karabiner; Hammerspoon handles these Mac actions.
       remap = {
         "SUPER-m" = "C-ALT-SHIFT-SUPER_R-m";
         "SUPER-n" = "C-ALT-SHIFT-SUPER_R-n";
+        "C-delete" = "SUPER_R-delete";
       };
     }
 
