@@ -26,6 +26,8 @@ in
 
     (noMouse {
       name = "Minecraft";
+      # Linux focus stays on the game when Synergy switches to the Mac.
+      mode = "local";
       application = {
         only = [ "/Minecraft/" ];
       };
@@ -36,6 +38,7 @@ in
 
     (noMouse {
       name = "Runelite";
+      mode = "local";
       application = {
         only = [ "/runelite/" ];
       };

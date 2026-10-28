@@ -16,6 +16,8 @@ in
   modmap = [
     (mouseOnly {
       name = "G903 Minecraft";
+      # Modmaps run before Mac shortcuts, even if Linux focus never changes.
+      mode = "local";
       application = {
         only = [ "/Minecraft/" ];
       };
@@ -29,6 +31,7 @@ in
 
     (mouseOnly {
       name = "G903 Runelite";
+      mode = "local";
       application = {
         only = [ "/runelite/" ];
       };
@@ -46,6 +49,7 @@ in
 
     (mouseOnly {
       name = "G903 WoW";
+      mode = "local";
       window = {
         only = [ "/World of Warcraft/" ];
       };
