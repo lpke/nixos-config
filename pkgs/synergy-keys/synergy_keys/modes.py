@@ -4,15 +4,7 @@ from pathlib import Path
 
 
 DEVICE = "ydotoold virtual device"
-KEYCODES = {"local": 192, "mac": 194, "synergy-terminal": 191}
-
-
-def selected_mode(remote, application, terminal_applications):
-    if not remote:
-        return "local"
-    if application is None or application in terminal_applications:
-        return "synergy-terminal"
-    return "mac"
+KEYCODES = {"local": 192, "mac": 194}
 
 
 def captures_mode_device():

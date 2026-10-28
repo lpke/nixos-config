@@ -6,13 +6,12 @@ from pathlib import Path
 import socket
 
 
-CONTROLLER_UNIT = "mac-keys-controller.service"
-SSH_UNIT = "mac-keys-ssh.service"
-TRAY_UNIT = "mac-keys-tray.service"
+CONTROLLER_UNIT = "synergy-keys-controller.service"
+TRAY_UNIT = "synergy-keys-tray.service"
 
 
 def directory():
-    path = Path(os.environ["XDG_RUNTIME_DIR"]) / "mac-keys"
+    path = Path(os.environ["XDG_RUNTIME_DIR"]) / "synergy-keys"
     path.mkdir(mode=0o700, exist_ok=True)
     return path
 
@@ -33,10 +32,7 @@ def write_json(path, value):
 
 def configuration():
     config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    config = json.loads((config_home / "mac-keys/config.json").read_text())
-    config["ssh_socket"] = str(Path(os.environ["XDG_RUNTIME_DIR"]) / "mac-keys-ssh/control")
-    config["observer_script"] = str(Path(__file__).parent.parent / "mac-frontmost.js")
-    return config
+    return json.loads((config_home / "synergy-keys/config.json").read_text())
 
 
 def notify_service(message):
@@ -65,8 +61,7 @@ def request(command):
 def describe(state):
     lines = [state.get("status", "Controller unavailable")]
     lines.append(f"Screen: {state.get('screen', 'unknown')}")
-    lines.append("App context: Mac-local; no SSH" if state.get("app_context") == "mac" else
-                 f"Mac app: {state.get('application') or 'unknown'}")
+    lines.append("App shortcuts: handled locally on the Mac")
     lines.append(f"Mappings: {state.get('applied_mode') or 'pending'}")
     if state.get("error"):
         lines.append(state["error"])

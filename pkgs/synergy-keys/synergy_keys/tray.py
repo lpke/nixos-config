@@ -10,7 +10,7 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from . import synergy
-from .runtime import CONTROLLER_UNIT, configuration, describe, directory, read_json
+from .runtime import CONTROLLER_UNIT, describe, directory, read_json
 
 
 class Tray:
@@ -26,16 +26,12 @@ class Tray:
         self.detail = self.menu.addAction("Mappings: pending")
         self.detail.setEnabled(False)
         self.menu.addSeparator()
-        local_context = configuration().get("app_context", "ssh") == "mac"
-        commands = (("Refresh screen detection", "start"),) if local_context else (
-            ("Start detection", "start"), ("Retry SSH", "retry"), ("Stop detection", "stop"))
-        for label, command in commands:
-            action = QAction(label, self.menu)
-            action.triggered.connect(lambda checked=False, command=command: self.command("mac-keys", [command]))
-            self.menu.addAction(action)
+        action = QAction("Refresh screen detection", self.menu)
+        action.triggered.connect(lambda: self.command("synergy-keys", ["refresh"]))
+        self.menu.addAction(action)
         self.menu.addSeparator()
-        self.menu.addAction("Show logs", lambda: self.command("konsole", ["--hold", "-e", "mac-keys", "logs"]))
-        self.menu.addAction("Command help", lambda: self.command("konsole", ["--hold", "-e", "mac-keys", "--help"]))
+        self.menu.addAction("Show logs", lambda: self.command("konsole", ["--hold", "-e", "synergy-keys", "logs"]))
+        self.menu.addAction("Command help", lambda: self.command("konsole", ["--hold", "-e", "synergy-keys", "--help"]))
         self.tray.setContextMenu(self.menu)
         assets = Path(__file__).parent.parent / "icons"
         self.icons = {name: QIcon(str(assets / f"{name}.svg")) for name in ("connected", "error")}
@@ -53,7 +49,7 @@ class Tray:
         def finished(code, status):
             if code:
                 error = bytes(process.readAllStandardError()).decode(errors="replace").strip()
-                error = error or "Command failed; run mac-keys logs"
+                error = error or "Command failed; run synergy-keys logs"
                 if lifecycle:
                     self.lifecycle_error = error
                 else:
@@ -74,8 +70,7 @@ class Tray:
         snapshot = synergy.processes()
         identity = (snapshot["running"], snapshot["session"], snapshot["cores"])
         if identity != self.previous:
-            # A core restart changes the service lifetime, but not the saved SSH attempt
-            # for its parent Synergy session.
+            # Re-read screen state whenever the sharing process changes.
             action = ("start" if self.previous is None else "restart") if snapshot["running"] else "stop"
             self.command("systemctl", ["--user", action, CONTROLLER_UNIT], lifecycle=True)
             self.previous = identity
@@ -84,20 +79,19 @@ class Tray:
             return
         state = read_json(directory() / "state.json")
         if time.time() - state.get("updated", 0) > 4:
-            state = {"status": "Controller unavailable", "error": "Run mac-keys start or check mac-keys logs"}
+            state = {"status": "Controller unavailable", "error": "Run synergy-keys refresh or check synergy-keys logs"}
         if self.lifecycle_error:
             state = {**state, "error": self.lifecycle_error}
-        healthy = state.get("status") in {"Connected", "Mac receiver (no SSH)"} and not state.get("error")
+        healthy = state.get("status") == "Mac-local app shortcuts" and not state.get("error")
         self.tray.setIcon(self.icons["connected" if healthy else "error"])
         self.tray.setToolTip("Mac keys\n" + describe(state))
         self.summary.setText(state.get("status", "Controller unavailable"))
-        context = "Mac-local app context" if state.get("app_context") == "mac" else state.get("application") or "App unknown"
-        self.detail.setText(f"{context} · {state.get('applied_mode') or 'Mappings pending'}")
+        self.detail.setText(f"{state.get('screen', 'Unknown screen')} · {state.get('applied_mode') or 'Mappings pending'}")
 
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("mac-keys")
+    app.setApplicationName("synergy-keys")
     app.setApplicationDisplayName("Synergy Mac keys")
     app.setQuitOnLastWindowClosed(False)
     tray = Tray(app)

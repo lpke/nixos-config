@@ -1,8 +1,6 @@
 let
   modesFor = base: [ base "${base}-super-left" "${base}-super-right" ];
-  appModes = modesFor "mac";
-  terminalModes = modesFor "synergy-terminal";
-  macModes = appModes ++ terminalModes;
+  macModes = modesFor "mac";
   synergyHyper = key: [
     { press = "CTRL_L"; }
     { press = "ALT_L"; }
@@ -34,13 +32,10 @@ in
     {
       name = "Internal mode switch with held Super";
       device.only = [ "ydotoold virtual device" ];
-      # App detection can change the base mode during a window gesture.
       # Match held modifiers before the unconditional mode-switch keymap.
       remap = {
         "SUPER_L-KEY_F24".set_mode = "mac-super-left";
         "SUPER_R-KEY_F24".set_mode = "mac-super-right";
-        "SUPER_L-KEY_F21".set_mode = "synergy-terminal-super-left";
-        "SUPER_R-KEY_F21".set_mode = "synergy-terminal-super-right";
       };
     }
     {
@@ -49,7 +44,6 @@ in
       remap = {
         "KEY_F22".set_mode = "local";
         "KEY_F24".set_mode = "mac";
-        "KEY_F21".set_mode = "synergy-terminal";
       };
     }
   ];
@@ -86,19 +80,10 @@ in
   }) [
     { side = "left"; key = "SUPER_L"; }
     { side = "right"; key = "SUPER_R"; }
-  ]) [ "mac" "synergy-terminal" ];
+  ]) [ "mac" ];
 
   # Add only shortcuts that should differ while controlling macOS.
   keymap = [
-    {
-      name = "Synergy thumb+L pilot";
-      mode = macModes;
-      device.not = [ "Logitech G903" ];
-      exact_match = true;
-      # One app-independent intent token; Hammerspoon chooses Ctrl/Cmd locally.
-      remap."C-l" = "C-ALT-SHIFT-SUPER_R-F8";
-    }
-
     {
       name = "Synergy Mac actions";
       mode = macModes;
@@ -169,60 +154,11 @@ in
     }
 
     {
-      name = "Synergy terminal shortcuts";
-      mode = terminalModes;
+      name = "Synergy app-independent shortcuts";
+      mode = macModes;
       device.not = [ "Logitech G903" ];
-      # Identity mappings stop the PC's focused app rules from handling these
-      # keys while Alacritty or iTerm has focus on the Mac. Keep native Ctrl bindings.
-      remap = builtins.listToAttrs (map (key: { name = key; value = key; }) (
-        (builtins.concatMap (key: [ "C-${key}" "C-SHIFT-${key}" ]) [
-          "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"
-          "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
-          "left" "right" "up" "down" "backspace" "delete" "enter"
-        ]) ++ [ "HOME" "END" "SHIFT-HOME" "SHIFT-END" ]
-      )) // {
-        # iTerm also remaps left Command to Control internally. Right Command
-        # keeps these application actions intact without changing that setting.
-        "C-SHIFT-c" = "SUPER_R-c"; # terminal copy; Ctrl+C remains interrupt
-        "C-SHIFT-v" = "SUPER_R-v"; # terminal paste
-        "C-backspace" = "C-w"; # delete a word in both Mac terminals
-        # iTerm consumes Ctrl+Shift+Down. Both Mac terminal profiles decode
-        # this reserved Synergy chord as CSI 1;6B, without native key changes.
-        "C-SHIFT-down" = "C-ALT-SHIFT-SUPER_R-y";
-        "SUPER-space" = "C-space"; # retain the existing Spotlight shortcut
-      };
-    }
-
-    {
-      name = "mac shortcuts";
-      mode = appModes;
-      device.not = [ "Logitech G903" ];
-      remap = {
-        "C-c" = "SUPER-c";
-        "C-x" = "SUPER-x";
-        "C-v" = "SUPER-v";
-        "C-z" = "SUPER-z";
-        "C-S-z" = "SUPER-S-z";
-        "SUPER-space" = "C-space";
-        "C-a" = "SUPER-a";
-        "C-f" = "SUPER-f";
-        "C-r" = "SUPER-r";
-        "C-t" = "SUPER-t";
-        "C-w" = "SUPER-w";
-        "C-enter" = "SUPER-enter";
-
-        # word/line navigation
-        "C-left" = "ALT-left";
-        "C-right" = "ALT-right";
-        "C-S-left" = "ALT-S-left";
-        "C-S-right" = "ALT-S-right";
-        "C-backspace" = "ALT-backspace";
-        "C-delete" = "ALT-delete";
-        "HOME" = "SUPER-left";
-        "END" = "SUPER-right";
-        "S-HOME" = "SUPER-S-left";
-        "S-END" = "SUPER-S-right";
-      };
+      exact_match = true;
+      remap."SUPER-space" = "C-space";
     }
   ];
 }

@@ -48,7 +48,7 @@ class ScreenState:
             "stopped server", "stopped client", "server is dead", "process exited",
         )):
             self.remote = False
-        elif self.role == "server" and ('switch from "' in line or 'jump from "' in line):
+        elif 'switch from "' in line or 'jump from "' in line:
             marker = ' to "'
             if marker in line:
                 destination = line.split(marker, 1)[1].split('"', 1)[0]

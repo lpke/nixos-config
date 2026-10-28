@@ -21,7 +21,7 @@ let
   };
   desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
   displayBrightnessToggle = pkgs.callPackage ../pkgs/display-brightness-toggle {};
-  macKeys = pkgs.callPackage ../pkgs/mac-keys {};
+  synergyKeys = pkgs.callPackage ../pkgs/synergy-keys {};
   tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
@@ -591,7 +591,7 @@ in
     oh-my-posh
     tmux
     bnix # guarded NixOS rebuild command
-    macKeys # Synergy Mac keyboard status and controls
+    synergyKeys # Synergy Mac keyboard status and controls
     ranger
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)
