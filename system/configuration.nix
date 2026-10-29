@@ -8,8 +8,8 @@ let
   adobeDngConverter = pkgs.callPackage ../pkgs/adobe-dng-converter {};
   adobePhotoshop = pkgs.callPackage ../pkgs/adobe-photoshop {};
   voquill = pkgs.callPackage ../pkgs/voquill {
-    version = "0.0.644";
-    hash = "sha256-5vYImGJoI1E1km5LKFgF336QnSUeN2HWkuzjSOOl9D8=";
+    version = "0.0.652";
+    hash = "sha256-mJXA84lG7jbRdrBx9U6np1G60gi6sPsbTU/oqod3+Lo=";
   };
   bnix = pkgs.callPackage ../pkgs/bnix {
     flakePath = "/etc/nixos";
