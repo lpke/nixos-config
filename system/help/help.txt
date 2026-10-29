@@ -3,12 +3,13 @@ NixOS Custom Help
 
 Core
   help                         Show this custom command list.
-  bnix                         Rebuild with guarded CUDA Ollama selection.
+  bnix                         Rebuild with automatic CPU/CUDA Ollama selection.
   bnix status                  Show current Ollama mode, service status, and CUDA readiness.
-  bnix cpu                     Rebuild CPU Ollama config. Alias: --cpu.
-  bnix cuda                    Rebuild CUDA Ollama config without readiness prompt. Alias: --cuda.
+  bnix cpu                     Rebuild with CPU Ollama.
+  bnix cuda                    Rebuild with CUDA Ollama without a readiness prompt.
+  bnix help                    Show all rebuild options.
   lnix                         List NixOS system generations.
-  dnix                         Garbage collect old Nix store generations.
+  dnix                         Remove generations older than 14 days and collect unused store paths.
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
 
@@ -21,14 +22,12 @@ Services
 Synergy Mac Keys
   synergy-keys                 Show Synergy screen and keyboard mapping status.
   synergy-keys inspect         Inspect shortcut inputs, transport, and Mac app outcomes.
-  synergy-keys inspect 'thumb+l' --json  Print a shortcut trace without opening a window.
   synergy-keys refresh         Refresh local screen detection and mappings.
   synergy-keys logs            Show screen-controller and tray logs.
   synergy-keys --help          Show keyboard controller commands.
 
 Audio
-  audio                        Entrypoint to all custom audio commands. Run alone for help.
-  audio ** help                Every command and sub-command can be followed with `help`.
+  audio                        Show audio commands; append help to a subcommand for details.
   audio status                 Show readable custom audio overview.
   audio list                   List PipeWire nodes and WirePlumber devices.
   audio restart                Restart PipeWire stack and custom audio services.
@@ -40,21 +39,21 @@ Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
 
 Display
-  display-brightness-toggle     Fade primary display to black at 0%; restore at 100% brightness.
+  display-brightness-toggle    Black out the primary display or restore full brightness.
 
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.
   convert-dng                  Convert DNG files with the configured wrapper.
-  adobe-photoshop setup        Open Creative Cloud setup; sign in through your default browser.
+  adobe-photoshop setup        Download and open the Creative Cloud installer.
   adobe-photoshop cloud        Open Creative Cloud to install licensed Adobe apps.
   adobe-creative-cloud         Open the installed Creative Cloud desktop app.
   adobe-photoshop run          Open installed Photoshop.
   adobe-photoshop repair       Repair Adobe compatibility fonts and runtimes.
-  adobe-photoshop scale 150    Set Adobe UI scaling (100–300 percent; stop Adobe then relaunch).
+  adobe-photoshop scale N      Set Adobe UI size in percent; relaunch Adobe to apply.
   adobe-photoshop file-picker kde|wine  Prefer KDE or use Wine file dialogs.
   adobe-photoshop stop         Close all Adobe apps and background services; save work first.
-  adobe-photoshop status       Show the isolated Wine runtime and installation paths.
-  adobe-photoshop --help       Show Adobe launcher usage (-h also works).
+  adobe-photoshop status       Show Adobe installation status and settings.
+  adobe-photoshop --help       Show all Adobe launcher options.
 
 Other
-  cmhelp                       Show non-NixOS chezmoi help.
+  cmhelp                       Show shared dotfile commands and shortcuts.
