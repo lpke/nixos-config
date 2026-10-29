@@ -1,6 +1,7 @@
-{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, ydotool, kdePackages }:
+{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, ydotool, kdePackages, nix, writeText }:
 let
   python = python3.withPackages (ps: [ ps.pyqt6 ]);
+  inspectorData = writeText "synergy-keys-inspector.json" (builtins.toJSON (import ./inspector-data.nix));
 in
 stdenvNoCC.mkDerivation {
   pname = "synergy-keys";
@@ -19,9 +20,11 @@ stdenvNoCC.mkDerivation {
       makeWrapper ${python}/bin/python "$out/bin/$name" \
         --add-flags "-m synergy_keys.$entry" \
         --prefix PYTHONPATH : "$out/lib/synergy-keys" \
+        --set SYNERGY_KEYS_INSPECT_DATA ${inspectorData} \
         --set PYTHONDONTWRITEBYTECODE 1 \
-        --prefix PATH : ${lib.makeBinPath [ systemd ydotool kdePackages.konsole ]}
+        --prefix PATH : ${lib.makeBinPath [ systemd ydotool kdePackages.konsole nix ]}
     done
+    wrapQtApp "$out/bin/synergy-keys"
     wrapQtApp "$out/bin/synergy-keys-tray"
     runHook postInstall
   '';

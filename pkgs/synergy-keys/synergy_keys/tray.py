@@ -19,6 +19,7 @@ class Tray:
         self.previous = None
         self.commands = set()
         self.lifecycle_error = None
+        self.inspector = None
         self.tray = QSystemTrayIcon(app)
         self.menu = QMenu()
         self.summary = self.menu.addAction("Starting")
@@ -26,6 +27,7 @@ class Tray:
         self.detail = self.menu.addAction("Mappings: pending")
         self.detail.setEnabled(False)
         self.menu.addSeparator()
+        self.menu.addAction("Inspect shortcuts…", self.inspect_shortcuts)
         action = QAction("Refresh screen detection", self.menu)
         action.triggered.connect(lambda: self.command("synergy-keys", ["refresh"]))
         self.menu.addAction(action)
@@ -41,6 +43,14 @@ class Tray:
         self.timer.start(500)
         app.aboutToQuit.connect(self.stop_controller)
         self.tick()
+
+    def inspect_shortcuts(self):
+        from .inspector_ui import InspectorWindow
+        if self.inspector is None:
+            self.inspector = InspectorWindow()
+        self.inspector.show()
+        self.inspector.raise_()
+        self.inspector.activateWindow()
 
     def command(self, program, arguments, lifecycle=False):
         process = QProcess(self.app)

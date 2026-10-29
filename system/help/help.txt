@@ -20,6 +20,8 @@ Services
 
 Synergy Mac Keys
   synergy-keys                 Show Synergy screen and keyboard mapping status.
+  synergy-keys inspect         Inspect shortcut inputs, transport, and Mac app outcomes.
+  synergy-keys inspect 'thumb+l' --json  Print a shortcut trace without opening a window.
   synergy-keys refresh         Refresh local screen detection and mappings.
   synergy-keys logs            Show screen-controller and tray logs.
   synergy-keys --help          Show keyboard controller commands.
