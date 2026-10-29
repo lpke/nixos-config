@@ -178,5 +178,5 @@ def decode(sources, result, chord, ref):
     result.outcomes = [{"when": "All Mac apps", "output": chord.label(mac=True) + (f" → {action}" if action else "") }]
     if hyper and key in {"h", "j", "k", "l"}:
         result.notes.append("macOS symbolic shortcuts handle this relay: H = desktop left, J = application windows, K = Mission Control, L = desktop right. Edit these on the Mac in System Settings → Keyboard → Keyboard Shortcuts → Mission Control; they are not managed in chezmoi.")
-    if mods == {"ctrl"} and key == "space":
-        result.notes.append("macOS handles Ctrl+Space. Its action depends on system shortcut preferences.")
+    if mods == {"meta"} and key == "space":
+        result.notes.append("macOS handles Command+Space. Spotlight must use this shortcut in System Settings → Keyboard → Keyboard Shortcuts → Spotlight.")

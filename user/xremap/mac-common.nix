@@ -155,7 +155,8 @@ in
       mode = macModes;
       device.not = [ "Logitech G903" ];
       exact_match = true;
-      remap."SUPER-space" = "C-space";
+      # Spotlight uses Command+Space; right Command avoids terminal modifier remaps.
+      remap."SUPER-space" = "SUPER_R-space";
     }
   ];
 }
