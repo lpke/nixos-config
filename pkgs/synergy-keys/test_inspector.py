@@ -74,7 +74,7 @@ class InspectorTests(unittest.TestCase):
         self.assertIn("Move window", trace(self.sources, "meta+leftclick").outcomes[0]["output"])
 
     def test_common_actions_and_device_filters(self):
-        for chord, action in {"meta+m": "Alacritty", "meta+n": "Helium", "ctrl+h": "Focus window left",
+        for chord, action in {"meta+m": "Alacritty", "meta+n": "Helium", "meta+h": "Focus window left",
                               "meta+l": "Focus window right", "meta+alt+v": "Grow window down",
                               "meta+alt+b": "Grow window right", "meta+wheelup": "Raise hovered",
                               "meta+wheeldown": "Lower hovered"}.items():
@@ -85,6 +85,17 @@ class InspectorTests(unittest.TestCase):
         self.assertIn("PC action", trace(self.sources, "F18").transport)
         self.assertEqual(trace(self.sources, "ctrl+q").rule, "No PC remap")
         self.assertEqual(trace(self.sources, "ctrl+alt+l").outcomes[0]["output"], "Ctrl+Option+L")
+
+    def test_linux_layer_keeps_control_for_apps_and_meta_for_window_focus(self):
+        for key in "hjk":
+            with self.subTest(key=key):
+                result = trace(self.sources, f"ctrl+{key}")
+                self.assertEqual(result.rule, "No PC remap")
+                self.assertEqual([o["output"] for o in result.outcomes], [f"Ctrl+{key.upper()}"])
+        self.assertEqual([o["output"] for o in trace(self.sources, "ctrl+l").outcomes], ["Cmd+L", "Ctrl+L"])
+        for key, direction in zip("hjkl", ["left", "down", "up", "right"]):
+            with self.subTest(key=key):
+                self.assertIn(f"Focus window {direction}", trace(self.sources, f"meta+{key}").outcomes[0]["output"])
 
     def test_fuzzy_search_aliases_and_exact_ranking(self):
         for query, first in {"thumb+l": "Ctrl+L", "COMMAND-m": "Meta+M", "pinky-m": "Meta+M",

@@ -103,12 +103,9 @@ in
       device.not = [ "Logitech G903" ];
       exact_match = true;
       # Synergy bypasses Karabiner and its Mac client drops F17-F20. Use
-      # Hammerspoon's Hyper+F13-F16 relay for both Ctrl and PC Command/Super,
-      # matching physical Mac Ctrl+hjkl before terminal Ctrl passthrough.
+      # Hammerspoon's Hyper+F13-F16 relay for Linux-layer Super+H/J/K/L.
+      # Keep Ctrl shortcuts available to apps; native Mac Control is a different layer.
       remap = {
-        "C-h" = "C-ALT-SHIFT-SUPER_R-F13";
-        "C-j" = "C-ALT-SHIFT-SUPER_R-F14";
-        "C-k" = "C-ALT-SHIFT-SUPER_R-F15";
         "SUPER-h" = "C-ALT-SHIFT-SUPER_R-F13";
         "SUPER-j" = "C-ALT-SHIFT-SUPER_R-F14";
         "SUPER-k" = "C-ALT-SHIFT-SUPER_R-F15";

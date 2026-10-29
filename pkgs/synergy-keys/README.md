@@ -56,6 +56,11 @@ app-dependent chords, including Shift/Alt/Super variants. Common launch, close,
 focus, growth, scroll, mouse gestures, and internal mode keys live separately in
 `user/xremap/mac-common.nix`.
 
+Super+H/J/K/L focuses Mac windows with the keyboard on its Linux layer.
+Ctrl+H/J/K passes through unchanged; Ctrl+L sends real Control in terminals
+and Command in other Mac apps. Native Mac Control-based desktop shortcuts
+belong to the Mac keyboard layer and are not Synergy aliases.
+
 Never allocate Ctrl+Alt+F1–F12 tokens without Shift. Linux intercepts them as
 virtual console switches even with Meta held. Avoid Ctrl+Shift+Meta+arrows,
 which KDE uses to move windows between desktops. Hyper+F9–F16 and Hyper+Y,
