@@ -1,7 +1,7 @@
 # ══════════════════════════════════════════════════════════════════
 # NIXOS SYSTEM CONFIGURATION
 # ══════════════════════════════════════════════════════════════════
-{ config, pkgs, pkgs-unstable, pkgs-neovim, ... }:
+{ config, pkgs, pkgs-unstable, ... }:
 
 let
   gimpLatest = pkgs.callPackage ../pkgs/gimp-latest {};
@@ -382,6 +382,10 @@ in
     histSize = 1000000;
     autosuggestions.enable = true;
     syntaxHighlighting.enable = true;
+    # Pick up Bob in new terminals even before the desktop session is restarted.
+    interactiveShellInit = ''
+      export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+    '';
 
     shellAliases = {
       ll = "ls -l";
@@ -547,15 +551,17 @@ in
     };
 
     sessionVariables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
       TESSDATA_PREFIX = "${tesseractOcr}/share/tessdata";
       PATH = [
+        "$HOME/.local/share/bob/nvim-bin"
         "$HOME/.local/bin"
         "$HOME/bin"
         "$HOME/.local/share/npm/bin"
         "$HOME/.local/share/pnpm"
       ];
     };
-
     etc."1password/custom_allowed_browsers" = {
       text = ''
         helium
@@ -566,8 +572,6 @@ in
   };
 
   # System packages
-  # see `flake.nix` for how to configure a custom package version
-  # eg neovim is using `pkgs-neovim.neovim-unwrapped`
   environment.systemPackages = with pkgs; [
     kdePackages.kate
     kdePackages.krunner
@@ -612,6 +616,7 @@ in
     nodejs_24
     (pnpm.override { nodejs = nodejs_24; }) # pnpm but using specific version
     fnm # "fast node manager" - for ad-hoc node version swapping
+    bob-nvim # Neovim version manager
     fzf # CLI fuzzy finding
     fd # much faster version of `find`
     ripgrep # much faster version of `grep`
@@ -650,14 +655,6 @@ in
     winetricks
     # macos ssh control
   ];
-
-  programs.neovim = {
-    enable = true;
-    package = pkgs-neovim.neovim-unwrapped; # "unwrapped" required as `programs.neovim` wraps it
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-  };
 
   # Fonts
   fonts.enableDefaultPackages = true;

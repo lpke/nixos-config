@@ -14,10 +14,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    # pinned package version commits
-    # to get commit versions: https://www.nixhub.io
-    nixpkgs-neovim-pin.url = "github:NixOS/nixpkgs/f665af0cdb70ed27e1bd8f9fdfecaf451260fc55"; # 0.11.5 (Jan 2026)
-
     # user environment manager
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -44,7 +40,6 @@
   outputs = inputs@{
     nixpkgs,
     nixpkgs-unstable,
-    nixpkgs-neovim-pin,
     home-manager,
     plasma-manager,
     xremap-flake,
@@ -54,10 +49,9 @@
       system = "x86_64-linux";
       # these will be made available in configuration.nix via specialArgs
       pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
-      pkgs-neovim = nixpkgs-neovim-pin.legacyPackages.${system};
       mkLpnix = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit pkgs-unstable pkgs-neovim; };
+        specialArgs = { inherit pkgs-unstable; };
         modules = [
           # base config
           ./system/configuration.nix
