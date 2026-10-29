@@ -469,15 +469,15 @@ in
 
   programs.helium = {
     enable = true;
-    version = "0.18.3.1";
-    hash = "sha256-xDrhTCq3FVWz/kC9Al3wBPcLxHlalhoaOlaXn6G4uYA=";
+    version = "0.20.2.1";
+    hash = "sha256-rEkoQk0xyGP/86t1076HPfyS7eAOaIljTcvFiBoSA5c=";
     checkForUpdates = true;
   };
 
   programs.postman = {
     enable = true;
-    version = "12.31.2";
-    hash = "sha256-Jj4/uLkELW/6hxL0daBood9ZzxeJSnMSJlZCIzAetKs=";
+    version = "12.34.2";
+    hash = "sha256-8Gld4bLb83kfQOudLxoqld1ByAt8WdQP1T6X31aBUNE=";
     checkForUpdates = true;
   };
 
