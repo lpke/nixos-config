@@ -162,6 +162,9 @@ def decode(sources, result, chord, ref):
         file, anchor = "synergy-actions.lua", f"[hs.keycodes.map.{key}]"
     elif mods == {"meta"} and key == "delete":
         action, file, anchor = "Close the focused window", "synergy-actions.lua", "[hs.keycodes.map.forwarddelete]"
+    elif hyper and key in {"pageup", "pagedown"}:
+        action = "Command+wheel up for app zoom" if key == "pageup" else "Command+wheel down for app zoom"
+        file, anchor = "synergy-actions.lua", "local zoomRelays ="
     elif hyper and key in {"f9", "f10", "f13", "f14", "f15", "f16"}:
         action = {"f9": "Grow window down", "f10": "Grow window right", "f13": "Focus window left",
                   "f14": "Focus window down", "f15": "Focus window up", "f16": "Focus window right"}[key]

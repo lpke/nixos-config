@@ -61,6 +61,13 @@ Ctrl+H/J/K passes through unchanged; Ctrl+L sends real Control in terminals
 and Command in other Mac apps. Native Mac Control-based desktop shortcuts
 belong to the Mac keyboard layer and are not Synergy aliases.
 
+Ctrl+wheel sends Command+wheel for app zoom, including the Figma canvas.
+Super+wheel still raises/lowers the hovered Mac window. These wheel rules apply
+only in Mac modes and handle both standard and high-resolution wheel input.
+The PC sends Hyper+PageUp/PageDown, reserved by Hammerspoon's `synergy-actions.lua`,
+which emits native Command+wheel events at the pointer. xremap cannot emit wheel
+events directly. Deploy the Mac receiver before activating these PC mappings.
+
 Never allocate Ctrl+Alt+F1–F12 tokens without Shift. Linux intercepts them as
 virtual console switches even with Meta held. Avoid Ctrl+Shift+Meta+arrows,
 which KDE uses to move windows between desktops. Hyper+F9–F16 and Hyper+Y,

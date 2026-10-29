@@ -75,7 +75,8 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(relays["remap"], {b["input"]: b["relay"] for b in self.manifest["bindings"]})
         tokens = {(b["transport"]["key"], frozenset(b["transport"]["modifiers"])) for b in self.manifest["bindings"]}
         self.assertEqual(len(tokens), 148)
-        reserved = {"m", "n", "d", "escape", "h", "j", "k", "l", "y", *[f"f{i}" for i in range(9, 17)]}
+        reserved = {"m", "n", "d", "escape", "h", "j", "k", "l", "y", "pageup", "pagedown",
+                    *[f"f{i}" for i in range(9, 17)]}
         hyper = frozenset(["ctrl", "alt", "shift", "cmd"])
         self.assertFalse(tokens & {(key, hyper) for key in reserved})
         for key, mods in tokens:
@@ -100,6 +101,17 @@ class ProtocolTests(unittest.TestCase):
         if not canonical.exists():
             self.skipTest("Canonical dotfiles checkout unavailable")
         self.assertEqual(canonical.read_bytes(), (ROOT / "user/xremap/synergy-keymap.json").read_bytes())
+
+    def test_ctrl_wheel_zoom_is_remote_only_and_separate_from_stacking(self):
+        zoom = next(b for b in self.config["keymap"] if b["name"] == "Synergy app zoom")
+        self.assertEqual(set(zoom["mode"]), {"mac", "mac-super-left", "mac-super-right"})
+        self.assertTrue(zoom["exact_match"])
+        self.assertNotIn("device", zoom, "Ctrl may be held on a separate keyboard from the mouse")
+        for stream in ("X", "XHIRES_"):
+            for direction, key in (("UP", "pageup"), ("DOWN", "pagedown")):
+                self.assertEqual(zoom["remap"][f"C-{stream}{direction}SCROLL"], f"C-ALT-SHIFT-SUPER_R-{key}")
+        stack = next(b for b in self.config["keymap"] if b["name"] == "Synergy hovered window stacking")
+        self.assertTrue(all(key.startswith("SUPER-") for key in stack["remap"]))
 
 
 if __name__ == "__main__":
