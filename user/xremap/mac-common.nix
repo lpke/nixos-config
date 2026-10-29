@@ -156,7 +156,12 @@ in
       device.not = [ "Logitech G903" ];
       exact_match = true;
       # Spotlight uses Command+Space; right Command avoids terminal modifier remaps.
-      remap."SUPER-space" = "SUPER_R-space";
+      remap = {
+        "SUPER-space" = "SUPER_R-space";
+        # Moonlander bottom-left Enter/hold key sends Alt+Shift+Super on Linux.
+        # Match its native Mac Ctrl+Option+Shift screenshot chord.
+        "SHIFT-ALT-SUPER-s" = "C-ALT-SHIFT-s";
+      };
     }
   ];
 }

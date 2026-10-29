@@ -180,3 +180,5 @@ def decode(sources, result, chord, ref):
         result.notes.append("macOS symbolic shortcuts handle this relay: H = desktop left, J = application windows, K = Mission Control, L = desktop right. Edit these on the Mac in System Settings → Keyboard → Keyboard Shortcuts → Mission Control; they are not managed in chezmoi.")
     if mods == {"meta"} and key == "space":
         result.notes.append("macOS handles Command+Space. Spotlight must use this shortcut in System Settings → Keyboard → Keyboard Shortcuts → Spotlight.")
+    if mods == {"ctrl", "alt", "shift"} and key == "s":
+        result.notes.append("macOS handles Ctrl+Option+Shift+S: select a screenshot area and copy it to the clipboard. This shortcut is configured in System Settings → Keyboard → Keyboard Shortcuts → Screenshots.")

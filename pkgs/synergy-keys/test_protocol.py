@@ -89,7 +89,8 @@ class ProtocolTests(unittest.TestCase):
         blocks = {b["name"]: b for b in self.config["keymap"]}
         self.assertEqual(blocks["Synergy Mac actions"]["remap"], {
             "SUPER-m": "C-ALT-SHIFT-SUPER_R-m", "SUPER-n": "C-ALT-SHIFT-SUPER_R-n", "C-delete": "SUPER_R-delete"})
-        self.assertEqual(blocks["Synergy app-independent shortcuts"]["remap"], {"SUPER-space": "SUPER_R-space"})
+        self.assertEqual(blocks["Synergy app-independent shortcuts"]["remap"], {
+            "SUPER-space": "SUPER_R-space", "SHIFT-ALT-SUPER-s": "C-ALT-SHIFT-s"})
         internal = self.config["modeSwitchInternalKeymap"]
         self.assertEqual(internal[1]["remap"], {"KEY_F22": {"set_mode": "local"}, "KEY_F24": {"set_mode": "mac"}})
         self.assertTrue(all(b["device"]["only"] == ["ydotoold virtual device"] for b in internal))
