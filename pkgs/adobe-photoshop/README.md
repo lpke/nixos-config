@@ -50,6 +50,7 @@ Helium. The launcher does not change browser associations.
 | Resizing could leave a blank or frozen window | Remove the duplicate window-manager decoration, prevent Wine from switching the window into compositor fullscreen, and make AdobeWine's extra offscreen repaint skip a busy client-surface mutex. This avoids a possible nested-lock deadlock while retaining canvas repaint. The combined changes passed 60 consecutive geometry changes with a layered document. |
 | KDE save format did not match the filename | The upstream portal patch ignored the returned `current_filter`. Pass it back into Wine and notify Adobe before accepting the save. Verified by switching PNG to PSD and reopening the resulting layered PSD. |
 | Save for Web returned to its preview without exporting | The forced KDE portal bypassed the legacy Save Optimized As dialog's Windows hook and custom template. Such dialogs now automatically use Wine's complete dialog so Adobe receives its callbacks and custom export options. Standard dialogs retain KDE integration. |
+| Document-tab tooltips stayed on screen after leaving a tab | Photoshop deletes the active tracking tool before deactivating its tooltip. Wine hid only ordinary tooltips during deletion, then discarded the tracking index, leaving the popup visible. Hide the active tracking tooltip before deleting its tool, in both common-controls versions. |
 
 The preparation step also registers `windows.ui.dll`, sets Photoshop's Windows
 version to Windows 10, keeps WebView2's D3D11/DXGI implementation builtin for
@@ -59,6 +60,13 @@ Wine's remaining dialog captions use neutral gray colors. Changes
 apply only to the dedicated Adobe prefix. Existing DLLs and relevant registry
 keys are backed up before replacement. DLL files are replaced atomically so
 existing background processes retain their loaded copies.
+
+The document-tab tooltip fix rebuilds Wine's `comctl32.dll` and
+`comctl32_v6.dll`. It preserves tooltips and needs no background helper or
+Photoshop preference change. These are builtin Wine modules, so the updated
+launcher supplies them without replacing the prefix's DLL files. Newly started
+Photoshop processes use the fix; already running processes retain their loaded
+modules.
 
 ## Verification and limits
 
@@ -95,6 +103,17 @@ existing background processes retain their loaded copies.
   at 320×240 with both layers intact. These tests ran in a copied prefix with
   private KWin, XWayland and D-Bus, without host windows or audio. The updated
   package and full CUDA system configuration both built successfully.
+- On 2026-10-31, reproduced stuck document-tab tooltips and traced Photoshop
+  deleting a tracking tool before deactivation. A standalone Windows API test
+  failed five checks in each unpatched common-controls version. Both patched
+  versions passed all 14 checks, including deletion, reappearance, deleting an
+  unrelated tool and normal tracking deactivation. Photoshop passed 12
+  alternating tab-hover/leave cycles and repeated hovering of the same tab.
+  The toolbar's rich tooltip still appeared and disappeared normally.
+  The tests used a copied prefix with private Xvfb/Openbox and process/runtime
+  namespaces. The package built and the CUDA NixOS configuration evaluated.
+  The package is installed in the user profile; the system generation was not
+  switched and no host Adobe processes were terminated.
 
 Open and Save use KDE's native file dialog, the same file-browser components as
 Dolphin. Adobe's custom export settings remain Adobe dialogs; their standard
@@ -111,7 +130,7 @@ Camera Raw workflows and Lightroom have not been acceptance-tested. This is a
 working Wine installation, outside Adobe's supported Windows/macOS desktop
 [platforms](https://helpx.adobe.com/photoshop/system-requirements.html).
 
-All GUI tests ran in a copied prefix with private display, process, home and
+The October 11/16 GUI tests ran in a copied prefix with private display, process, home and
 audio namespaces. Later tests used headless KWin/XWayland and the actual NVIDIA
 GPU. A test-only XWayland wrapper disabled its input portal inside that namespace
 to allow automation. The host's XWayland executable was not changed. Tests made
@@ -207,6 +226,7 @@ No third-party Photoshop repacks or activation bypasses were used.
 | `pkgs/adobe-photoshop/install-icons.sh` | Extracts icons from the installed Adobe applications. |
 | `pkgs/adobe-photoshop/file-dialogs.nix`, `portal-file-type.patch`, `portal-custom-dialogs.patch` | Rebuild Wine's dialog module with native picker format selection, home-directory defaults and complete Windows dialogs for hooks/templates. |
 | `pkgs/adobe-photoshop/repaint.nix`, `resize-repaint.patch` | Rebuild Wine's window module with a nonblocking guard for its extra offscreen repaint. |
+| `pkgs/adobe-photoshop/tooltips.nix`, `tracking-tooltip-delete.patch` | Rebuild both common-controls modules so deleting an active tracking tool hides its popup. |
 | `pkgs/adobe-photoshop/show-installer.c` | Earlier installer window-placement repair. |
 | `flake.nix`, `system/configuration.nix` | Earlier standalone package exposure and system package integration. |
 | `system/help/help.txt` | Command usage in `help`. |
@@ -251,6 +271,9 @@ Runtime changes outside the repository:
   `verification-20261011/`, `verification-polish-20261011/` and
   `verification-save-for-web-20261016/` directories with
   test documents, exports, results, screenshots and build evidence. No account data is committed to Git.
+- `~/.local/share/adobe-photoshop/logs/verification-tooltips-20261031/`:
+  standalone tooltip reproducer, before/after API results, Photoshop hover
+  observations, tooltip-only traces and screenshots.
 - `~/.local/share/icons/hicolor/256x256/apps/adobe-{photoshop,creative-cloud}.png`:
   Adobe application icons.
 - `~/.config/kwinrulesrc`: applied the generated Adobe rules immediately,

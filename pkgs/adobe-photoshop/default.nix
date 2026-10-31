@@ -4,11 +4,13 @@ let
   baseWine = import ./wine.nix;
   fileDialogs = import ./file-dialogs.nix { wine = baseWine; };
   repaint = import ./repaint.nix { wine = baseWine; };
+  tooltips = import ./tooltips.nix { wine = baseWine; };
   wine = baseWine.overrideAttrs (old: {
     postInstall = (old.postInstall or "") + ''
       cp ${fileDialogs}/x86_64-windows/comdlg32.dll "$out/lib/wine/x86_64-windows/"
       cp ${fileDialogs}/x86_64-unix/comdlg32.so "$out/lib/wine/x86_64-unix/"
       cp ${repaint}/win32u.so "$out/lib/wine/x86_64-unix/"
+      cp ${tooltips}/comctl32.dll ${tooltips}/comctl32_v6.dll "$out/lib/wine/x86_64-windows/"
     '';
   });
   assets = import ./runtime-assets.nix { inherit pkgs wine; };
@@ -77,6 +79,6 @@ let
 in pkgs.symlinkJoin {
   name = "adobe-photoshop";
   paths = [ launcher cloudLauncher photoshopDesktop cloudDesktop ];
-  passthru = { inherit wine showInstaller assets fileDialogs; };
+  passthru = { inherit wine showInstaller assets fileDialogs tooltips; };
   meta.description = "Isolated Adobe Creative Cloud and Photoshop launcher";
 }

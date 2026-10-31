@@ -1,0 +1,20 @@
+comctl32: hide an active tracking tooltip before deleting its tool.
+
+Photoshop removes its document-tab tool before deactivating tracking. Hiding
+only nCurrentTool leaves the tracking window visible, then clearing nTrackTool
+prevents the subsequent TTM_TRACKACTIVATE(FALSE) from dismissing it.
+
+--- a/dlls/comctl32/tooltips.c
++++ b/dlls/comctl32/tooltips.c
+@@ -1203,6 +1203,11 @@
+ 
+     /* make sure the tooltip has disappeared before deleting it */
+     TOOLTIPS_Hide(infoPtr);
++    if (infoPtr->nTrackTool == nTool)
++    {
++        TOOLTIPS_TrackHide(infoPtr);
++        infoPtr->bTrackActive = FALSE;
++    }
+ 
+     toolPtr = &infoPtr->tools[nTool];
+     TOOLTIPS_FreeToolText (toolPtr);
