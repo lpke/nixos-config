@@ -2,7 +2,7 @@ data="$HOME/.local/share/adobe-photoshop"
 umask 077
 export WINEPREFIX="$data/prefix"
 export WINEARCH=win64
-export WINEDEBUG=-all
+export WINEDEBUG="${WINEDEBUG:--all,err+all}"
 export WINEDLLOVERRIDES='winemenubuilder.exe=d'
 export WINE_HEAP_QUARANTINE='Creative Cloud.exe;Creative Cloud Helper.exe;Creative Cloud UI Helper.exe;Adobe Desktop Service.exe;node.exe;CCXProcess.exe;CoreSync.exe;CRLogTransport.exe;HDHelper.exe;AdobeIPCBroker.exe;AdobeUpdateService.exe'
 

@@ -34,6 +34,8 @@ registry said 144; a fresh session correctly reports 192 at 200%. `setup` remain
 for downloading and running Adobe's official Creative Cloud installer. Browser
 sign-in uses `xdg-open`, so it follows the desktop's default browser, currently
 Helium. The launcher does not change browser associations.
+Wine errors are retained in the run log by default. An explicit `WINEDEBUG`
+environment variable overrides the default `-all,err+all` channel selection.
 
 ## Repairs after installation
 
@@ -47,7 +49,7 @@ Helium. The launcher does not change browser associations.
 | Small text on the main monitor | Set Wine's DPI through the scale command. The default is 150%, or 144 DPI, as requested after the 200% tests. A complete Adobe session restart is required. |
 | Creative Cloud resisted resizing | It advertised identical minimum and maximum sizes. A targeted KWin rule permits resizing and Krohnkite tiling. |
 | Photoshop stopped tiling after restart or resizing | Wine marked its screen-sized startup window as fullscreen. A KWin rule keeps its normal window outside fullscreen, including after resizing. Photoshop's own screen modes remain available, but compositor fullscreen is intentionally blocked for tiling stability. |
-| Resizing could leave a blank or frozen window | Remove the duplicate window-manager decoration, prevent Wine from switching the window into compositor fullscreen, and make AdobeWine's extra offscreen repaint skip a busy client-surface mutex. This avoids a possible nested-lock deadlock while retaining canvas repaint. The combined changes passed 60 consecutive geometry changes with a layered document. |
+| Resizing could leave a blank or frozen window | Remove the duplicate window-manager decoration, prevent Wine from switching the window into compositor fullscreen, and keep the optional offscreen repaint under one nonblocking surface-lock acquisition. The original guard released this lock before presenting and releasing surface references, allowing a later blocking acquisition to deadlock against the GPU thread. |
 | KDE save format did not match the filename | The upstream portal patch ignored the returned `current_filter`. Pass it back into Wine and notify Adobe before accepting the save. Verified by switching PNG to PSD and reopening the resulting layered PSD. |
 | Save for Web returned to its preview without exporting | The forced KDE portal bypassed the legacy Save Optimized As dialog's Windows hook and custom template. Such dialogs now automatically use Wine's complete dialog so Adobe receives its callbacks and custom export options. Standard dialogs retain KDE integration. |
 | Document-tab tooltips stayed on screen after leaving a tab | Photoshop deletes the active tracking tool before deactivating its tooltip. Wine hid only ordinary tooltips during deletion, then discarded the tracking index, leaving the popup visible. Hide the active tracking tooltip before deleting its tool, in both common-controls versions. |
@@ -89,7 +91,7 @@ modules.
   A separate Windows common-dialog probe also confirmed the C-drive-root fallback.
 - Saved and reopened a three-layer PSD through KDE, including editable text.
   Independently checked PSD file signatures and a 640×480 PNG export.
-- The final repaint module passed 60 resize cycles between half-screen,
+- The October 11 repaint module passed 60 resize cycles between half-screen,
   floating, wide and screen-sized windows. Photoshop then answered COM queries
   and exported the document correctly.
   After another fresh launch, 12 further cycles with the native Plasma panel
@@ -114,6 +116,31 @@ modules.
   namespaces. The package built and the CUDA NixOS configuration evaluated.
   The package is installed in the user profile; the system generation was not
   switched and no host Adobe processes were terminated.
+
+The later October 31 freeze investigation found that the original repaint guard
+was incomplete. The UI could retain Wine's user lock, drop the surface lock,
+then block taking the surface lock again in `client_surface_present` or
+`client_surface_release`. A GPU submission thread could hold that surface lock
+while waiting for the user lock. The replacement follows upstream
+[patch 0083](https://github.com/le-birnes/AdobeWine/blob/main/patches/0083-win32u-do-not-wait-for-surfaces-lock-when-re-presenting-offscreen-surfaces.patch),
+adapted to the pinned 0.2.2 source. It keeps the successful nonblocking acquisition
+through all surface copies; the held lock protects their lifetimes without extra
+reference releases.
+
+A D3D11 child-window fixture with concurrent GDI repaint and resizing reproduced
+the deadlock under a test-only 5 ms delay after a repaint unlocked the mutex.
+Native stacks and mutex owners confirmed the cycle between the UI and
+`dxvk-submit` threads. The repaired build passed the same targeted test with 321
+resizes and 682 GPU presents in 12 seconds. No timing hook is installed in the
+normal runtime. Photoshop then passed 30 measured window-size changes, answered
+COM requests, saved and reopened a two-layer PSD, and exported a 640x480 PNG
+with the expected blue center and white border. The test-only Openbox session
+needed fullscreen removed before these measurements; the host's existing KWin
+rule already prevents fullscreen for the normal Photoshop window.
+The killed Photoshop process from the earlier user-reported
+freeze had no retained hang stack, so that specific incident cannot be assigned
+to this defect with certainty. No GPU reset or out-of-memory kill was recorded
+in the inspected kernel journal.
 
 Open and Save use KDE's native file dialog, the same file-browser components as
 Dolphin. Adobe's custom export settings remain Adobe dialogs; their standard
@@ -221,11 +248,11 @@ No third-party Photoshop repacks or activation bypasses were used.
 | `pkgs/adobe-photoshop/wine.nix` | Pinned Wine runtime and Nix ELF/dependency fixes from the initial installation. |
 | `pkgs/adobe-photoshop/runtime-assets.nix` | Pinned font, Visual C++, DXVK, vkd3d and D3D12 shim package. |
 | `pkgs/adobe-photoshop/default.nix` | Packages the launchers, runtime preparation, icons and two KDE desktop entries. |
-| `pkgs/adobe-photoshop/adobe-photoshop.sh` | Dedicated prefix, setup/cloud/run/repair/scale/file-picker/stop/status commands, browser integration and logging. |
+| `pkgs/adobe-photoshop/adobe-photoshop.sh` | Dedicated prefix, setup/cloud/run/repair/scale/file-picker/stop/status commands, browser integration, error logging and an explicit `WINEDEBUG` override. |
 | `pkgs/adobe-photoshop/prepare-prefix.sh` | Idempotent compatibility repairs, backups and DPI configuration. |
 | `pkgs/adobe-photoshop/install-icons.sh` | Extracts icons from the installed Adobe applications. |
 | `pkgs/adobe-photoshop/file-dialogs.nix`, `portal-file-type.patch`, `portal-custom-dialogs.patch` | Rebuild Wine's dialog module with native picker format selection, home-directory defaults and complete Windows dialogs for hooks/templates. |
-| `pkgs/adobe-photoshop/repaint.nix`, `resize-repaint.patch` | Rebuild Wine's window module with a nonblocking guard for its extra offscreen repaint. |
+| `pkgs/adobe-photoshop/repaint.nix`, `resize-repaint.patch` | Rebuild Wine's window module with one nonblocking surface-lock acquisition covering the complete optional offscreen repaint. |
 | `pkgs/adobe-photoshop/tooltips.nix`, `tracking-tooltip-delete.patch` | Rebuild both common-controls modules so deleting an active tracking tool hides its popup. |
 | `pkgs/adobe-photoshop/show-installer.c` | Earlier installer window-placement repair. |
 | `flake.nix`, `system/configuration.nix` | Earlier standalone package exposure and system package integration. |
@@ -274,6 +301,9 @@ Runtime changes outside the repository:
 - `~/.local/share/adobe-photoshop/logs/verification-tooltips-20261031/`:
   standalone tooltip reproducer, before/after API results, Photoshop hover
   observations, tooltip-only traces and screenshots.
+- `~/.local/share/adobe-photoshop/logs/verification-freeze-20261031/`:
+  D3D11 stress fixture, test-only scheduling hook, before/after logs, captured
+  thread stacks and mutex owners, measured Photoshop resizes and PSD/PNG checks.
 - `~/.local/share/icons/hicolor/256x256/apps/adobe-{photoshop,creative-cloud}.png`:
   Adobe application icons.
 - `~/.config/kwinrulesrc`: applied the generated Adobe rules immediately,

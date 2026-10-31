@@ -1,15 +1,51 @@
-win32u: avoid blocking a nested offscreen repaint on the client-surface lock.
+win32u: avoid waiting for the surface lock anywhere in the offscreen repaint.
+
+The UI can hold the user lock during a window-surface flush, while a Vulkan
+present holds surfaces_lock and waits for the user lock. An initial trylock
+is insufficient if the repaint then unlocks and calls client_surface_present,
+which takes the same mutex with a blocking lock. Keep the successful trylock
+through all copies and use a helper that assumes the lock is already held.
+
+Adapted for AdobeWine 0.2.2 from upstream patch 0083:
+https://github.com/le-birnes/AdobeWine/blob/main/patches/0083-win32u-do-not-wait-for-surfaces-lock-when-re-presenting-offscreen-surfaces.patch
 
 --- a/dlls/win32u/window.c
 +++ b/dlls/win32u/window.c
-@@ -464,7 +464,14 @@
+@@ -431,12 +431,11 @@
+     pthread_mutex_unlock( &surfaces_lock );
+ }
+ 
+-void client_surface_present( struct client_surface *surface )
++static void client_surface_present_locked( struct client_surface *surface )
+ {
+     HDC hdc = 0;
+     HWND hwnd;
+ 
+-    pthread_mutex_lock( &surfaces_lock );
+     if ((hwnd = surface->hwnd))
+     {
+         client_surface_update_locked( surface );
+@@ -446,6 +445,12 @@
+         surface->funcs->present( surface, hdc );
+         if (hdc) NtUserReleaseDC( hwnd, hdc );
+     }
++}
++
++void client_surface_present( struct client_surface *surface )
++{
++    pthread_mutex_lock( &surfaces_lock );
++    client_surface_present_locked( surface );
+     pthread_mutex_unlock( &surfaces_lock );
+ }
+ 
+@@ -464,21 +469,26 @@
      if (disabled) return;
      if (InterlockedCompareExchange( &presenting, 1, 0 )) return;
  
 -    pthread_mutex_lock( &surfaces_lock );
-+    /* Flushing a GDI surface can re-enter here while the caller already owns
-+     * surfaces_lock. This refresh is optional: the in-flight presentation will
-+     * provide the pixels. Never block the window thread waiting on that lock. */
++    /* A window-surface flush can hold the user lock, while a Vulkan present
++     * takes surfaces_lock before acquiring the user lock for its DC. Never
++     * wait for surfaces_lock here, including while copying the surfaces. */
 +    if (pthread_mutex_trylock( &surfaces_lock ))
 +    {
 +        InterlockedExchange( &presenting, 0 );
@@ -18,3 +54,22 @@ win32u: avoid blocking a nested offscreen repaint on the client-surface lock.
      LIST_FOR_EACH_ENTRY( surface, &client_surfaces, struct client_surface, entry )
      {
          if (!surface->hwnd || !surface->offscreen || surface->toplevel != toplevel) continue;
+         if (count == ARRAY_SIZE(surfaces)) break;
+-        InterlockedIncrement( &surface->ref );
+         surfaces[count++] = surface;
+     }
++    /* Keep the lock until every copy finishes. Dropping it here and calling
++     * client_surface_present() would block acquiring it again, reopening the
++     * same lock-order deadlock despite the initial trylock. The held lock also
++     * protects surface lifetimes, so extra references are unnecessary. */
++    for (i = 0; i < count; i++) client_surface_present_locked( surfaces[i] );
+     pthread_mutex_unlock( &surfaces_lock );
+-
+-    for (i = 0; i < count; i++)
+-    {
+-        client_surface_present( surfaces[i] );
+-        client_surface_release( surfaces[i] );
+-    }
+ 
+     InterlockedExchange( &presenting, 0 );
+ }
