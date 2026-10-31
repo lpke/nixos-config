@@ -53,6 +53,8 @@ environment variable overrides the default `-all,err+all` channel selection.
 | KDE save format did not match the filename | The upstream portal patch ignored the returned `current_filter`. Pass it back into Wine and notify Adobe before accepting the save. Verified by switching PNG to PSD and reopening the resulting layered PSD. |
 | Save for Web returned to its preview without exporting | The forced KDE portal bypassed the legacy Save Optimized As dialog's Windows hook and custom template. Such dialogs now automatically use Wine's complete dialog so Adobe receives its callbacks and custom export options. Standard dialogs retain KDE integration. |
 | Document-tab tooltips stayed on screen after leaving a tab | Photoshop deletes the active tracking tool before deactivating its tooltip. Wine hid only ordinary tooltips during deletion, then discarded the tracking index, leaving the popup visible. Hide the active tracking tooltip before deleting its tool, in both common-controls versions. |
+| Custom scrollbars changed to a light native skin on hover | Wine's direct hover/tracking draws bypassed the control's custom `WM_PAINT` handler. Extend its existing painted-state check to scrollbar controls, so native painting cannot overwrite an application-owned skin. Controls using the default paint procedure retain native rendering. |
+| Zooming and panning felt slow on high-refresh Wayland displays | Hidden child-window FIFO presents could follow XWayland's roughly 60 Hz fallback. Use immediate host presents with display-rate pacing, and avoid the extra 10 ms sparse-present re-copy after a successful present-completion wait. |
 
 The preparation step also registers `windows.ui.dll`, sets Photoshop's Windows
 version to Windows 10, keeps WebView2's D3D11/DXGI implementation builtin for
@@ -141,6 +143,24 @@ The killed Photoshop process from the earlier user-reported
 freeze had no retained hang stack, so that specific incident cannot be assigned
 to this defect with certainty. No GPU reset or out-of-memory kill was recorded
 in the inspected kernel journal.
+
+The later scrollbar and responsiveness work keeps the runtime on Wine 11.18.
+`offscreen-pacing.patch` and `present-completion.patch` come from upstream
+AdobeWine patches 0069/0070. A child-window rendering benchmark under private
+KWin/XWayland increased from 59.5 to 163.3 presents/s with a test-only 165 Hz
+pacing target. This measures rendering throughput, not end-to-end Photoshop
+input latency. Xvfb did not expose the same 60 Hz bottleneck. Normal launches
+detect the display rate; `WINE_OFFSCREEN_REFRESH=N` overrides it, and
+`WINE_OFFSCREEN_PACING=0` disables the pacing workaround.
+
+The scrollbar regression fixture reproduced a custom control changing from
+`#303030` to `#f5f5f5` on hover. The fixed build kept `#303030`; a default-painted
+control continued to render normally. Photoshop accepted pan/zoom inputs and
+saved/reopened the layered PSD and PNG fixture with the combined build.
+The reported sticky brush outline could not be reproduced using Alt+right-drag
+in either private Xvfb/Openbox or KWin/XWayland. Its preview cleared after release
+in those tests. No dedicated brush-outline fix is claimed; the exact user gesture
+and any cursor/compositor-specific trigger still need confirmation.
 
 Open and Save use KDE's native file dialog, the same file-browser components as
 Dolphin. Adobe's custom export settings remain Adobe dialogs; their standard
@@ -253,6 +273,7 @@ No third-party Photoshop repacks or activation bypasses were used.
 | `pkgs/adobe-photoshop/install-icons.sh` | Extracts icons from the installed Adobe applications. |
 | `pkgs/adobe-photoshop/file-dialogs.nix`, `portal-file-type.patch`, `portal-custom-dialogs.patch` | Rebuild Wine's dialog module with native picker format selection, home-directory defaults and complete Windows dialogs for hooks/templates. |
 | `pkgs/adobe-photoshop/repaint.nix`, `resize-repaint.patch` | Rebuild Wine's window module with one nonblocking surface-lock acquisition covering the complete optional offscreen repaint. |
+| `offscreen-pacing.patch`, `present-completion.patch`, `scrollbar-skin.patch` | Display-rate pacing, completed-frame copying and preservation of custom scrollbar painting in the rebuilt window module. |
 | `pkgs/adobe-photoshop/tooltips.nix`, `tracking-tooltip-delete.patch` | Rebuild both common-controls modules so deleting an active tracking tool hides its popup. |
 | `pkgs/adobe-photoshop/show-installer.c` | Earlier installer window-placement repair. |
 | `flake.nix`, `system/configuration.nix` | Earlier standalone package exposure and system package integration. |
@@ -304,6 +325,9 @@ Runtime changes outside the repository:
 - `~/.local/share/adobe-photoshop/logs/verification-freeze-20261031/`:
   D3D11 stress fixture, test-only scheduling hook, before/after logs, captured
   thread stacks and mutex owners, measured Photoshop resizes and PSD/PNG checks.
+- `~/.local/share/adobe-photoshop/logs/verification-ui-20261031/`:
+  scrollbar regression, rendering benchmark, brush-preview observations and
+  combined-build Photoshop checks from private X11 and Wayland sessions.
 - `~/.local/share/icons/hicolor/256x256/apps/adobe-{photoshop,creative-cloud}.png`:
   Adobe application icons.
 - `~/.config/kwinrulesrc`: applied the generated Adobe rules immediately,

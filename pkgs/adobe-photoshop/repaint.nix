@@ -2,7 +2,12 @@
 
 wine.sourceBuild.overrideAttrs (old: {
   pname = "adobe-repaint";
-  patches = old.patches ++ [ ./resize-repaint.patch ];
+  patches = old.patches ++ [
+    ./resize-repaint.patch
+    ./offscreen-pacing.patch
+    ./present-completion.patch
+    ./scrollbar-skin.patch
+  ];
   buildPhase = ''
     make -j2 dlls/win32u/win32u.so
   '';

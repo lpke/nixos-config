@@ -1,0 +1,55 @@
+win32u: preserve application-painted scrollbar controls during mouse tracking.
+
+The existing painted flag protects custom nonclient scrollbars, but SB_CTL
+hover and tracking paints bypass the subclass WM_PAINT handler. Track whether
+the default scrollbar procedure has actually painted a control, and suppress
+its direct native paints when the application supplies the entire skin.
+
+--- a/dlls/win32u/scroll.c
++++ b/dlls/win32u/scroll.c
+@@ -283,6 +283,8 @@
+  *
+  * Redraw the whole scrollbar.
+  */
++static BOOL is_standard_scroll_painted( HWND hwnd, int bar );
++
+ static void draw_scroll_bar( HWND hwnd, HDC hdc, int bar, enum SCROLL_HITTEST hit_test,
+                       const struct SCROLL_TRACKING_INFO *tracking_info, BOOL draw_arrows,
+                       BOOL draw_interior )
+@@ -342,6 +344,10 @@
+     /* do not draw if the scrollbar rectangle is empty */
+     if (IsRectEmpty( &params.rect ))
+         return;
++
++    /* A subclass may paint a scrollbar control entirely in WM_PAINT. Do not
++     * overwrite that skin from native hover, tracking or refresh draws. */
++    if (bar == SB_CTL && !is_standard_scroll_painted( hwnd, bar )) return;
+ 
+     TRACE( "hwnd %p, hdc %p, bar %d, hit_test %d, tracking_info(win %p, bar %d, thumb_pos %d, "
+            "track_pos %d, vertical %d, hit_test %d), draw_arrows %d, draw_interior %d, rect %s, "
+@@ -447,7 +453,7 @@
+     struct scroll_info *info;
+     BOOL ret;
+ 
+-    if (bar != SB_HORZ && bar != SB_VERT) return FALSE;
++    if (bar != SB_HORZ && bar != SB_VERT && bar != SB_CTL) return FALSE;
+     if (!(info = get_scroll_info_ptr( hwnd, bar, FALSE ))) return FALSE;
+     ret = info->painted;
+     release_scroll_info_ptr( info );
+@@ -1356,6 +1362,7 @@
+         {
+             PAINTSTRUCT ps;
+             HDC hdc = wparam ? (HDC)wparam : NtUserBeginPaint( hwnd, &ps );
++            set_standard_scroll_painted( hwnd, SB_CTL, TRUE );
+             draw_scroll_bar( hwnd, hdc, SB_CTL, g_tracking_info.hit_test, &g_tracking_info, TRUE, TRUE );
+             if (!wparam) NtUserEndPaint( hwnd, &ps );
+         }
+@@ -1429,7 +1436,7 @@
+ {
+     struct scroll_info *info;
+ 
+-    if (bar != SB_HORZ && bar != SB_VERT)
++    if (bar != SB_HORZ && bar != SB_VERT && bar != SB_CTL)
+         return;
+ 
+     if ((info = get_scroll_info_ptr( hwnd, bar, FALSE )))
