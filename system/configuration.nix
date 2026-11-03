@@ -36,6 +36,7 @@ in
   imports =
     [
       ./hardware-configuration.nix
+      ./desktop/pointer-warp.nix
       ./audio/routing.nix
       ./audio/volume-lock.nix
       ./audio/gains.nix

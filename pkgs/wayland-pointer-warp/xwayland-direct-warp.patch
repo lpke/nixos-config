@@ -1,0 +1,216 @@
+--- a/meson.build
++++ b/meson.build
+@@ -64,7 +64,7 @@
+ libselinux_req = '>= 2.0.86'
+ xext_req = '>= 1.0.99.4'
+ wayland_req = '>= 1.21.0'
+-wayland_protocols_req = '>= 1.34'
++wayland_protocols_req = '>= 1.45'
+ gbm_req = '>= 10.2'
+ xshmfence_req = '>= 1.1'
+ 
+--- a/hw/xwayland/meson.build
++++ b/hw/xwayland/meson.build
+@@ -36,6 +36,7 @@
+ protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
+ protodir = protocols_dep.get_variable(pkgconfig : 'pkgdatadir')
+ 
++warp_xml = join_paths(protodir, 'staging', 'pointer-warp', 'pointer-warp-v1.xml')
+ pointer_xml = join_paths(protodir, 'unstable', 'pointer-constraints', 'pointer-constraints-unstable-v1.xml')
+ relative_xml = join_paths(protodir, 'unstable', 'relative-pointer', 'relative-pointer-unstable-v1.xml')
+ gestures_xml = join_paths(protodir, 'unstable', 'pointer-gestures', 'pointer-gestures-unstable-v1.xml')
+@@ -69,6 +70,7 @@
+ )
+ srcs += client_header.process(relative_xml)
+ srcs += client_header.process(pointer_xml)
++srcs += client_header.process(warp_xml)
+ srcs += client_header.process(gestures_xml)
+ srcs += client_header.process(tablet_xml)
+ srcs += client_header.process(kbgrab_xml)
+@@ -84,6 +86,7 @@
+ srcs += client_header.process(syncobj_xml)
+ srcs += code.process(relative_xml)
+ srcs += code.process(pointer_xml)
++srcs += code.process(warp_xml)
+ srcs += code.process(gestures_xml)
+ srcs += code.process(tablet_xml)
+ srcs += code.process(kbgrab_xml)
+--- a/hw/xwayland/xwayland-screen.h
++++ b/hw/xwayland/xwayland-screen.h
+@@ -105,6 +105,7 @@
+     struct xdg_wm_base *xdg_wm_base;
+     struct zwp_relative_pointer_manager_v1 *relative_pointer_manager;
+     struct zwp_pointer_constraints_v1 *pointer_constraints;
++    struct wp_pointer_warp_v1 *pointer_warp;
+     struct zwp_pointer_gestures_v1 *pointer_gestures;
+     struct zwp_xwayland_keyboard_grab_manager_v1 *wp_grab;
+     struct zwp_keyboard_shortcuts_inhibit_manager_v1 *shortcuts_inhibit_manager;
+--- a/hw/xwayland/xwayland-input.c
++++ b/hw/xwayland/xwayland-input.c
+@@ -50,6 +50,7 @@
+ #endif
+ 
+ #include "pointer-constraints-unstable-v1-client-protocol.h"
++#include "pointer-warp-v1-client-protocol.h"
+ #include "relative-pointer-unstable-v1-client-protocol.h"
+ #include "tablet-unstable-v2-client-protocol.h"
+ #include "pointer-gestures-unstable-v1-client-protocol.h"
+@@ -83,6 +84,9 @@
+ 
+ static void
+ xwl_seat_destroy_confined_pointer(struct xwl_seat *xwl_seat);
++
++static void
++xwl_seat_destroy_pointer_warp_emulator_at(struct xwl_seat *xwl_seat, int x, int y);
+ 
+ static void
+ init_tablet_manager_seat(struct xwl_screen *xwl_screen,
+@@ -3157,6 +3161,10 @@
+         maybe_init_relative_pointer_listeners_after_capabilities(xwl_screen);
+     } else if (strcmp(interface, zwp_pointer_constraints_v1_interface.name) == 0) {
+         init_pointer_constraints(xwl_screen, id, version);
++    } else if (strcmp(interface, wp_pointer_warp_v1_interface.name) == 0) {
++        xwl_screen->pointer_warp =
++            wl_registry_bind(xwl_screen->registry, id,
++                             &wp_pointer_warp_v1_interface, 1);
+     } else if (strcmp(interface, zwp_pointer_gestures_v1_interface.name) == 0) {
+         init_pointer_gestures(xwl_screen, id, version);
+         maybe_init_pointer_gesture_listeners_after_capabilities(xwl_screen);
+@@ -3436,10 +3444,36 @@
+ }
+ 
+ static void
+-xwl_pointer_warp_emulator_destroy(struct xwl_pointer_warp_emulator *warp_emulator)
+-{
+-    if (warp_emulator->locked_pointer)
++xwl_pointer_warp_emulator_destroy(struct xwl_pointer_warp_emulator *warp_emulator,
++                                 int x, int y)
++{
++    if (warp_emulator->locked_pointer) {
++        struct xwl_seat *seat = warp_emulator->xwl_seat;
++        struct xwl_window *locked_window = warp_emulator->locked_window;
++        struct wp_pointer_warp_v1 *warp = seat->xwl_screen->pointer_warp;
++
+         zwp_locked_pointer_v1_destroy(warp_emulator->locked_pointer);
++
++        /* A position hint can still be waiting behind a GPU-fenced surface
++         * commit when the lock is destroyed. Restore the current X position
++         * directly where supported, without waiting for another frame.
++         * Teardown, focus loss and motion outside the window must not warp. */
++        if (warp && seat->wl_pointer && seat->focus_window == locked_window) {
++            WindowPtr window = locked_window->toplevel;
++            double sx, sy;
++            if (x >= window->drawable.x && y >= window->drawable.y &&
++                x < window->drawable.x + window->drawable.width &&
++                y < window->drawable.y + window->drawable.height) {
++                sx = (double) (x - window->drawable.x) / locked_window->viewport_scale_x;
++                sy = (double) (y - window->drawable.y) / locked_window->viewport_scale_y;
++                wp_pointer_warp_v1_warp_pointer(warp, locked_window->surface,
++                                                seat->wl_pointer,
++                                                wl_fixed_from_double(sx),
++                                                wl_fixed_from_double(sy),
++                                                seat->pointer_enter_serial);
++            }
++        }
++    }
+     free(warp_emulator);
+ }
+ 
+@@ -3529,10 +3563,10 @@
+ }
+ 
+ void
+-xwl_seat_cursor_visibility_changed(struct xwl_seat *xwl_seat)
++xwl_seat_cursor_visibility_changed(struct xwl_seat *xwl_seat, int x, int y)
+ {
+     if (xwl_seat->pointer_warp_emulator && xwl_seat->x_cursor != NULL) {
+-        xwl_seat_destroy_pointer_warp_emulator(xwl_seat);
++        xwl_seat_destroy_pointer_warp_emulator_at(xwl_seat, x, y);
+     } else if (!xwl_seat->x_cursor && xwl_seat->cursor_confinement_window) {
+         /* If the cursor goes hidden as is confined, lock it for
+          * relative motion to work. */
+@@ -3543,10 +3577,22 @@
+ void
+ xwl_seat_destroy_pointer_warp_emulator(struct xwl_seat *xwl_seat)
+ {
++    int x, y;
++
+     if (!xwl_seat->pointer_warp_emulator)
+         return;
+ 
+-    xwl_pointer_warp_emulator_destroy(xwl_seat->pointer_warp_emulator);
++    miPointerGetPosition(xwl_seat->pointer, &x, &y);
++    xwl_seat_destroy_pointer_warp_emulator_at(xwl_seat, x, y);
++}
++
++static void
++xwl_seat_destroy_pointer_warp_emulator_at(struct xwl_seat *xwl_seat, int x, int y)
++{
++    if (!xwl_seat->pointer_warp_emulator)
++        return;
++
++    xwl_pointer_warp_emulator_destroy(xwl_seat->pointer_warp_emulator, x, y);
+     xwl_seat->pointer_warp_emulator = NULL;
+ 
+     if (xwl_seat->cursor_confinement_window) {
+--- a/hw/xwayland/xwayland-input.h
++++ b/hw/xwayland/xwayland-input.h
+@@ -207,7 +207,7 @@
+ 
+ void xwl_seat_destroy_pointer_warp_emulator(struct xwl_seat *xwl_seat);
+ 
+-void xwl_seat_cursor_visibility_changed(struct xwl_seat *xwl_seat);
++void xwl_seat_cursor_visibility_changed(struct xwl_seat *xwl_seat, int x, int y);
+ 
+ void xwl_seat_confine_pointer(struct xwl_seat *xwl_seat,
+                               struct xwl_window *xwl_window);
+--- a/hw/xwayland/xwayland-cursor.c
++++ b/hw/xwayland/xwayland-cursor.c
+@@ -294,10 +294,10 @@
+ }
+ 
+ static void
+-xwl_seat_update_cursor_visibility(struct xwl_seat *xwl_seat)
++xwl_seat_update_cursor_visibility(struct xwl_seat *xwl_seat, int x, int y)
+ {
+     xwl_seat->x_cursor = xwl_seat->pending_x_cursor;
+-    xwl_seat_cursor_visibility_changed(xwl_seat);
++    xwl_seat_cursor_visibility_changed(xwl_seat, x, y);
+     xwl_seat_update_all_cursors(xwl_seat);
+ }
+ 
+@@ -314,9 +314,11 @@
+ xwl_set_cursor_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
+ {
+     struct xwl_seat *xwl_seat = arg;
+-
++    int x, y;
++
++    miPointerGetPosition(xwl_seat->pointer, &x, &y);
+     xwl_set_cursor_free_timer(xwl_seat);
+-    xwl_seat_update_cursor_visibility(xwl_seat);
++    xwl_seat_update_cursor_visibility(xwl_seat, x, y);
+ 
+     /* Don't re-arm the timer */
+     return 0;
+@@ -362,7 +364,7 @@
+         xwl_set_cursor_delayed(xwl_seat, cursor);
+     } else {
+         /* Cursor is being hidden, apply the change immediately */
+-        xwl_seat_update_cursor_visibility(xwl_seat);
++        xwl_seat_update_cursor_visibility(xwl_seat, x, y);
+     }
+ }
+ 
+@@ -377,8 +379,10 @@
+ 
+     xwl_set_cursor_free_timer(xwl_seat);
+ 
++    /* MoveCursor can run before miPointerGetPosition is updated. Pass the
++     * callback position through to a pending cursor reveal and unlock. */
+     if (xwl_seat->pending_x_cursor)
+-        xwl_seat_update_cursor_visibility(xwl_seat);
++        xwl_seat_update_cursor_visibility(xwl_seat, x, y);
+ }
+ 
+ static Bool

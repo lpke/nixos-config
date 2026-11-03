@@ -1,0 +1,216 @@
+--- a/src/pointer_input.cpp
++++ b/src/pointer_input.cpp
+@@ -153,14 +153,21 @@
+         if (serial != waylandServer()->seat()->pointer()->focusedSerial()) {
+             return;
+         }
+-        if (!surface->boundingRect().contains(point)) {
++        const QPointF localPoint = point / surface->scaleOverride();
++        if (!surface->boundingRect().contains(localPoint)) {
+             return;
+         }
+-        Window *window = waylandServer()->findWindow(surface->mainSurface());
++        SurfaceInterface *mainSurface = surface->mainSurface();
++        Window *window = waylandServer()->findWindow(mainSurface);
++        if (!window && surface->client() == waylandServer()->xWaylandConnection()) {
++            window = workspace()->findWindow([mainSurface](const Window *candidate) {
++                return candidate->surface() == mainSurface;
++            });
++        }
+         if (!window) {
+             return;
+         }
+-        input()->pointer()->warp(window->mapFromLocal(surface->mapToMainSurface(point)));
++        input()->pointer()->warp(window->mapFromLocal(surface->mapToMainSurface(localPoint)));
+     });
+ }
+ 
+--- a/autotests/integration/CMakeLists.txt
++++ b/autotests/integration/CMakeLists.txt
+@@ -123,6 +123,10 @@
+ endif()
+ integrationTest(NAME testWindowSelection SRCS window_selection_test.cpp)
+ integrationTest(NAME testPointerConstraints SRCS pointer_constraints_test.cpp)
++qt6_generate_wayland_protocol_client_sources(testPointerConstraints
++    PRIVATE_CODE
++    FILES ${WaylandProtocols_DATADIR}/staging/pointer-warp/pointer-warp-v1.xml
++)
+ integrationTest(NAME testKeyboardLayout SRCS keyboard_layout_test.cpp LIBS KF6::GlobalAccel XKB::XKB)
+ integrationTest(NAME testKeymapCreationFailure SRCS keymap_creation_failure_test.cpp LIBS KF6::GlobalAccel)
+ integrationTest(NAME testShowingDesktop SRCS showing_desktop_test.cpp)
+--- a/autotests/integration/pointer_constraints_test.cpp
++++ b/autotests/integration/pointer_constraints_test.cpp
+@@ -12,17 +12,25 @@
+ #include "cursor.h"
+ #include "keyboard_input.h"
+ #include "pointer_input.h"
++#include "wayland/clientconnection.h"
++#include "wayland/pointer.h"
++#include "wayland/pointerwarp_v1.h"
+ #include "wayland/seat.h"
+ #include "wayland/surface.h"
+ #include "wayland_server.h"
+ #include "window.h"
+ #include "workspace.h"
++#include "qwayland-pointer-warp-v1.h"
++
++#include <QScopeGuard>
++#include <QMetaMethod>
+ 
+ #include <KWayland/Client/compositor.h>
+ #include <KWayland/Client/keyboard.h>
+ #include <KWayland/Client/pointer.h>
+ #include <KWayland/Client/pointerconstraints.h>
+ #include <KWayland/Client/region.h>
++#include <KWayland/Client/registry.h>
+ #include <KWayland/Client/seat.h>
+ #include <KWayland/Client/shm_pool.h>
+ #include <KWayland/Client/surface.h>
+@@ -30,6 +38,10 @@
+ #include <linux/input.h>
+ 
+ #include <functional>
++
++#if KWIN_BUILD_X11
++#include "x11window.h"
++#endif
+ 
+ using namespace KWin;
+ 
+@@ -50,6 +62,11 @@
+     void testConfinedPointer();
+     void testLockedPointer();
+     void testCloseWindowWithLockedPointer();
++    void testProtocolPointerWarp_data();
++    void testProtocolPointerWarp();
++#if KWIN_BUILD_X11
++    void testXwaylandPointerWarpDispatch();
++#endif
+ };
+ 
+ void TestPointerConstraints::initTestCase()
+@@ -360,5 +377,124 @@
+     QCOMPARE(input()->pointer()->isConstrained(), false);
+ }
+ 
++void TestPointerConstraints::testProtocolPointerWarp_data()
++{
++    QTest::addColumn<qreal>("scale");
++    QTest::newRow("ordinary-client") << qreal(1.0);
++    QTest::newRow("scaled-client") << qreal(1.25);
++}
++
++void TestPointerConstraints::testProtocolPointerWarp()
++{
++    QFETCH(qreal, scale);
++
++    KWayland::Client::Registry registry;
++    registry.create(Test::waylandConnection());
++    QSignalSpy interfaceAnnounced(&registry, &KWayland::Client::Registry::interfaceAnnounced);
++    QSignalSpy allAnnounced(&registry, &KWayland::Client::Registry::interfacesAnnounced);
++    registry.setup();
++    QVERIFY(allAnnounced.wait());
++    uint32_t warpName = 0;
++    for (const auto &announcement : interfaceAnnounced) {
++        if (announcement[0].toByteArray() == QByteArrayLiteral("wp_pointer_warp_v1")) {
++            warpName = announcement[1].toUInt();
++            break;
++        }
++    }
++    QVERIFY(warpName);
++    QtWayland::wp_pointer_warp_v1 warp(registry.registry(), warpName, 1);
++    QVERIFY(warp.isInitialized());
++    const auto destroyWarp = qScopeGuard([&]() { warp.destroy(); });
++
++    std::unique_ptr<KWayland::Client::Surface> surface(Test::createSurface());
++    std::unique_ptr<Test::XdgToplevel> shellSurface(Test::createXdgToplevelSurface(surface.get()));
++    std::unique_ptr<KWayland::Client::Pointer> pointer(Test::waylandSeat()->createPointer());
++    auto window = Test::renderAndWaitForShown(surface.get(), QSize(100, 100), Qt::blue);
++    QVERIFY(window);
++    SurfaceInterface *serverSurface = window->surface();
++    serverSurface->client()->setScaleOverride(scale);
++    surface->commit(KWayland::Client::Surface::CommitFlag::None);
++    QVERIFY(Test::waylandSync());
++    QCOMPARE(serverSurface->scaleOverride(), scale);
++    input()->pointer()->warp(window->frameGeometry().center());
++    QVERIFY(Test::waylandSync());
++    QCOMPARE(waylandServer()->seat()->pointer()->focusedSurface(), serverSurface);
++    const uint32_t serial = waylandServer()->seat()->pointer()->focusedSerial();
++
++    // Send a real protocol request. At scale 1.25 the raw point is outside the
++    // compositor bounds but inside the client surface after coordinate conversion.
++    const QPointF point(90.5, 75.25);
++    warp.warp_pointer(*surface, *pointer, wl_fixed_from_double(point.x()), wl_fixed_from_double(point.y()), serial);
++    QVERIFY(Test::waylandSync());
++    QCOMPARE(Cursors::self()->mouse()->pos(), window->mapFromLocal(point / scale));
++
++    const QPointF before = Cursors::self()->mouse()->pos();
++    warp.warp_pointer(*surface, *pointer, wl_fixed_from_int(10), wl_fixed_from_int(20), serial - 1);
++    QVERIFY(Test::waylandSync());
++    QCOMPARE(Cursors::self()->mouse()->pos(), before);
++
++    warp.warp_pointer(*surface, *pointer, wl_fixed_from_int(101), wl_fixed_from_int(20), serial);
++    QVERIFY(Test::waylandSync());
++    QCOMPARE(Cursors::self()->mouse()->pos(), before);
++    warp.warp_pointer(*surface, *pointer, wl_fixed_from_int(-1), wl_fixed_from_int(20), serial);
++    QVERIFY(Test::waylandSync());
++    QCOMPARE(Cursors::self()->mouse()->pos(), before);
++}
++
++#if KWIN_BUILD_X11
++void TestPointerConstraints::testXwaylandPointerWarpDispatch()
++{
++    Test::XcbConnectionPtr connection = Test::createX11Connection();
++    QVERIFY(!xcb_connection_has_error(connection.get()));
++    const xcb_window_t windowId = xcb_generate_id(connection.get());
++    const uint32_t background = 0x0000ff;
++    xcb_create_window(connection.get(), XCB_COPY_FROM_PARENT, windowId, rootWindow(),
++                      0, 0, 100, 100, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL, &background);
++    QSignalSpy windowAdded(workspace(), &Workspace::windowAdded);
++    xcb_map_window(connection.get(), windowId);
++    xcb_flush(connection.get());
++    QVERIFY(windowAdded.wait());
++    auto window = qobject_cast<X11Window *>(windowAdded.last().first().value<Window *>());
++    QVERIFY(window);
++    QMetaObject::invokeMethod(window, "setReadyForPainting");
++    QVERIFY(Test::waitForWaylandSurface(window));
++    SurfaceInterface *surface = window->surface();
++    QTRY_VERIFY(surface->boundingRect().contains(QPointF(23.5, 41.25) / surface->scaleOverride()));
++    QCOMPARE(surface->client(), waylandServer()->xWaylandConnection());
++    QVERIFY(!waylandServer()->findWindow(surface));
++    input()->pointer()->warp(window->bufferGeometry().center());
++    QCOMPARE(waylandServer()->seat()->pointer()->focusedSurface(), surface);
++    const uint32_t serial = waylandServer()->seat()->pointer()->focusedSerial();
++
++    // Dispatch the server signal using a real X11 window and its Xwayland-owned
++    // surface. A separate native client cannot name that client's wl_surface.
++    PointerInterface *serverPointer = waylandServer()->seat()->pointer();
++    const auto dispatchWarp = [&](const QPointF &point, uint32_t enterSerial) {
++        auto warp = waylandServer()->pointerWarp();
++        const int signal = warp->metaObject()->indexOfSignal("warpRequested(SurfaceInterface*,PointerInterface*,QPointF,uint32_t)");
++        if (signal < 0) {
++            return false;
++        }
++        return warp->metaObject()->method(signal).invoke(warp, Qt::DirectConnection,
++                                                         QGenericArgument("SurfaceInterface*", &surface),
++                                                         QGenericArgument("PointerInterface*", &serverPointer),
++                                                         QGenericArgument("QPointF", &point),
++                                                         QGenericArgument("uint32_t", &enterSerial));
++    };
++    const QPointF point(23.5, 41.25);
++    QVERIFY(dispatchWarp(point, serial));
++    QCOMPARE(Cursors::self()->mouse()->pos(), window->mapFromLocal(point / surface->scaleOverride()));
++    const QPointF before = Cursors::self()->mouse()->pos();
++    QVERIFY(dispatchWarp(QPointF(10, 20), serial - 1));
++    QCOMPARE(Cursors::self()->mouse()->pos(), before);
++
++    QSignalSpy closed(window, &Window::closed);
++    xcb_unmap_window(connection.get(), windowId);
++    xcb_destroy_window(connection.get(), windowId);
++    xcb_flush(connection.get());
++    QVERIFY(closed.wait());
++}
++#endif
++
+ WAYLANDTEST_MAIN(TestPointerConstraints)
+ #include "pointer_constraints_test.moc"
