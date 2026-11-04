@@ -2,12 +2,12 @@
 
 {
   shortcuts = {
-    # Match tiled focus to the same layout neighbors as directional swaps.
-    # The patched driver falls back to KWin for wrapping, floating and other screens.
-    kwin.KrohnkiteFocusDown = "Meta+j";
-    kwin.KrohnkiteFocusLeft = "Meta+h";
-    kwin.KrohnkiteFocusRight = "Meta+l";
-    kwin.KrohnkiteFocusUp = "Meta+k";
+    # Invoked by the independent directional-focus script, which owns H/J/K/L
+    # and keeps native KWin focus available when Krohnkite is disabled.
+    kwin.KrohnkiteFocusDown = [];
+    kwin.KrohnkiteFocusLeft = [];
+    kwin.KrohnkiteFocusRight = [];
+    kwin.KrohnkiteFocusUp = [];
     kwin.KrohnkiteFocusNext = [];
     kwin.KrohnkiteFocusPrev = [];
     # move

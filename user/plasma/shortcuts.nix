@@ -101,7 +101,7 @@ in lib.foldl' lib.recursiveUpdate {} [
       kwin."Window Maximize" = "Meta+S"; # fake fullscreen. default: Meta+PgUp
       # alt-tabbing
       kwin."Walk Through Windows of Current Application" = "Meta+Shift+Tab"; # default: meta+`, alt+`
-      # Directional focus is owned by the patched Krohnkite driver.
+      # Directional focus is owned by the independent directional-focus script.
       kwin."Switch Window Down" = [];
       kwin."Switch Window Left" = [];
       kwin."Switch Window Right" = [];

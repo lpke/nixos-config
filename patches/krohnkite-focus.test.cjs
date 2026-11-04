@@ -55,9 +55,11 @@ function setup() {
 test("H/J/K/L have one owner, with native actions unbound", () => {
     const root = path.resolve(__dirname, "..");
     const config = fs.readFileSync(`${root}/user/plasma/apps/krohnkite.nix`, "utf8");
+    const router = fs.readFileSync(`${root}/user/plasma/directional-focus.nix`, "utf8");
     const native = fs.readFileSync(`${root}/user/plasma/shortcuts.nix`, "utf8");
     for (const [dir, key] of [["Left", "h"], ["Right", "l"], ["Down", "j"], ["Up", "k"]]) {
-        assert.ok(config.includes(`kwin.KrohnkiteFocus${dir} = "Meta+${key}";`));
+        assert.ok(config.includes(`kwin.KrohnkiteFocus${dir} = [];`));
+        assert.ok(router.includes(`DirectionalFocus${dir} = "Meta+${key}";`));
         assert.ok(native.includes(`kwin."Switch Window ${dir}" = [];`));
     }
 });

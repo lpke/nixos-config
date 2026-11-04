@@ -51,6 +51,7 @@ in
   imports = [
     inputs.xremap-flake.homeManagerModules.default
     ./kglance.nix
+    ./plasma/directional-focus.nix
     ./plasma/minecraft-primary-screen.nix
     ./xremap/synergy-keys.nix
   ];
