@@ -1,0 +1,96 @@
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index eac7a9a..58b3337 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -195,6 +195,16 @@ class KWinDriver implements IDriverContext {
+         this.enter(() => this.control.onShortcut(this, shortcut));
+       };
+     };
++    // Use the same layout geometry as directional swaps for tiled neighbors.
++    // Native focus remains the fallback for wraparound and other screens/windows.
++    const callbackFocus = (dir: Direction, nativeFocus: () => void) => () => {
++      if (this.isStaleDriver()) return;
++      this.enter(() => {
++        const window = this.currentWindow;
++        if (!window || !window.tiled || !this.engine.focusDir(this, dir))
++          nativeFocus();
++      });
++    };
+     this.shortcuts
+       .getToggleDock()
+       .activated.connect(callbackShortcut(Shortcut.ToggleDock));
+@@ -206,16 +216,24 @@ class KWinDriver implements IDriverContext {
+       .activated.connect(callbackShortcut(Shortcut.FocusPrev));
+     this.shortcuts
+       .getFocusDown()
+-      .activated.connect(callbackShortcut(Shortcut.FocusDown));
++      .activated.connect(
++        callbackFocus("down", () => this.workspace.slotSwitchWindowDown())
++      );
+     this.shortcuts
+       .getFocusUp()
+-      .activated.connect(callbackShortcut(Shortcut.FocusUp));
++      .activated.connect(
++        callbackFocus("up", () => this.workspace.slotSwitchWindowUp())
++      );
+     this.shortcuts
+       .getFocusLeft()
+-      .activated.connect(callbackShortcut(Shortcut.FocusLeft));
++      .activated.connect(
++        callbackFocus("left", () => this.workspace.slotSwitchWindowLeft())
++      );
+     this.shortcuts
+       .getFocusRight()
+-      .activated.connect(callbackShortcut(Shortcut.FocusRight));
++      .activated.connect(
++        callbackFocus("right", () => this.workspace.slotSwitchWindowRight())
++      );
+
+     this.shortcuts
+       .getShiftDown()
+diff --git a/src/engine/engine.ts b/src/engine/engine.ts
+index 80d065e..3adf5d5 100644
+--- a/src/engine/engine.ts
++++ b/src/engine/engine.ts
+@@ -392,18 +392,23 @@ class TilingEngine {
+   /**
+    * Focus a neighbor at the given direction.
+    */
+-  public focusDir(ctx: IDriverContext, dir: Direction) {
++  public focusDir(ctx: IDriverContext, dir: Direction): boolean {
+     const window = ctx.currentWindow;
+
+     /* if no current window, select the first tile. */
+     if (window === null) {
+       const tiles = this.windows.getVisibleTiles(ctx.currentSurface);
+-      if (tiles.length > 1) ctx.currentWindow = tiles[0];
+-      return;
++      if (tiles.length > 1) {
++        ctx.currentWindow = tiles[0];
++        return true;
++      }
++      return false;
+     }
+
+     const neighbor = this.getNeighborByDirection(ctx, window, dir);
+-    if (neighbor) ctx.currentWindow = neighbor;
++    if (!neighbor) return false;
++    ctx.currentWindow = neighbor;
++    return true;
+   }
+
+   /**
+diff --git a/src/extern/workspace.kwin.d.ts b/src/extern/workspace.kwin.d.ts
+index 56467be..b75f689 100644
+--- a/src/extern/workspace.kwin.d.ts
++++ b/src/extern/workspace.kwin.d.ts
+@@ -1,4 +1,9 @@
+ interface Workspace {
++  slotSwitchWindowDown(): void;
++  slotSwitchWindowUp(): void;
++  slotSwitchWindowLeft(): void;
++  slotSwitchWindowRight(): void;
++
+   readonly desktops: Output[];
+   readonly desktopGridSize: QSize;
+   readonly desktopGridWidth: number;

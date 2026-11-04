@@ -29,6 +29,7 @@ let
       ../patches/krohnkite-stable-timer-parent.patch
       ../patches/krohnkite-ignore-stale-driver.patch
       ../patches/krohnkite-guard-stale-shortcuts.patch
+      ../patches/krohnkite-layout-directional-focus.patch
     ];
   });
 in

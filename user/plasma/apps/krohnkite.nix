@@ -2,11 +2,12 @@
 
 {
   shortcuts = {
-    # focus - disabled as it's handled natively
-    kwin.KrohnkiteFocusDown = [];
-    kwin.KrohnkiteFocusLeft = [];
-    kwin.KrohnkiteFocusRight = [];
-    kwin.KrohnkiteFocusUp = [];
+    # Match tiled focus to the same layout neighbors as directional swaps.
+    # The patched driver falls back to KWin for wrapping, floating and other screens.
+    kwin.KrohnkiteFocusDown = "Meta+j";
+    kwin.KrohnkiteFocusLeft = "Meta+h";
+    kwin.KrohnkiteFocusRight = "Meta+l";
+    kwin.KrohnkiteFocusUp = "Meta+k";
     kwin.KrohnkiteFocusNext = [];
     kwin.KrohnkiteFocusPrev = [];
     # move
@@ -51,6 +52,9 @@
     # ENABLE KROHNKITE
     # Equivilent of: System Settings > KWin Scripts > Krohnkite > check the box > apply)
     kwinrc.Plugins.krohnkiteEnabled = true;
+
+    # Keep H/J/K/L directional rather than applying the optional dwm remapping.
+    kwinrc.Script-krohnkite.directionalKeyDwm = false;
 
     # WINDOW RULES
     # Fully ignore windows with this class
