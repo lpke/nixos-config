@@ -52,7 +52,6 @@ in
       ./help
       ./local-llm.nix
       ./postman.nix
-      ./t3code.nix
       ./custom-options.nix
     ];
 
@@ -488,8 +487,6 @@ in
     checkForUpdates = true;
   };
 
-  programs.t3code.enable = true;
-
   # Applies to Vivaldi, Google Chrome, Firefox, and Helium.
   # Fixes issue where running Synergy caused browsers to think device is
   # touchscreen due to a virtual device, which in turn caused issues on some
@@ -578,6 +575,7 @@ in
 
   # System packages
   environment.systemPackages = with pkgs; [
+    appimage-run # writable desktop AppImages, including T3's self-updating release
     kdePackages.kate
     kdePackages.krunner
     kdePackages.yakuake
