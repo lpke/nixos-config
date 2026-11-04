@@ -52,6 +52,7 @@ in
       ./help
       ./local-llm.nix
       ./postman.nix
+      ./t3code.nix
       ./custom-options.nix
     ];
 
@@ -486,6 +487,8 @@ in
     hash = "sha256-8Gld4bLb83kfQOudLxoqld1ByAt8WdQP1T6X31aBUNE=";
     checkForUpdates = true;
   };
+
+  programs.t3code.enable = true;
 
   # Applies to Vivaldi, Google Chrome, Firefox, and Helium.
   # Fixes issue where running Synergy caused browsers to think device is
