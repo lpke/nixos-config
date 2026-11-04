@@ -1,0 +1,106 @@
+diff --git a/autotests/integration/activation_test.cpp b/autotests/integration/activation_test.cpp
+index de138a6..b4399e3 100644
+--- a/autotests/integration/activation_test.cpp
++++ b/autotests/integration/activation_test.cpp
+@@ -20,6 +20,7 @@
+ #include <KWayland/Client/seat.h>
+ #include <KWayland/Client/surface.h>
+ #include <linux/input.h>
++#include <QScopeGuard>
+
+ #if KWIN_BUILD_X11
+ #include "x11window.h"
+@@ -42,6 +43,8 @@ private Q_SLOTS:
+     void init();
+     void cleanup();
+
++    void testSwitchToWindowSkipsDeleted_data();
++    void testSwitchToWindowSkipsDeleted();
+     void testSwitchToWindowToLeft();
+     void testSwitchToWindowToRight();
+     void testSwitchToWindowAbove();
+@@ -100,6 +103,18 @@ void ActivationTest::cleanup()
+     stackScreensHorizontally();
+ }
+
++void ActivationTest::testSwitchToWindowSkipsDeleted_data()
++{
++    QTest::addColumn<int>("direction");
++    QTest::addColumn<QPoint>("targetPosition");
++    QTest::addColumn<QPoint>("deletedPosition");
++
++    QTest::newRow("right") << int(Workspace::DirectionEast) << QPoint(900, 500) << QPoint(700, 500);
++    QTest::newRow("left") << int(Workspace::DirectionWest) << QPoint(100, 500) << QPoint(300, 500);
++    QTest::newRow("down") << int(Workspace::DirectionSouth) << QPoint(500, 800) << QPoint(500, 650);
++    QTest::newRow("up") << int(Workspace::DirectionNorth) << QPoint(500, 100) << QPoint(500, 300);
++}
++
+ void ActivationTest::testSwitchToWindowToLeft()
+ {
+     // This test verifies that "Switch to Window to the Left" shortcut works.
+@@ -453,6 +468,52 @@ static X11Window *createX11Window(xcb_connection_t *connection, const Rect &geom
+ }
+ #endif
+
++void ActivationTest::testSwitchToWindowSkipsDeleted()
++{
++#if KWIN_BUILD_X11
++    QFETCH(int, direction);
++    QFETCH(QPoint, targetPosition);
++    QFETCH(QPoint, deletedPosition);
++    stackScreensHorizontally();
++
++    Test::XdgToplevelWindow source;
++    QVERIFY(source.show());
++    source.m_window->move(QPoint(500, 500));
++
++    Test::XdgToplevelWindow target;
++    QVERIFY(target.show());
++    target.m_window->move(targetPosition);
++
++    // Reproduce the retained X11 launcher between two live Wayland windows.
++    // Unlike an unmapped Wayland toplevel, it still wants tab focus after close.
++    Test::XcbConnectionPtr connection = Test::createX11Connection();
++    QVERIFY(!xcb_connection_has_error(connection.get()));
++    X11Window *deleted = createX11Window(connection.get(), Rect(deletedPosition, QSize(100, 100)));
++    QVERIFY(deleted);
++    deleted->move(deletedPosition);
++    deleted->ref();
++    const auto cleanup = qScopeGuard([deleted] { deleted->unref(); });
++    QSignalSpy closedSpy(deleted, &Window::closed);
++    xcb_destroy_window(connection.get(), deleted->window());
++    xcb_flush(connection.get());
++    QVERIFY(closedSpy.wait());
++    QVERIFY(deleted->isDeleted());
++    QVERIFY(deleted->wantsTabFocus());
++    QVERIFY(workspace()->stackingOrder().contains(deleted));
++
++    workspace()->activateWindow(source.m_window);
++    QCOMPARE(workspace()->activeWindow(), source.m_window);
++    workspace()->switchWindow(Workspace::Direction(direction));
++    QCOMPARE(workspace()->activeWindow(), target.m_window);
++
++    // Continue in the same direction: wrapping must still reach the live source.
++    workspace()->switchWindow(Workspace::Direction(direction));
++    QCOMPARE(workspace()->activeWindow(), source.m_window);
++#else
++    QSKIP("Requires Xwayland");
++#endif
++}
++
+ void ActivationTest::testActiveFullscreen()
+ {
+ #if KWIN_BUILD_X11
+diff --git a/src/useractions.cpp b/src/useractions.cpp
+index 1c89c97..f2ca70e 100644
+--- a/src/useractions.cpp
++++ b/src/useractions.cpp
+@@ -1552,7 +1552,7 @@ bool Workspace::switchWindow(Window *window, Direction direction, QPoint curPos,
+     QList<Window *> clist = stackingOrder();
+     for (auto i = clist.rbegin(); i != clist.rend(); ++i) {
+         auto other = *i;
+-        if (!other->isClient()) {
++        if (!other->isClient() || other->isDeleted()) {
+             continue;
+         }
+         if (other->wantsTabFocus() && *i != window && other->isOnDesktop(desktop) && !other->isMinimized() && (*i)->isOnCurrentActivity()) {

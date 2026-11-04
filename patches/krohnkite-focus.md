@@ -11,11 +11,27 @@ driver falls back to KWin when there is no tiled neighbor, including wraparound,
 floating or unmanaged windows, and navigation to another output. Meta+arrow
 swaps are unchanged.
 
-Previously focus used KWin's committed window geometry while swaps used
-Krohnkite's layout geometry. Those can differ during client resize/configure
-updates. The intermittent Alacritty/Helium reversal was not reproduced during
-ordinary opening in the isolated compositor. The change removes that disagreement
-for tiled neighbors; its regression test also models unsettled client geometry.
+The reproduced failure is in KWin 6.6.5's native directional search. It considers
+deleted windows retained in the stacking order, then `activateWindow()` rejects
+the selected deleted window. The observed Prism Launcher entry was an X11 window
+that still reported itself as wanting input after closing. An unmapped Wayland
+toplevel no longer wants tab focus, so two live Wayland apps alone did not
+reproduce this. On the affected desktop the closed Prism Launcher
+window scored 1189 for focus right, ahead of the live Helium window at 2048.
+Meta+L consequently did nothing; Meta+H wrapped to Helium on the right. Both
+OS key events through ydotool and direct native action dispatch reproduced this.
+
+The earlier theory about unsettled client geometry was not the cause of this
+captured failure. The tiled workaround already skips deleted windows through
+Krohnkite's visibility filter. It was activated and tested successfully against
+the affected desktop without moving windows or reloading Krohnkite.
+
+`kwin-skip-deleted-focus.patch` fixes the native search itself by excluding
+`isDeleted()` candidates. It has no application-specific rules and preserves
+the existing scoring, desktop/activity filtering and wraparound. The KWin package
+builds and runs `testActivation`, including a retained closed X11 window between
+live Wayland windows in all four directions and wraparound, alongside the
+pointer-constraint suite.
 
 The patch uses existing stale-driver and re-entry guards. It calls native KWin
 slots directly, so falling back cannot recursively dispatch the same shortcut.
@@ -48,6 +64,8 @@ the private D-Bus, disables and re-enables Krohnkite twice, checks native focus 
 all four directions while disabled, and checks that shortcut ownership survives.
 The test terminates its own processes and removes its temporary files.
 
-`bnix` installs the package and saved shortcut assignments. Leave the existing
-compositor and its shortcuts loaded while the user is working. The change takes
-effect at the next login.
+`bnix` installs the package and saved shortcut assignments. Loading the independent
+router is sufficient to activate the tiled workaround in an existing session;
+clear the old native action bindings first. Do that only when session interaction
+is authorized. The native KWin binary fix takes effect at the next login; do not
+restart a Wayland compositor with applications open just to load it.

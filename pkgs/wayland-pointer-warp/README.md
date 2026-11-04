@@ -26,6 +26,8 @@ removing these patches on package upgrades. The existing Nixpkgs patches remain.
 
 KWin builds and runs its pointer-constraint integration suite, extended with
 real protocol scaling/serial/bounds checks and an X11-window dispatch regression.
+The same package also applies the independent deleted-window focus correction
+and runs the activation suite, documented in [directional focus](../../patches/krohnkite-focus.md).
 Xwayland end-to-end testing belongs in an isolated compositor. A compiled package
 or a private test plugin alone does not establish desktop correctness or latency.
 The exact packages passed isolated native acceptance and software timing review

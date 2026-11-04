@@ -14,7 +14,7 @@ function setup() {
         print: (message) => { throw new Error(message); },
     });
     vm.runInContext(fs.readFileSync(script, "utf8"), context);
-    const { KWinDriver, Rect } = vm.runInContext("({ KWinDriver, Rect })", context);
+    const { KWinDriver, KWinWindow, Rect } = vm.runInContext("({ KWinDriver, KWinWindow, Rect })", context);
     const callbacks = {};
     const shortcuts = new Proxy({}, {
         get: (_, name) => () => ({
@@ -49,7 +49,7 @@ function setup() {
         driver.engine.windows.push(wrapper);
         return wrapper;
     }
-    return { driver, callbacks, native, workspace, tile, api, KWinDriver };
+    return { driver, callbacks, native, workspace, tile, api, KWinDriver, KWinWindow };
 }
 
 test("H/J/K/L have one owner, with native actions unbound", () => {
@@ -111,6 +111,26 @@ test("minimized, off-desktop and off-screen tiles are excluded by the window sto
     hidden.visible = () => false;
     callbacks.getFocusRight();
     assert.deepEqual(native, ["Right"]);
+});
+
+test("a retained deleted window cannot beat a live tiled neighbor", () => {
+    const { driver, callbacks, native, workspace, tile, KWinWindow } = setup();
+    const current = tile("Alacritty", 0, 0);
+    const deleted = tile("closed Prism Launcher", 400, 0);
+    const target = tile("Helium", 800, 0);
+    // Exercise the real KWin driver visibility predicate, with the deleted flag
+    // observed in the failing desktop. The closed window would otherwise win.
+    deleted.visible = (surface) => KWinWindow.prototype.visible.call({
+        window: { deleted: true },
+    }, surface);
+    workspace.activeWindow = current.window.window;
+    let swapped;
+    driver.engine.windows.swap = (_, neighbor) => { swapped = neighbor; };
+    driver.engine.swapDirection(driver, "right");
+    callbacks.getFocusRight();
+    assert.equal(swapped, target);
+    assert.equal(workspace.activeWindow, target.window.window);
+    assert.deepEqual(native, []);
 });
 
 test("stale focus callbacks neither focus tiles nor invoke native actions", () => {

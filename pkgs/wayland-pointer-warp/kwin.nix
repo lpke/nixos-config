@@ -2,7 +2,10 @@
 assert kwin.version == "6.6.5";
 kwin.overrideAttrs (old: {
   pname = "kwin-pointer-warp-scale";
-  patches = (old.patches or []) ++ [ ./kwin-pointer-warp-scale.patch ];
+  patches = (old.patches or []) ++ [
+    ./kwin-pointer-warp-scale.patch
+    ../../patches/kwin-skip-deleted-focus.patch
+  ];
   buildInputs = (old.buildInputs or []) ++ [ pkgs.kdePackages.kwayland pkgs.kdePackages.kpipewire ];
   nativeCheckInputs = (old.nativeCheckInputs or []) ++ [ pkgs.dbus pkgs.xwayland ];
   cmakeFlags = (old.cmakeFlags or []) ++ [ "-DBUILD_TESTING=ON" ];
@@ -10,7 +13,7 @@ kwin.overrideAttrs (old: {
     substituteInPlace CMakeLists.txt --replace-fail 'add_subdirectory(autotests)' 'add_subdirectory(autotests EXCLUDE_FROM_ALL)'
   '';
   postBuild = (old.postBuild or "") + ''
-    cmake --build . --target testPointerConstraints --parallel "$NIX_BUILD_CORES"
+    cmake --build . --target testPointerConstraints testActivation --parallel "$NIX_BUILD_CORES"
   '';
   doCheck = true;
   checkPhase = ''
@@ -21,6 +24,7 @@ kwin.overrideAttrs (old: {
     mkdir -p /tmp/.X11-unix
     chmod 1777 /tmp/.X11-unix
     dbus-run-session --config-file=${pkgs.dbus}/share/dbus-1/session.conf -- ./bin/testPointerConstraints
+    dbus-run-session --config-file=${pkgs.dbus}/share/dbus-1/session.conf -- ./bin/testActivation
     runHook postCheck
   '';
 })
