@@ -7,7 +7,7 @@ import os
 import subprocess
 import sys
 
-from . import modes, synergy
+from . import controls, modes, synergy
 from .runtime import CONTROLLER_UNIT, TRAY_UNIT, describe, request
 
 
@@ -16,15 +16,26 @@ def main():
         prog="synergy-keys",
         description="Inspect Synergy shortcuts and screen detection. App shortcuts are resolved on the Mac.",
     )
-    parser.add_argument("command", nargs="?", default="status", choices=["status", "refresh", "logs", "inspect"])
-    parser.add_argument("shortcut", nargs="?", help="Initial inspector search, or exact chord with --json")
+    parser.add_argument("command", nargs="?", default="status", choices=["status", "refresh", "logs", "inspect", "pause", "resume", "synergy"])
+    parser.add_argument("shortcut", nargs="?", help="Inspector search, or Synergy action: pause, resume, config")
     parser.add_argument("--json", action="store_true", help="Print an inspector trace without opening a window")
     parser.add_argument("--device", choices=["Keyboard", "Logitech G903"], default="Keyboard", help="Device for --json inspection")
     parser.add_argument("--reapply", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--reset-local", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
-    if args.command != "inspect" and (args.shortcut or args.json or args.device != "Keyboard"):
+    if args.command not in ("inspect", "synergy") and (args.shortcut or args.json or args.device != "Keyboard"):
         parser.error("shortcut, --json and --device are only for inspect")
+    if args.command == "synergy" and (args.shortcut not in ("pause", "resume", "config") or args.json):
+        parser.error("synergy requires pause, resume or config")
+    if args.command in ("pause", "resume", "synergy"):
+        try:
+            controls.control("synergy" if args.command == "synergy" else "keys", args.shortcut if args.command == "synergy" else args.command)
+            print(f"{'Synergy' if args.command == 'synergy' else 'synergy-keys'}: {args.shortcut or args.command}")
+            return 0
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            detail = error.stderr.strip() if isinstance(error, subprocess.CalledProcessError) and error.stderr else str(error)
+            print(detail, file=sys.stderr)
+            return 1
     if args.command == "inspect":
         if args.json:
             if not args.shortcut:
@@ -55,13 +66,16 @@ def main():
     if args.command == "logs":
         os.execvp("journalctl", ["journalctl", "--user", "-u", CONTROLLER_UNIT, "-u", TRAY_UNIT,
                                "-n", "60", "--no-pager"])
+    if controls.preferences().get("keys_paused", False):
+        print("synergy-keys is paused. Run synergy-keys resume to enable mappings.")
+        return 0 if args.command == "status" else 1
     if not synergy.processes()["running"]:
-        print("Synergy is stopped. Start Synergy sharing first.")
+        paused = controls.preferences().get("synergy_paused", False)
+        print(f"Synergy is {'paused' if paused else 'stopped'}. Run synergy-keys synergy resume to start sharing.")
         return 0 if args.command == "status" else 1
     try:
         if args.command == "refresh":
-            subprocess.run(["systemctl", "--user", "reset-failed", CONTROLLER_UNIT], check=True, timeout=10)
-            subprocess.run(["systemctl", "--user", "start", CONTROLLER_UNIT], check=True, timeout=10)
+            controls.start_controller()
         response = request("reapply" if args.command == "refresh" else args.command)
         print(describe(response) if args.command == "status" else response.get("message", response.get("error")))
         return 1 if response.get("error") else 0

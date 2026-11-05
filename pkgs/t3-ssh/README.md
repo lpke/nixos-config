@@ -1,9 +1,9 @@
 # T3 SSH connection
 
-`t3-ssh` controls a Home Manager user target containing the SSH tunnel and a
-Qt tray. `user/t3-ssh.nix` owns the destination settings and unit definitions.
-The package provides the command, asynchronous tray status checks, help text,
-and icons. `system/help/help.txt` lists the public commands.
+`t3-ssh` controls a Home Manager user target containing the SSH tunnel.
+`user/t3-ssh.nix` owns its destination settings and units. The package supplies
+commands, credential-free health checks and help. The independent
+[`t3-tray`](../t3-tray/README.md) package supplies the combined connection tray.
 
 Native SSH is the preferred saved route for the Mac environment, with existing
 HTTP routes retained as backups. T3 stores these locally rather than managing
@@ -21,15 +21,11 @@ and quit also record that session so later app windows respect those choices.
 The next graphical session can start automatically on first T3 use, including
 when the user manager lingers across logouts.
 
-The units have no `WantedBy` and are never enabled for login or boot. The target
-is part of the graphical session, and both services are part of the target.
-Pausing stops only the tunnel. Quitting stops the target and both services.
-Neither closing T3 nor a tray process crash stops the tunnel. A failed tray
-process is restarted independently.
-The tray disconnects and stops outstanding child processes before Qt teardown,
-including when Quit interrupts a pending health check.
-Its Qt implementation is shared with T3 Tailscale in `pkgs/t3-connection-tray`;
-each package supplies its own command, display name, icons and service identity.
+The SSH target and tunnel have no `WantedBy` and are never enabled for login or
+boot. The target is part of the graphical session, and the tunnel is part of the
+target. Pause stops only the tunnel. Quit stops the SSH target and tunnel, while
+leaving the shared T3 tray and Tailscale route alone. Explicit Start also shows
+the shared tray. Closing T3 or quitting the tray never stops the tunnel.
 
 The held remote sleep keeps a multiplexed SSH client in the foreground for
 systemd to supervise. A forced remote PTY hangs up that helper when the client
@@ -47,19 +43,12 @@ Consequently a green ring confirms transport/server readiness, not valid T3
 pairing credentials. The tray runs each check in a child process so an offline
 Mac does not block menu interactions.
 
-Plasma's tray item id is `T3 SSH`. Its panel definition always shows the icon
-while the tray service is running. The icons use Synergy's 32px canvas, 10.6px ring radius
-and 2.8px stroke. The white glyphs are T3's original vector letter shapes with
-their background removed. See `icons/LICENSE-T3` for the upstream MIT notice.
+The SSH status is the dotted right half of the combined T3 ring. Aqua means
+the SSH forward reaches the expected T3 server; red includes paused/error states.
+See the combined tray guide for rendering, menus and Qt tests.
 
-Run the controller tests with:
+Run controller tests without touching live services:
 
 ```sh
-PYTHONPATH=pkgs/t3-ssh:pkgs/t3-tailscale:pkgs/t3-connection-tray python3 -B -m unittest discover -s pkgs/t3-ssh -v
+PYTHONPATH=pkgs/t3-ssh python3 -B -m unittest discover -s pkgs/t3-ssh -v
 ```
-
-Qt tests use the package Python, `QT_QPA_PLATFORM=offscreen`, an isolated D-Bus
-session and no live service commands. Live lifecycle checks should leave the
-Mac app and unrelated SSH sessions running.
-With PyQt6 available, `python3 -B pkgs/t3-connection-tray/test_trays.py` runs both
-transport tray suites and supplies an explicit isolated D-Bus configuration.

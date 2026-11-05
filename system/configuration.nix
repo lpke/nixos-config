@@ -39,6 +39,7 @@ in
     [
       ./hardware-configuration.nix
       ./desktop/pointer-warp.nix
+      ./desktop/task-icons.nix
       ./audio/routing.nix
       ./audio/volume-lock.nix
       ./audio/gains.nix

@@ -6,14 +6,43 @@ shortcut arrives. The controller contains no SSH connection, observer, host,
 remote app list, or fallback backend.
 
 Commands: `synergy-keys status`, `synergy-keys refresh`, `synergy-keys logs`,
-`synergy-keys inspect`.
-The tray starts the screen watcher while sharing runs and restores Linux
-mappings when sharing stops. Log rotation and truncation preserve screen state.
-Restarting xremap reasserts the current screen's mode.
+`synergy-keys inspect`, `synergy-keys pause`, `synergy-keys resume`, and
+`synergy-keys synergy pause|resume|config`.
+
+The single visible **Synergy** tray starts at desktop login and stays available
+when sharing stops. Its aqua ring means Synergy's sharing core is running;
+the aqua pointer means `synergy-keys` is enabled and its controller is healthy,
+including while the cursor is on the PC. Each part independently turns red when
+paused or unavailable. SVG geometry is rendered at exact physical icon sizes
+through the shared `pkgs/tray-support` loader, including fractional display scales.
+
+The menu pauses/resumes sharing and keyboard mappings independently, opens the
+native Synergy configuration, and retains shortcut inspection, refresh, logs and
+help. Pausing `synergy-keys` stops its controller and restores Linux mappings;
+resuming arms the next sharing session if sharing is currently stopped. Choices
+persist in `~/.local/state/synergy-keys/controls.json`, respecting XDG overrides.
+Refresh preserves an explicit keyboard pause. Pausing sharing does not change
+the independent keyboard preference. After a restart, the tray reasserts a
+saved sharing pause if Synergy starts its core automatically.
+
+Sharing controls use the installed Synergy native tray's own Start/Stop D-Bus
+menu actions. Its exact item ID and title identify the backend without confusing
+other apps using the same AppIndicator library. Plasma hides this native item;
+it must remain running and registered because closing it also stops Synergy's
+service. The custom tray never kills the Synergy service or core. Resume can
+start the Flatpak service after a complete app exit. This integration follows
+Synergy 3.6's exported menu protocol and reports changes as errors rather than
+guessing at private service commands.
+
+The tray starts the screen watcher while sharing runs and keyboard mappings are
+enabled, and restores Linux mappings when either pauses. The controller binds
+to the tray unit so systemd handles cleanup without detached process races.
+Log rotation and truncation preserve screen state. Restarting xremap reasserts
+the current screen's mode. Shortcut mappings and the Mac receiver are unchanged.
 
 ## Shortcut inspector
 
-Open **Inspect shortcuts…** from the Mac keys tray menu, or run
+Open **Inspect shortcuts…** from the Synergy tray menu, or run
 `synergy-keys inspect`. Search by shortcut or action, for example `thumb+l`,
 `COMMAND-m`, `ctrl-shift+c`, or `grw windw`. Search ignores case and accepts
 `+`, `-`, or spaces. Thumb means Linux Control; pinky, Meta, Super, Cmd and

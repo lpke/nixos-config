@@ -12,7 +12,7 @@ import urllib.request
 
 TARGET = "t3-ssh.target"
 TUNNEL = "t3-mbp-tunnel.service"
-TRAY = "t3-ssh-tray.service"
+TRAY = "t3-tray.service"
 ASSETS = Path(__file__).parent.parent
 
 
@@ -59,14 +59,14 @@ def control(action):
         if action == "auto-start" and marker.exists() and marker.read_text() == session:
             return
         if action in ("start", "auto-start"):
-            systemctl("--no-block", "start", TARGET, TUNNEL)
+            systemctl("--no-block", "start", TARGET, TUNNEL, TRAY)
         elif action == "stop":
             systemctl("stop", TUNNEL)
         elif action == "quit":
-            # A tray-spawned command is in the tray's cgroup and may itself be
-            # stopped before systemctl returns. Preserve the choice first.
+            # Keep the shared tray running for the independent Tailscale route.
+            # Persist the SSH startup choice before stopping its target.
             marker.write_text(session)
-            systemctl("stop", TARGET, TUNNEL, TRAY)
+            systemctl("stop", TARGET, TUNNEL)
         else:
             raise ValueError(f"Unknown action: {action}")
         marker.write_text(session)

@@ -1,0 +1,19 @@
+--- a/applets/taskmanager/qml/Task.qml
++++ b/applets/taskmanager/qml/Task.qml
+@@ -561,7 +561,15 @@
+         Kirigami.Icon {
+             id: icon
+ 
+-            anchors.fill: parent
++            // Kirigami snaps its internal painted rect. Keep a square viewport
++            // for compact icons-only tasks so fractional-scale rounding cannot
++            // move the icon down inside a taller, non-square viewport.
++            readonly property bool compactIcon: !task.inPopup && task.tasksRoot.iconsOnly && !task.tasksRoot.vertical
++            anchors.fill: compactIcon ? undefined : parent
++            x: compactIcon ? (parent.width - width) / 2 : 0
++            y: compactIcon ? (parent.height - height) / 2 : 0
++            width: compactIcon ? Kirigami.Units.iconSizes.roundedIconSize(Math.min(parent.width, parent.height)) : parent.width
++            height: compactIcon ? width : parent.height
+ 
+             active: task.highlighted
+             enabled: true

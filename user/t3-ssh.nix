@@ -17,8 +17,8 @@ in
   # No WantedBy: the launcher explicitly starts this group on first T3 use.
   # Neither closing T3 nor a later app launch changes a paused/quit group.
   systemd.user.targets.t3-ssh.Unit = {
-    Description = "Persistent T3 SSH connection and tray";
-    Wants = [ "t3-mbp-tunnel.service" "t3-ssh-tray.service" ];
+    Description = "Persistent T3 SSH connection";
+    Wants = [ "t3-mbp-tunnel.service" ];
     PartOf = [ "graphical-session.target" ];
   };
 
@@ -54,16 +54,4 @@ in
     };
   };
 
-  systemd.user.services.t3-ssh-tray = {
-    Unit = {
-      Description = "T3 SSH connection status and controls";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "t3-ssh.target" ];
-    };
-    Service = {
-      ExecStart = "${t3Ssh}/bin/t3-ssh-tray";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-  };
 }

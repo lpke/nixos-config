@@ -64,6 +64,16 @@
         HideTitleBar = true;
         Mask = 0;
       };
+      "Windeco Exception 4" = {
+        # VS Code uses a native surface so Electron does not add CSD margins.
+        # Match Alacritty's hidden titlebar with a KDE-owned, toggleable shadow.
+        ExceptionPattern = "(?i)^code( code)?$";
+        Enabled = true;
+        BorderSize = 0;
+        ExceptionType = 0;
+        HideTitleBar = true;
+        Mask = 0;
+      };
     };
   };
 }

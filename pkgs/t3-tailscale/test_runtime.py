@@ -37,12 +37,11 @@ class ControlTests(unittest.TestCase):
         runtime.control("stop")
         self.commands.assert_called_once_with("tailscale", "set", "--advertise-routes=198.51.100.0/24")
 
-    def test_quit_withdraws_before_stopping_own_tray(self):
+    def test_quit_withdraws_route_and_preserves_shared_tray(self):
         self.prefs["AdvertiseRoutes"] = [CONFIG.route]
         runtime.control("quit")
         self.assertEqual([call.args for call in self.commands.call_args_list], [
             ("tailscale", "set", "--advertise-routes="),
-            ("systemctl", "--user", "stop", runtime.TRAY),
         ])
 
     def test_repeated_start_does_not_rewrite_preferences(self):

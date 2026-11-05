@@ -7,45 +7,7 @@
 let
   systemMonitor = import ./plasma/apps/system-monitor.nix { inherit lib; };
   windowTitleApplet = pkgs.callPackage ../pkgs/window-title-applet {};
-  synergyTrayIconPadder = pkgs.writeShellApplication {
-    name = "synergy-tray-icon-padder";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.imagemagick
-      pkgs.inotify-tools
-    ];
-    text = ''
-      tray_dir="$XDG_RUNTIME_DIR/tray-icon"
-      icon_path="$tray_dir/tray-icon-2-0.png"
 
-      pad_icon() {
-        local content_bounds
-        local padded_icon="$tray_dir/.tray-icon-2-0.padded.png"
-
-        [ -f "$icon_path" ] || return 0
-        content_bounds=$(magick identify -format '%@' "$icon_path")
-        [ "$content_bounds" != "24x24+4+4" ] || return 0
-
-        magick "$icon_path" \
-          -resize 24x24 \
-          -gravity center \
-          -background none \
-          -extent 32x32 \
-          "$padded_icon"
-        mv -- "$padded_icon" "$icon_path"
-      }
-
-      mkdir -p -- "$tray_dir"
-      pad_icon
-
-      inotifywait --monitor --quiet --event close_write --format '%f' "$tray_dir" |
-        while IFS= read -r changed_file; do
-          if [ "$changed_file" = "tray-icon-2-0.png" ]; then
-            pad_icon
-          fi
-        done
-    '';
-  };
 in
 {
   imports = [
@@ -56,6 +18,7 @@ in
     ./xremap/synergy-keys.nix
     ./t3-ssh.nix
     ./t3-tailscale.nix
+    ./t3-tray.nix
     ./vscode.nix
   ];
 
@@ -144,18 +107,6 @@ in
     '';
   };
 
-  systemd.user.services.synergy-tray-icon-padder = {
-    Unit = {
-      Description = "Add padding to Synergy's tray icon";
-      PartOf = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${synergyTrayIconPadder}/bin/synergy-tray-icon-padder";
-      Restart = "on-failure";
-      RestartSec = 1;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
 
   # Override Wine's generated Adobe DNG Converter launcher. Wine points this
   # at a .lnk that currently does not show a usable window from KRunner.

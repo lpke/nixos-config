@@ -8,10 +8,10 @@ in
     synergy_log = "${config.home.homeDirectory}/.var/app/com.symless.synergy/.local/state/Synergy/synergy.log";
   };
 
-  # Only the tray's lightweight lifecycle watcher starts with the desktop.
+  # One visible tray manages sharing and independently pausable keyboard mappings.
   systemd.user.services.synergy-keys-tray = {
     Unit = {
-      Description = "Synergy Mac keyboard status and controls";
+      Description = "Synergy sharing and synergy-keys status and controls";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
     };
@@ -29,6 +29,7 @@ in
       After = [ "xremap.service" "ydotoold.service" ];
       Wants = [ "xremap.service" "ydotoold.service" ];
       PartOf = [ "graphical-session.target" "synergy-keys-tray.service" ];
+      BindsTo = [ "synergy-keys-tray.service" ];
     };
     Service = {
       ExecStart = "${synergyKeys}/bin/synergy-keys-controller";

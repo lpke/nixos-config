@@ -1,48 +1,85 @@
-"""Watch Synergy's lifecycle and show controller health independently of it."""
+"""One tray for Synergy sharing and its independent keyboard controller."""
 
 import signal
 import sys
 import time
-from pathlib import Path
 
 from PyQt6.QtCore import QProcess, QTimer
-from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from tray_icon import svg_icon
 
-from . import synergy
+from . import controls, synergy
 from .runtime import CONTROLLER_UNIT, describe, directory, read_json
+
+
+AQUA = "#2eacc4"
+RED = "#da4453"
+
+
+def icon_svg(sharing, keys):
+    ring, pointer = AQUA if sharing else RED, AQUA if keys else RED
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="10.6" fill="none" stroke="{ring}" stroke-width="2.8"/>
+      <path fill="{pointer}" d="M 11.5 9.3 L 21.4 17.1 L 17.1 17.7 L 19.2 22 L 16.9 23.1 L 14.8 18.8 L 11.5 22 Z"/>
+    </svg>'''
+
+
+def health(snapshot, prefs, state, error=None):
+    running = snapshot["running"]
+    paused = prefs.get("keys_paused", False)
+    fresh = time.time() - state.get("updated", 0) < 4
+    healthy = (running and not paused and not prefs.get("synergy_paused", False) and fresh
+               and state.get("status") == "Mac-local app shortcuts" and state.get("applied_mode") in ("local", "mac")
+               and not state.get("error") and not error)
+    sharing_status = "Running" if running else "Paused" if prefs.get("synergy_paused") else "Stopped"
+    keys_status = "Paused" if paused else "Ready" if healthy else "Waiting for Synergy" if not running else "Unavailable"
+    return running, healthy, sharing_status, keys_status
 
 
 class Tray:
     def __init__(self, app):
         self.app = app
         self.previous = None
+        self.previous_sharing = None
+        self.displayed_icon = None
         self.commands = set()
         self.lifecycle_error = None
+        self.lifecycle_error_at = 0
         self.inspector = None
+        self.closing = False
         self.tray = QSystemTrayIcon(app)
         self.menu = QMenu()
-        self.summary = self.menu.addAction("Starting")
+        self.summary = self.menu.addAction("Synergy: starting")
         self.summary.setEnabled(False)
-        self.detail = self.menu.addAction("Mappings: pending")
+        self.detail = self.menu.addAction("synergy-keys: pending")
         self.detail.setEnabled(False)
         self.menu.addSeparator()
-        self.menu.addAction("Inspect shortcuts…", self.inspect_shortcuts)
-        action = QAction("Refresh screen detection", self.menu)
-        action.triggered.connect(lambda: self.command("synergy-keys", ["refresh"]))
-        self.menu.addAction(action)
+        self.sharing = self.menu.addAction("Pause Synergy", self.toggle_sharing)
+        self.keys = self.menu.addAction("Pause synergy-keys", self.toggle_keys)
+        self.menu.addAction("Show Synergy configuration", lambda: self.command("synergy-keys", ["synergy", "config"]))
         self.menu.addSeparator()
+        self.menu.addAction("Inspect shortcuts…", self.inspect_shortcuts)
+        self.menu.addAction("Refresh screen detection", lambda: self.command("synergy-keys", ["refresh"]))
         self.menu.addAction("Show logs", lambda: self.command("konsole", ["--hold", "-e", "synergy-keys", "logs"]))
         self.menu.addAction("Command help", lambda: self.command("konsole", ["--hold", "-e", "synergy-keys", "--help"]))
         self.tray.setContextMenu(self.menu)
-        assets = Path(__file__).parent.parent / "icons"
-        self.icons = {name: QIcon(str(assets / f"{name}.svg")) for name in ("connected", "error")}
-        self.tray.setIcon(self.icons["error"])
+        self.icons = {(sharing, keys): svg_icon(icon_svg(sharing, keys))
+                      for sharing in (False, True) for keys in (False, True)}
+        self.tray.setIcon(self.icons[False, False])
+        self.tray.show()
         self.timer = QTimer(app)
         self.timer.timeout.connect(self.tick)
         self.timer.start(500)
-        app.aboutToQuit.connect(self.stop_controller)
+        app.aboutToQuit.connect(self.shutdown)
         self.tick()
+
+    def toggle_keys(self):
+        action = "resume" if controls.preferences().get("keys_paused", False) else "pause"
+        self.command("synergy-keys", [action])
+
+    def toggle_sharing(self):
+        action = "pause" if synergy.processes()["running"] else "resume"
+        self.command("synergy-keys", ["synergy", action])
 
     def inspect_shortcuts(self):
         from .inspector_ui import InspectorWindow
@@ -53,6 +90,8 @@ class Tray:
         self.inspector.activateWindow()
 
     def command(self, program, arguments, lifecycle=False):
+        if self.closing:
+            return
         process = QProcess(self.app)
         self.commands.add(process)
 
@@ -62,47 +101,74 @@ class Tray:
                 error = error or "Command failed; run synergy-keys logs"
                 if lifecycle:
                     self.lifecycle_error = error
+                    self.lifecycle_error_at = time.time()
                 else:
-                    self.tray.showMessage("Mac keys", error, QSystemTrayIcon.MessageIcon.Warning)
-            elif lifecycle:
+                    self.tray.showMessage("Synergy", error, QSystemTrayIcon.MessageIcon.Warning)
+            elif lifecycle or (program == "synergy-keys" and arguments[0] in ("refresh", "pause", "resume", "synergy")):
                 self.lifecycle_error = None
             self.commands.discard(process)
             process.deleteLater()
 
+        def failed(error):
+            if error != QProcess.ProcessError.FailedToStart:
+                return  # Crashes emit finished too.
+            self.lifecycle_error = process.errorString()
+            self.lifecycle_error_at = time.time()
+            self.commands.discard(process)
+            process.deleteLater()
+
         process.finished.connect(finished)
-        process.errorOccurred.connect(lambda error: setattr(self, "lifecycle_error", process.errorString()))
+        process.errorOccurred.connect(failed)
         process.start(program, arguments)
 
-    def stop_controller(self):
-        QProcess.startDetached("systemctl", ["--user", "--no-block", "stop", CONTROLLER_UNIT])
+    def shutdown(self):
+        self.closing = True
+        self.timer.stop()
+        for process in tuple(self.commands):
+            process.blockSignals(True)
+            if process.state() != QProcess.ProcessState.NotRunning:
+                process.kill()
+                process.waitForFinished(1000)
+        self.commands.clear()
+        self.tray.hide()
+        # The controller binds to this tray's unit; systemd resets mappings when
+        # the tray exits, without a detached stop racing its replacement.
 
     def tick(self):
         snapshot = synergy.processes()
-        identity = (snapshot["running"], snapshot["session"], snapshot["cores"])
+        prefs = controls.preferences()
+        sharing_identity = (snapshot["running"], snapshot["session"], snapshot["cores"], prefs.get("synergy_paused", False))
+        if sharing_identity != self.previous_sharing:
+            if snapshot["running"] and prefs.get("synergy_paused", False):
+                self.command("synergy-keys", ["synergy", "pause"], lifecycle=True)
+            self.previous_sharing = sharing_identity
+        enabled = snapshot["running"] and not prefs.get("keys_paused", False) and not prefs.get("synergy_paused", False)
+        identity = (enabled, snapshot["session"], snapshot["cores"])
         if identity != self.previous:
-            # Re-read screen state whenever the sharing process changes.
-            action = ("start" if self.previous is None else "restart") if snapshot["running"] else "stop"
+            # Explicit resume can issue start concurrently. Join that start job;
+            # restart only when an already-enabled sharing process changed.
+            action = ("start" if self.previous is None or not self.previous[0] else "restart") if enabled else "stop"
             self.command("systemctl", ["--user", action, CONTROLLER_UNIT], lifecycle=True)
             self.previous = identity
-        self.tray.setVisible(snapshot["running"])
-        if not snapshot["running"]:
-            return
         state = read_json(directory() / "state.json")
-        if time.time() - state.get("updated", 0) > 4:
-            state = {"status": "Controller unavailable", "error": "Run synergy-keys refresh or check synergy-keys logs"}
-        if self.lifecycle_error:
-            state = {**state, "error": self.lifecycle_error}
-        healthy = state.get("status") == "Mac-local app shortcuts" and not state.get("error")
-        self.tray.setIcon(self.icons["connected" if healthy else "error"])
-        self.tray.setToolTip("Mac keys\n" + describe(state))
-        self.summary.setText(state.get("status", "Controller unavailable"))
-        self.detail.setText(f"{state.get('screen', 'Unknown screen')} · {state.get('applied_mode') or 'Mappings pending'}")
+        if state.get("updated", 0) > self.lifecycle_error_at and health(snapshot, prefs, state)[1]:
+            self.lifecycle_error = None
+        sharing, keys, sharing_status, keys_status = health(snapshot, prefs, state, self.lifecycle_error)
+        if (sharing, keys) != self.displayed_icon:
+            self.tray.setIcon(self.icons[sharing, keys])
+            self.displayed_icon = sharing, keys
+        self.summary.setText(f"Synergy: {sharing_status}")
+        self.detail.setText(f"synergy-keys: {keys_status}")
+        self.sharing.setText("Pause Synergy" if sharing else "Resume Synergy")
+        self.keys.setText("Resume synergy-keys" if prefs.get("keys_paused", False) else "Pause synergy-keys")
+        detail = self.lifecycle_error or describe(state)
+        self.tray.setToolTip(f"Synergy: {sharing_status}\nsynergy-keys: {keys_status}\n{detail}")
 
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("synergy-keys")
-    app.setApplicationDisplayName("Synergy Mac keys")
+    app.setApplicationName("synergy")
+    app.setApplicationDisplayName("Synergy")
     app.setQuitOnLastWindowClosed(False)
     tray = Tray(app)
     for sig in (signal.SIGINT, signal.SIGTERM):

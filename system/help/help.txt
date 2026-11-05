@@ -13,16 +13,18 @@ Core
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
   t3code                       Launch T3 Code; use Settings > About for stable updates.
-  t3-ssh start                 Start or resume the persistent T3 connection and tray.
+  t3-tray show                 Show the shared SSH and Tailscale tray.
+  t3-tray quit                 Hide the shared tray, keeping both connections running.
+  t3-ssh start                 Start or resume SSH and show the shared T3 tray.
   t3-ssh stop                  Pause the connection and keep its tray controls.
   t3-ssh status                Show connection health.
-  t3-ssh quit                  Stop the connection and close its tray icon.
+  t3-ssh quit                  Stop SSH, leaving the shared T3 tray available.
   t3-ssh help                  Open pairing and connection instructions.
   t3-ssh logs                  Show connection and tray logs.
   t3-tailscale start           Restore the T3 VPN route and show its tray.
   t3-tailscale stop            Pause the T3 VPN route, keeping tray controls.
   t3-tailscale status          Check gateway readiness and Mac T3 identity.
-  t3-tailscale quit            Pause the T3 VPN route and close its tray.
+  t3-tailscale quit            Pause the T3 VPN route, leaving the shared T3 tray.
   t3-tailscale help            Open phone pairing and gateway instructions.
   t3-tailscale logs            Show gateway and tray logs.
 
@@ -32,8 +34,12 @@ Services
   prs                          Restart Piper, libratbag autostart, and ratbagd.
   ars                          Restart custom audio services.
 
-Synergy Mac Keys
+Synergy
   synergy-keys                 Show Synergy screen and keyboard mapping status.
+  synergy-keys pause           Pause keyboard mappings and restore Linux mode.
+  synergy-keys resume          Resume automatic keyboard mappings.
+  synergy-keys synergy pause   Pause Synergy sharing.
+  synergy-keys synergy resume  Resume Synergy sharing.
   synergy-keys inspect         Inspect shortcut inputs, transport, and Mac app outcomes.
   synergy-keys refresh         Refresh local screen detection and mappings.
   synergy-keys logs            Show screen-controller and tray logs.

@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from uuid import UUID
 
 
-TRAY = "t3-tailscale-tray.service"
+TRAY = "t3-tray.service"
 ASSETS = Path(__file__).parent.parent
 
 
@@ -76,8 +76,7 @@ def control(action):
             command("tailscale", "set", "--advertise-routes=" + ",".join(updated))
         if action == "start":
             command("systemctl", "--user", "start", TRAY)
-        elif action == "quit":
-            command("systemctl", "--user", "stop", TRAY)
+        # Quit is scoped to this route. The shared tray also controls SSH.
 
 
 def forwarding_enabled():

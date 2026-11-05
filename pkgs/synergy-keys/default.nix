@@ -1,4 +1,4 @@
-{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, ydotool, kdePackages, nix, writeText }:
+{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, flatpak, ydotool, kdePackages, nix, writeText }:
 let
   python = python3.withPackages (ps: [ ps.pyqt6 ]);
   inspectorData = writeText "synergy-keys-inspector.json" (builtins.toJSON (import ./inspector-data.nix));
@@ -10,10 +10,15 @@ stdenvNoCC.mkDerivation {
   nativeBuildInputs = [ makeWrapper qt6.wrapQtAppsHook ];
   buildInputs = [ qt6.qtbase qt6.qtsvg qt6.qtwayland ];
   dontWrapQtApps = true;
+  doInstallCheck = true;
+  installCheckPhase = ''
+    PYTHONPATH="$out/lib/synergy-keys" ${python}/bin/python -B -c "from synergy_keys.tray import Tray; import tray_icon"
+  '';
   installPhase = ''
     runHook preInstall
     mkdir -p "$out/lib/synergy-keys" "$out/bin"
-    cp -r synergy_keys icons "$out/lib/synergy-keys/"
+    cp -r synergy_keys "$out/lib/synergy-keys/"
+    cp ${../tray-support/tray_icon.py} "$out/lib/synergy-keys/tray_icon.py"
     for entry in cli controller tray; do
       name="synergy-keys-$entry"
       if [ "$entry" = cli ]; then name=synergy-keys; fi
@@ -22,7 +27,8 @@ stdenvNoCC.mkDerivation {
         --prefix PYTHONPATH : "$out/lib/synergy-keys" \
         --set SYNERGY_KEYS_INSPECT_DATA ${inspectorData} \
         --set PYTHONDONTWRITEBYTECODE 1 \
-        --prefix PATH : ${lib.makeBinPath [ systemd ydotool kdePackages.konsole nix ]}
+        --prefix PATH : "$out/bin" \
+        --prefix PATH : ${lib.makeBinPath [ systemd flatpak ydotool kdePackages.konsole nix ]}
     done
     wrapQtApp "$out/bin/synergy-keys"
     wrapQtApp "$out/bin/synergy-keys-tray"

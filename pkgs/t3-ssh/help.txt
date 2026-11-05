@@ -10,18 +10,19 @@ Commands on the PC
   t3-ssh start    Start or resume the connection and tray.
   t3-ssh stop     Pause the connection, keeping the tray available.
   t3-ssh status   Show whether the connection reaches T3 on the Mac.
-  t3-ssh quit     Stop the connection and close its tray icon.
+  t3-ssh quit     Stop SSH, keeping the shared tray and Tailscale.
   t3-ssh help     Open this file.
   t3-ssh logs     Show recent connection and tray logs.
 
-The first T3 Code launch in each desktop login starts the connection and tray.
-Closing T3 leaves them running. Later T3 launches in the same login respect
-Pause and Quit. Use Start or t3-ssh start to resume. Nothing starts at boot
-or login until you launch T3.
+The first T3 Code launch in each desktop login starts SSH and shows the shared
+tray. Closing T3 leaves SSH running. Later launches in the same login respect
+Pause and Quit. Use t3-ssh start to resume. SSH does not start at boot or login.
 
-The tray icon is always visible while its service is running. Green means
-the tunnel reaches T3 on the Mac. Red means paused, connecting, or an error.
-Right-click it for Start, Pause, Show logs, Help, and Quit.
+The combined T3 tray starts at desktop login. Its dotted right half reports SSH,
+and its solid left half reports Tailscale independently. Aqua means connected;
+red means paused, connecting, or an error. Right-click and use the SSH submenu
+for Start, Pause, Show logs and Help. Quit tray hides only the shared icon.
+Use t3-tray show to restore the icon without changing either connection.
 
 Use the saved connection
   1. On the Mac, open T3 Code Beta. Keep it running and keep the Mac awake.

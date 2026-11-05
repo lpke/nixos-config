@@ -32,10 +32,10 @@ class LifecycleTests(unittest.TestCase):
         self.controller.start()
         self.addCleanup(self.controller.stop)
 
-    def test_first_launch_starts_both_and_later_windows_do_nothing(self):
+    def test_first_launch_starts_transport_and_shared_tray_once(self):
         runtime.control("auto-start")
         runtime.control("auto-start")
-        self.assertEqual(self.actions, [("--no-block", "start", runtime.TARGET, runtime.TUNNEL)])
+        self.assertEqual(self.actions, [("--no-block", "start", runtime.TARGET, runtime.TUNNEL, runtime.TRAY)])
 
     def test_pause_is_respected_until_explicit_start(self):
         runtime.control("auto-start")
@@ -44,18 +44,18 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(self.actions[-1], ("stop", runtime.TUNNEL))
         self.assertEqual(len(self.actions), 2)
         runtime.control("start")
-        self.assertEqual(self.actions[-1], ("--no-block", "start", runtime.TARGET, runtime.TUNNEL))
+        self.assertEqual(self.actions[-1], ("--no-block", "start", runtime.TARGET, runtime.TUNNEL, runtime.TRAY))
 
     def test_quit_stops_group_and_is_respected_by_later_launches(self):
         runtime.control("quit")
         runtime.control("auto-start")
-        self.assertEqual(self.actions, [("stop", runtime.TARGET, runtime.TUNNEL, runtime.TRAY)])
+        self.assertEqual(self.actions, [("stop", runtime.TARGET, runtime.TUNNEL)])
 
     def test_next_desktop_login_can_start_again_with_lingering_manager(self):
         runtime.control("quit")
         self.session = "desktop-login-2"
         runtime.control("auto-start")
-        self.assertEqual(self.actions[-1], ("--no-block", "start", runtime.TARGET, runtime.TUNNEL))
+        self.assertEqual(self.actions[-1], ("--no-block", "start", runtime.TARGET, runtime.TUNNEL, runtime.TRAY))
 
     def test_failed_start_can_be_retried_on_next_launch(self):
         with patch.object(runtime, "systemctl", side_effect=[self.session, subprocess.TimeoutExpired("systemctl", 20)]):

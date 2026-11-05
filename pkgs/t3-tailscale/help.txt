@@ -9,15 +9,17 @@ Commands on the PC
   t3-tailscale start    Restore the T3 route and show the tray.
   t3-tailscale stop     Pause the T3 route, keeping the tray available.
   t3-tailscale status   Check route approval, forwarding and Mac identity.
-  t3-tailscale quit     Pause the T3 route and close the tray.
+  t3-tailscale quit     Pause this route, keeping shared tray and SSH.
   t3-tailscale help     Open these instructions.
   t3-tailscale logs     Show recent tray and Tailscale daemon logs.
 
-The tray starts at desktop login and is always visible while running.
-Its dotted ring distinguishes it from the solid-ring SSH icon. Green means
-this PC is ready to forward T3 and the expected Mac environment responds.
+The combined T3 tray starts at desktop login and is always visible while running.
+Its solid left half reports Tailscale; the dotted right half reports SSH.
+Aqua means this gateway is ready and the expected Mac environment responds.
 Red means paused, disconnected, unapproved, misconfigured or unreachable.
-Right-click for Start, Pause, Show logs, Help and Quit.
+Right-click and use the Tailscale submenu for Start, Pause, Show logs and Help.
+Quit tray hides only the icon, keeping both connections running. Use t3-tray show
+or start either transport to restore it.
 
 Pause and Quit withdraw only @ROUTE@. Other advertised routes and the main
 Tailscale connection are preserved. Start restores this route; it does not
@@ -59,5 +61,5 @@ Configuration and policy
   Policy changes are reviewed and saved in the Tailscale dashboard; pulling
   Git does not publish them. Credentials remain in Tailscale and T3 state.
 
-Green checks this gateway and Mac identity, not the phone's internet connection
+Aqua checks this gateway and Mac identity, not the phone's internet connection
 or pairing expiry. It cannot prove remote phone access without a phone test.

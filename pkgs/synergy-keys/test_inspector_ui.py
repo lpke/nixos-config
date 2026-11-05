@@ -106,9 +106,8 @@ class InspectorUiTests(unittest.TestCase):
 
     def test_tray_entry_opens_and_reuses_inspector_without_lifecycle_changes(self):
         from synergy_keys.tray import Tray
-        # Never exercise the real tray lifecycle: stopping the tray normally
-        # stops the controller. Both methods stay mocked through destruction.
-        with patch.object(Tray, "tick"), patch.object(Tray, "stop_controller"), \
+        # Never exercise the real tray lifecycle. Systemd owns controller stop.
+        with patch.object(Tray, "tick"), \
              patch("synergy_keys.tray.QProcess") as process, \
              patch("synergy_keys.inspector_ui.InspectorWindow", return_value=self.window) as constructor:
             tray = Tray(self.app)
@@ -118,7 +117,7 @@ class InspectorUiTests(unittest.TestCase):
             action.trigger()
             constructor.assert_called_once()
             process.assert_not_called()
-            tray.tray.hide()
+            tray.shutdown()
             del tray
 
 
