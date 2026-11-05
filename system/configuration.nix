@@ -22,6 +22,7 @@ let
   desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
   displayBrightnessToggle = pkgs.callPackage ../pkgs/display-brightness-toggle {};
   synergyKeys = pkgs.callPackage ../pkgs/synergy-keys {};
+  t3Ssh = pkgs.callPackage ../pkgs/t3-ssh {};
   tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
   krohnkitePatched = pkgs.kdePackages.krohnkite.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches or []) ++ [
@@ -600,6 +601,7 @@ in
     tmux
     bnix # guarded NixOS rebuild command
     synergyKeys # Synergy Mac keyboard status and controls
+    t3Ssh # on-demand persistent T3 SSH connection and tray
     ranger
     trashy
     wl-clipboard # allow neovim clipboard access (wayland)

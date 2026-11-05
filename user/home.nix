@@ -54,6 +54,7 @@ in
     ./plasma/directional-focus.nix
     ./plasma/minecraft-primary-screen.nix
     ./xremap/synergy-keys.nix
+    ./t3-ssh.nix
   ];
 
   home.stateVersion = "25.11";

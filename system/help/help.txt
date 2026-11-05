@@ -13,6 +13,12 @@ Core
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
   t3code                       Launch T3 Code; use Settings > About for stable updates.
+  t3-ssh start                 Start or resume the persistent T3 connection and tray.
+  t3-ssh stop                  Pause the connection and keep its tray controls.
+  t3-ssh status                Show connection health.
+  t3-ssh quit                  Stop the connection and close its tray icon.
+  t3-ssh help                  Open pairing and connection instructions.
+  t3-ssh logs                  Show connection and tray logs.
 
 Services
   xrs                          Restart xremap and restore current Synergy Mac mappings.
