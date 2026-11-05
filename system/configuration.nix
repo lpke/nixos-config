@@ -51,6 +51,7 @@ in
       ./browser/webrtc-audio.nix
       ./help
       ./local-llm.nix
+      ./tailscale.nix
       ./postman.nix
       ./custom-options.nix
     ];
