@@ -10,11 +10,12 @@ Commands: `synergy-keys status`, `synergy-keys refresh`, `synergy-keys logs`,
 `synergy-keys synergy pause|resume|config`.
 
 The single visible **Synergy** tray starts at desktop login and stays available
-when sharing stops. Its aqua ring means Synergy's sharing core is running;
-the aqua pointer means `synergy-keys` is enabled and its controller is healthy,
+when sharing stops. Its original multicolor Synergy ring means the sharing core is running;
+the white pointer means `synergy-keys` is enabled and its controller is healthy,
 including while the cursor is on the PC. Each part independently turns red when
 paused or unavailable. SVG geometry is rendered at exact physical icon sizes
 through the shared `pkgs/tray-support` loader, including fractional display scales.
+The ring matches T3's 13px radius and 2.6px stroke on a 32px canvas.
 
 The menu pauses/resumes sharing and keyboard mappings independently, opens the
 native Synergy configuration, and retains shortcut inspection, refresh, logs and

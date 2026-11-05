@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 try:
     from PyQt6.QtWidgets import QApplication
-    from synergy_keys.tray import AQUA, RED, Tray, health, icon_svg
+    from synergy_keys.tray import SYNERGY_COLORS, WHITE, RED, Tray, health, icon_svg
     HAS_QT = True
 except ImportError:
     HAS_QT = False
@@ -42,8 +42,10 @@ class TrayTests(unittest.TestCase):
         for sharing in (False, True):
             for keys in (False, True):
                 svg = icon_svg(sharing, keys)
-                self.assertIn(f'stroke="{AQUA if sharing else RED}"', svg)
-                self.assertIn(f'fill="{AQUA if keys else RED}"', svg)
+                for color in SYNERGY_COLORS:
+                    self.assertEqual(f'stroke="{color}"' in svg, sharing)
+                self.assertIn(f'fill="{WHITE if keys else RED}"', svg)
+                self.assertEqual('stroke="' + RED + '"' in svg, not sharing)
                 sizes = {size.width() for size in self.tray.icons[sharing, keys].availableSizes()}
                 self.assertTrue({25, 28, 30, 64}.issubset(sizes))
 

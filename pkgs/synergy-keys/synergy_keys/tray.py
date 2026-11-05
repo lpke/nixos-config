@@ -12,14 +12,24 @@ from . import controls, synergy
 from .runtime import CONTROLLER_UNIT, describe, directory, read_json
 
 
-AQUA = "#2eacc4"
+SYNERGY_COLORS = ("#2cba97", "#2eacc4", "#88d32f", "#3968d3")
+WHITE = "#ffffff"
 RED = "#da4453"
 
 
 def icon_svg(sharing, keys):
-    ring, pointer = AQUA if sharing else RED, AQUA if keys else RED
+    pointer = WHITE if keys else RED
+    # Match T3's 13px radius and 2.6px stroke on the same 32px canvas.
+    arcs = (
+        "M19.36 3.44 A13 13 0 0 1 28.56 19.36",
+        "M28.56 19.36 A13 13 0 0 1 12.64 28.56",
+        "M12.64 28.56 A13 13 0 0 1 3.44 12.64",
+        "M3.44 12.64 A13 13 0 0 1 19.36 3.44",
+    )
+    ring = "".join(f'<path stroke="{color if sharing else RED}" d="{arc}"/>'
+                   for color, arc in zip(SYNERGY_COLORS, arcs))
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-      <circle cx="16" cy="16" r="10.6" fill="none" stroke="{ring}" stroke-width="2.8"/>
+      <g fill="none" stroke-width="2.6" stroke-linecap="round">{ring}</g>
       <path fill="{pointer}" d="M 11.5 9.3 L 21.4 17.1 L 17.1 17.7 L 19.2 22 L 16.9 23.1 L 14.8 18.8 L 11.5 22 Z"/>
     </svg>'''
 
