@@ -28,6 +28,8 @@ Neither closing T3 nor a tray process crash stops the tunnel. A failed tray
 process is restarted independently.
 The tray disconnects and stops outstanding child processes before Qt teardown,
 including when Quit interrupts a pending health check.
+Its Qt implementation is shared with T3 Tailscale in `pkgs/t3-connection-tray`;
+each package supplies its own command, display name, icons and service identity.
 
 The held remote sleep keeps a multiplexed SSH client in the foreground for
 systemd to supervise. A forced remote PTY hangs up that helper when the client
@@ -53,9 +55,11 @@ their background removed. See `icons/LICENSE-T3` for the upstream MIT notice.
 Run the controller tests with:
 
 ```sh
-PYTHONPATH=pkgs/t3-ssh python3 -B -m unittest discover -s pkgs/t3-ssh -v
+PYTHONPATH=pkgs/t3-ssh:pkgs/t3-tailscale:pkgs/t3-connection-tray python3 -B -m unittest discover -s pkgs/t3-ssh -v
 ```
 
 Qt tests use the package Python, `QT_QPA_PLATFORM=offscreen`, an isolated D-Bus
 session and no live service commands. Live lifecycle checks should leave the
 Mac app and unrelated SSH sessions running.
+With PyQt6 available, `python3 -B pkgs/t3-connection-tray/test_trays.py` runs both
+transport tray suites and supplies an explicit isolated D-Bus configuration.

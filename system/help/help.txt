@@ -19,6 +19,12 @@ Core
   t3-ssh quit                  Stop the connection and close its tray icon.
   t3-ssh help                  Open pairing and connection instructions.
   t3-ssh logs                  Show connection and tray logs.
+  t3-tailscale start           Restore the T3 VPN route and show its tray.
+  t3-tailscale stop            Pause the T3 VPN route, keeping tray controls.
+  t3-tailscale status          Check gateway readiness and Mac T3 identity.
+  t3-tailscale quit            Pause the T3 VPN route and close its tray.
+  t3-tailscale help            Open phone pairing and gateway instructions.
+  t3-tailscale logs            Show gateway and tray logs.
 
 Services
   xrs                          Restart xremap and restore current Synergy Mac mappings.

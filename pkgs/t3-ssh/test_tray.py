@@ -10,17 +10,24 @@ try:
 except ImportError:
     QApplication = None
 
+try:
+    from t3_tailscale.tray import Tray as TailscaleTray
+except ImportError:
+    TailscaleTray = None
+
 
 @unittest.skipIf(QApplication is None, "Requires package Python with PyQt6")
 class TrayTests(unittest.TestCase):
+    factory = Tray if QApplication else None
+    helper = "t3-ssh"
     @classmethod
     def setUpClass(cls):
         cls.app = QApplication.instance() or QApplication([])
         cls.app.setQuitOnLastWindowClosed(False)
 
     def setUp(self):
-        with patch.object(Tray, "tick"):
-            self.tray = Tray(self.app)
+        with patch.object(self.factory, "tick"):
+            self.tray = self.factory(self.app)
         self.tray.timer.stop()
         self.addCleanup(self.tray.tray.hide)
         self.addCleanup(self.tray.shutdown)
@@ -37,6 +44,7 @@ class TrayTests(unittest.TestCase):
         self.assertFalse(self.tray.commands)
 
     def test_menu_controls_have_distinct_pause_and_quit_actions(self):
+        self.assertEqual(self.tray.program, self.helper)
         with patch.object(self.tray, "command") as command:
             for text, argument in [("Start", "start"), ("Pause", "stop"), ("Help", "help"), ("Quit", "quit")]:
                 next(a for a in self.tray.menu.actions() if a.text() == text).trigger()
@@ -51,6 +59,12 @@ class TrayTests(unittest.TestCase):
         self.tray.display({"connected": False, "active": False, "status": "Paused"})
         self.assertEqual(self.tray.tray.icon().cacheKey(), self.tray.icons["error"].cacheKey())
         self.assertTrue(self.tray.start.isEnabled())
+
+
+@unittest.skipIf(TailscaleTray is None, "Requires the Tailscale tray module")
+class TailscaleTrayTests(TrayTests):
+    factory = TailscaleTray
+    helper = "t3-tailscale"
 
 
 if __name__ == "__main__":

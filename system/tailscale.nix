@@ -6,6 +6,8 @@
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "server";
+    # The local helper operates this daemon without interactive sudo prompts.
+    extraSetFlags = [ "--operator=luke" ];
   };
 
   # Restrict the new forwarding role without changing host input/output policy.

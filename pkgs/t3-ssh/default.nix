@@ -9,10 +9,15 @@ stdenvNoCC.mkDerivation {
   nativeBuildInputs = [ makeWrapper qt6.wrapQtAppsHook ];
   buildInputs = [ qt6.qtbase qt6.qtsvg qt6.qtwayland ];
   dontWrapQtApps = true;
+  doInstallCheck = true;
+  installCheckPhase = ''
+    PYTHONPATH="$out/lib/t3-ssh" ${python}/bin/python -B -c "from t3_ssh.tray import Tray; import t3_connection_tray"
+  '';
   installPhase = ''
     runHook preInstall
     mkdir -p "$out/lib/t3-ssh" "$out/bin"
     cp -r t3_ssh icons help.txt "$out/lib/t3-ssh/"
+    cp ${../t3-connection-tray/t3_connection_tray.py} "$out/lib/t3-ssh/t3_connection_tray.py"
     for entry in cli tray; do
       name="t3-ssh-$entry"
       if [ "$entry" = cli ]; then name=t3-ssh; fi

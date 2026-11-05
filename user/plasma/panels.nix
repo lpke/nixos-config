@@ -133,6 +133,7 @@ let
           "org.kde.plasma.bluetooth"
           "org.kde.plasma.networkmanagement"
           "T3 SSH" # Qt's tray id is its application display name
+          "T3 Tailscale"
         ];
       };
     };
