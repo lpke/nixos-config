@@ -19,13 +19,13 @@ Core
   t3-ssh stop                  Pause the connection and keep its tray controls.
   t3-ssh status                Show connection health.
   t3-ssh quit                  Stop SSH, leaving the shared T3 tray available.
-  t3-ssh help                  Open pairing and connection instructions.
+  t3-ssh help                  Open connection instructions in Neovim and Alacritty.
   t3-ssh logs                  Show connection and tray logs.
   t3-tailscale start           Restore the T3 VPN route and show its tray.
   t3-tailscale stop            Pause the T3 VPN route, keeping tray controls.
   t3-tailscale status          Check gateway readiness and Mac T3 identity.
   t3-tailscale quit            Pause the T3 VPN route, leaving the shared T3 tray.
-  t3-tailscale help            Open phone pairing and gateway instructions.
+  t3-tailscale help            Open gateway instructions in Neovim and Alacritty.
   t3-tailscale logs            Show gateway and tray logs.
 
 Services

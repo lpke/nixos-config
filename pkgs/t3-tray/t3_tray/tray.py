@@ -39,7 +39,7 @@ class Tray:
             pause = menu.addAction("Pause", lambda checked=False, k=key: self.control(k, "stop"))
             menu.addSeparator()
             menu.addAction("Show logs", lambda checked=False, p=program:
-                           self.command("konsole", ["--hold", "-e", p, "logs"]))
+                           self.command("alacritty", ["--hold", "-e", p, "logs"]))
             menu.addAction("Help", lambda checked=False, p=program: self.command(p, ["help"]))
             self.actions[key] = {"summary": summary, "start": start, "pause": pause, "menu": menu}
         self.menu.addSeparator()

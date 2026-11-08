@@ -10,9 +10,14 @@ The T3 glyph is the original vector outline under `LICENSE-T3`. Four icon states
 are rendered once and cached. The icon is republished only when that pair of
 health values changes, rather than at every poll.
 
-Each transport has a submenu with Start, Pause, Show logs and Help. Polls use
-separate asynchronous child processes, so an offline route cannot hold up the
-other route or menu. Shutdown stops only child checks/commands before Qt teardown.
+Each transport has a submenu with Start, Pause, Show logs and Help. Help renders
+the transport's help file and opens it in Neovim in a new Alacritty window,
+using the user's `nvim` from PATH (Bob-managed on this machine). Show logs opens
+Alacritty and keeps the window open after the command exits. Both actions pass
+an explicit command, bypassing Alacritty's normal shell/tmux startup.
+
+Polls use separate asynchronous child processes, so an offline route cannot hold
+up the other route or menu. Shutdown stops only child checks/commands before Qt teardown.
 Global Quit tray exits the UI without changing either transport. `t3-tray show`
 restores it; `t3-tray quit` hides it. Starting either helper also restores the tray.
 

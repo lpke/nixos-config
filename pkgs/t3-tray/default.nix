@@ -1,4 +1,4 @@
-{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, kdePackages, callPackage }:
+{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, alacritty, callPackage }:
 let
   python = python3.withPackages (ps: [ ps.pyqt6 ]);
   ssh = callPackage ../t3-ssh {};
@@ -27,7 +27,7 @@ stdenvNoCC.mkDerivation {
         --add-flags "-m t3_tray.$entry" \
         --prefix PYTHONPATH : "$out/lib/t3-tray" \
         --set PYTHONDONTWRITEBYTECODE 1 \
-        --prefix PATH : ${lib.makeBinPath [ ssh tailscale systemd kdePackages.konsole ]}
+        --prefix PATH : ${lib.makeBinPath [ ssh tailscale systemd alacritty ]}
     done
     wrapQtApp "$out/bin/t3-tray-daemon"
     runHook postInstall

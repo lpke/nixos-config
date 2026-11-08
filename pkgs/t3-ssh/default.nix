@@ -1,4 +1,4 @@
-{ lib, stdenvNoCC, python3, makeWrapper, systemd, xdg-utils }:
+{ lib, stdenvNoCC, python3, makeWrapper, systemd, alacritty }:
 stdenvNoCC.mkDerivation {
   pname = "t3-ssh";
   version = "1.0";
@@ -16,7 +16,7 @@ stdenvNoCC.mkDerivation {
       --add-flags "-m t3_ssh.cli" \
       --prefix PYTHONPATH : "$out/lib/t3-ssh" \
       --set PYTHONDONTWRITEBYTECODE 1 \
-      --prefix PATH : ${lib.makeBinPath [ systemd xdg-utils ]}
+      --prefix PATH : ${lib.makeBinPath [ systemd alacritty ]}
     runHook postInstall
   '';
 }

@@ -21,7 +21,7 @@ def main():
         if args.command in ("start", "stop", "quit", "auto-start"):
             runtime.control(args.command)
         elif args.command == "help":
-            os.execvp("xdg-open", ["xdg-open", str(runtime.help_file())])
+            os.execvp("alacritty", ["alacritty", "-e", "nvim", "--", str(runtime.help_file())])
         elif args.command == "logs":
             os.execvp("journalctl", ["journalctl", "--user", "-u", runtime.TUNNEL,
                                    "-u", runtime.TRAY, "-n", "60", "--no-pager"])

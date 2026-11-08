@@ -1,4 +1,4 @@
-{ lib, stdenvNoCC, python3, makeWrapper, systemd, xdg-utils, tailscale }:
+{ lib, stdenvNoCC, python3, makeWrapper, systemd, alacritty, tailscale }:
 stdenvNoCC.mkDerivation {
   pname = "t3-tailscale";
   version = "1.0";
@@ -16,7 +16,7 @@ stdenvNoCC.mkDerivation {
       --add-flags "-m t3_tailscale.cli" \
       --prefix PYTHONPATH : "$out/lib/t3-tailscale" \
       --set PYTHONDONTWRITEBYTECODE 1 \
-      --prefix PATH : ${lib.makeBinPath [ systemd xdg-utils tailscale ]}
+      --prefix PATH : ${lib.makeBinPath [ systemd alacritty tailscale ]}
     runHook postInstall
   '';
 }

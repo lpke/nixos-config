@@ -59,7 +59,7 @@ class TrayTests(unittest.TestCase):
                     action.trigger()
                     command.assert_called_with(program, [argument])
                 next(a for a in menu.actions() if a.text() == "Show logs").trigger()
-                command.assert_called_with("konsole", ["--hold", "-e", program, "logs"])
+                command.assert_called_with("alacritty", ["--hold", "-e", program, "logs"])
 
     def test_shared_quit_only_exits_ui(self):
         with patch.object(self.app, "quit") as quit, patch.object(Tray, "tick"):

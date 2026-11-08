@@ -21,7 +21,7 @@ def main():
             runtime.control(args.command)
             print(f"T3 Tailscale: {args.command}")
         elif args.command == "help":
-            os.execvp("xdg-open", ["xdg-open", str(runtime.help_file())])
+            os.execvp("alacritty", ["alacritty", "-e", "nvim", "--", str(runtime.help_file())])
         elif args.command == "logs":
             subprocess.run(["journalctl", "--user", "-u", runtime.TRAY, "-n", "60", "--no-pager"], check=True)
             subprocess.run(["journalctl", "-u", "tailscaled.service", "-n", "60", "--no-pager"], check=False)
