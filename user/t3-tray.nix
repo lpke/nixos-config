@@ -6,7 +6,7 @@ in
   home.file.".local/bin/t3-tray".source = "${tray}/bin/t3-tray";
   systemd.user.services.t3-tray = {
     Unit = {
-      Description = "T3 SSH and Tailscale connection status and controls";
+      Description = "T3 connections and Git review launcher status and controls";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
     };

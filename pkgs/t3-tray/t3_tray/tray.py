@@ -1,4 +1,4 @@
-"""One asynchronous tray with separately controlled T3 transports."""
+"""One asynchronous tray with independent connection and Git-review controls."""
 
 import json
 import signal
@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 from .icons import icons
 
 
-TRANSPORTS = {"tailscale": ("Tailscale · solid left", "t3-tailscale"),
+TRANSPORTS = {"tailscale": ("Tailscale · solid upper left", "t3-tailscale"),
+              "review": ("Git review · solid lower left", "git-review-launcher"),
               "ssh": ("SSH · dotted right", "t3-ssh")}
 # Plasma imports the menu over D-Bus, so a widget stylesheet cannot set its
 # padding. Nonbreaking spaces reserve a font-scaled gutter before its arrow.
@@ -38,8 +39,9 @@ class Tray:
             start = menu.addAction("Start", lambda checked=False, k=key: self.control(k, "start"))
             pause = menu.addAction("Pause", lambda checked=False, k=key: self.control(k, "stop"))
             menu.addSeparator()
-            menu.addAction("Show logs", lambda checked=False, p=program:
-                           self.command("alacritty", ["--hold", "-e", p, "logs"]))
+            if key != "review":
+                menu.addAction("Show logs", lambda checked=False, p=program:
+                               self.command("alacritty", ["--hold", "-e", p, "logs"]))
             menu.addAction("Help", lambda checked=False, p=program: self.command(p, ["help"]))
             self.actions[key] = {"summary": summary, "start": start, "pause": pause, "menu": menu}
         self.menu.addSeparator()
@@ -58,12 +60,13 @@ class Tray:
         if state != self.icon_state:
             self.tray.setIcon(self.icons[state])
             self.icon_state = state
-        lines = ["T3 connections"]
+        lines = ["T3 status"]
         for key, (title, _) in TRANSPORTS.items():
             status = self.states[key]
             self.actions[key]["summary"].setText(status.get("status", "Connection error"))
             self.actions[key]["pause"].setEnabled(bool(status.get("active")))
-            self.actions[key]["start"].setEnabled(not status.get("active"))
+            started = status.get("connected") if key == "review" else status.get("active")
+            self.actions[key]["start"].setEnabled(not started and status.get("available", True))
             lines.append(f"{title}: {status.get('status', 'Connection error')}")
             if status.get("detail"):
                 lines.append(status["detail"])
@@ -79,6 +82,18 @@ class Tray:
     def command(self, program, arguments, polling=None):
         process = QProcess(self.app)
         self.commands.add(process)
+        timed_out = False
+        if polling == "review":
+            timeout = QTimer(process)
+            timeout.setSingleShot(True)
+
+            def expire():
+                nonlocal timed_out
+                timed_out = True
+                process.kill()
+
+            timeout.timeout.connect(expire)
+            timeout.start(12000)
 
         def cleanup():
             if polling:
@@ -92,8 +107,19 @@ class Tray:
                     state = json.loads(bytes(process.readAllStandardOutput()))
                     if not isinstance(state, dict):
                         raise ValueError("Expected status object")
+                    if polling == "review" and (
+                            any(type(state.get(field)) is not bool for field in ("connected", "active"))
+                            or not isinstance(state.get("status"), str)
+                            or not isinstance(state.get("detail"), str)
+                            or type(state.get("available", True)) is not bool):
+                        raise ValueError("Expected Git review status fields")
                 except (ValueError, UnicodeError):
-                    state = {"status": "Connection error", "detail": "Status check failed. Open Help or Show logs."}
+                    if polling == "review":
+                        state = {"status": "Helper unavailable", "connected": False, "active": False,
+                                 "available": False, "detail": "Git review status timed out." if timed_out else
+                                 "Install or update the Git review launcher from your dotfiles; other controls remain available."}
+                    else:
+                        state = {"status": "Connection error", "detail": "Status check failed. Open Help or Show logs."}
                 self.update(polling, state)
             elif code:
                 detail = bytes(process.readAllStandardError()).decode(errors="replace").strip()
@@ -107,9 +133,15 @@ class Tray:
             if error != QProcess.ProcessError.FailedToStart:
                 return
             if polling:
-                self.update(polling, {"status": "Connection error", "detail": process.errorString()})
+                if polling == "review":
+                    self.update(polling, {"status": "Helper unavailable", "connected": False, "active": False,
+                                         "available": False, "detail": "Git review launcher is not installed or executable. Apply your dotfiles to install it."})
+                else:
+                    self.update(polling, {"status": "Connection error", "detail": process.errorString()})
             else:
-                self.tray.showMessage("T3", process.errorString(), QSystemTrayIcon.MessageIcon.Warning)
+                detail = ("Git review launcher is unavailable. Apply your dotfiles to install it."
+                          if program == TRANSPORTS["review"][1] else process.errorString())
+                self.tray.showMessage("T3", detail, QSystemTrayIcon.MessageIcon.Warning)
             cleanup()
 
         process.finished.connect(finished)

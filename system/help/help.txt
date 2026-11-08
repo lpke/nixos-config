@@ -13,8 +13,8 @@ Core
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
   t3code                       Launch T3 Code; use Settings > About for stable updates.
-  t3-tray show                 Show the shared SSH and Tailscale tray.
-  t3-tray quit                 Hide the shared tray, keeping both connections running.
+  t3-tray show                 Show connection and Git review status controls.
+  t3-tray quit                 Hide the tray, keeping connections and Git review available.
   t3-ssh start                 Start or resume SSH and show the shared T3 tray.
   t3-ssh stop                  Pause the connection and keep its tray controls.
   t3-ssh status                Show connection health.
