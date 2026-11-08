@@ -70,8 +70,8 @@ class Tray:
         self.menu.addSeparator()
         self.menu.addAction("Inspect shortcuts…", self.inspect_shortcuts)
         self.menu.addAction("Refresh screen detection", lambda: self.command("synergy-keys", ["refresh"]))
-        self.menu.addAction("Show logs", lambda: self.command("konsole", ["--hold", "-e", "synergy-keys", "logs"]))
-        self.menu.addAction("Command help", lambda: self.command("konsole", ["--hold", "-e", "synergy-keys", "--help"]))
+        self.menu.addAction("Show logs", lambda: self.command("alacritty", ["--hold", "-e", "synergy-keys", "logs"]))
+        self.menu.addAction("Command help", lambda: self.command("synergy-keys", ["help"]))
         self.tray.setContextMenu(self.menu)
         self.icons = {(sharing, keys): svg_icon(icon_svg(sharing, keys))
                       for sharing in (False, True) for keys in (False, True)}

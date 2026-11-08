@@ -43,6 +43,7 @@ Synergy
   synergy-keys inspect         Inspect shortcut inputs, transport, and Mac app outcomes.
   synergy-keys refresh         Refresh local screen detection and mappings.
   synergy-keys logs            Show screen-controller and tray logs.
+  synergy-keys help            Open command help in Neovim and Alacritty.
   synergy-keys --help          Show keyboard controller commands.
 
 Audio

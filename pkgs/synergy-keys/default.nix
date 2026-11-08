@@ -1,4 +1,4 @@
-{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, flatpak, ydotool, kdePackages, nix, writeText }:
+{ lib, stdenvNoCC, python3, makeWrapper, qt6, systemd, flatpak, ydotool, alacritty, nix, writeText }:
 let
   python = python3.withPackages (ps: [ ps.pyqt6 ]);
   inspectorData = writeText "synergy-keys-inspector.json" (builtins.toJSON (import ./inspector-data.nix));
@@ -28,7 +28,7 @@ stdenvNoCC.mkDerivation {
         --set SYNERGY_KEYS_INSPECT_DATA ${inspectorData} \
         --set PYTHONDONTWRITEBYTECODE 1 \
         --prefix PATH : "$out/bin" \
-        --prefix PATH : ${lib.makeBinPath [ systemd flatpak ydotool kdePackages.konsole nix ]}
+        --prefix PATH : ${lib.makeBinPath [ systemd flatpak ydotool alacritty nix ]}
     done
     wrapQtApp "$out/bin/synergy-keys"
     wrapQtApp "$out/bin/synergy-keys-tray"

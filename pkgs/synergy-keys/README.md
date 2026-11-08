@@ -6,7 +6,7 @@ shortcut arrives. The controller contains no SSH connection, observer, host,
 remote app list, or fallback backend.
 
 Commands: `synergy-keys status`, `synergy-keys refresh`, `synergy-keys logs`,
-`synergy-keys inspect`, `synergy-keys pause`, `synergy-keys resume`, and
+`synergy-keys help`, `synergy-keys inspect`, `synergy-keys pause`, `synergy-keys resume`, and
 `synergy-keys synergy pause|resume|config`.
 
 The single visible **Synergy** tray starts at desktop login and stays available
@@ -19,7 +19,13 @@ The ring matches T3's 13px radius and 2.6px stroke on a 32px canvas.
 
 The menu pauses/resumes sharing and keyboard mappings independently, opens the
 native Synergy configuration, and retains shortcut inspection, refresh, logs and
-help. Pausing `synergy-keys` stops its controller and restores Linux mappings;
+help. Show logs uses a held Alacritty window. Command help (`synergy-keys help`)
+renders the CLI reference to `$XDG_CACHE_HOME/synergy-keys/help.txt` (defaulting
+to `~/.cache`) and opens it in Neovim in a new Alacritty window, using the user's
+`nvim` from PATH. Both actions bypass Alacritty's normal shell/tmux startup;
+`synergy-keys --help` still prints help in the current terminal.
+
+Pausing `synergy-keys` stops its controller and restores Linux mappings;
 resuming arms the next sharing session if sharing is currently stopped. Choices
 persist in `~/.local/state/synergy-keys/controls.json`, respecting XDG overrides.
 Refresh preserves an explicit keyboard pause. Pausing sharing does not change
