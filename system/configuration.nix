@@ -55,7 +55,6 @@ in
       ./help
       ./local-llm.nix
       ./tailscale.nix
-      ./html-library.nix
       ./postman.nix
       ./custom-options.nix
     ];
