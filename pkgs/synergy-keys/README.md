@@ -20,7 +20,7 @@ The ring matches T3's 13px radius and 2.6px stroke on a 32px canvas.
 The menu pauses/resumes sharing and keyboard mappings independently, opens the
 native Synergy configuration, and retains shortcut inspection, refresh, logs and
 help. Show logs uses a held Alacritty window. Command help (`synergy-keys help`)
-renders the CLI reference to `$XDG_CACHE_HOME/synergy-keys/help.txt` (defaulting
+copies the short Markdown guide to `$XDG_CACHE_HOME/synergy-keys/help.md` (defaulting
 to `~/.cache`) and opens it in Neovim in a new Alacritty window, using the user's
 `nvim` from PATH. Both actions bypass Alacritty's normal shell/tmux startup;
 `synergy-keys --help` still prints help in the current terminal.

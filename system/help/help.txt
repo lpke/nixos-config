@@ -59,7 +59,8 @@ Cooling
   nzxt-grid-v2-status          Print NZXT Grid+ V2 fan channel status.
 
 Display
-  display-brightness-toggle    Black out the primary display or restore full brightness.
+  monitor-control              Open monitor blackout and label controls.
+  display-brightness-toggle    Toggle the selected monitors' blackout.
 
 Photo Tools
   adobe-dng-converter          Launch Adobe DNG Converter via Wine.

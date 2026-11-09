@@ -21,6 +21,7 @@ let
   };
   desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
   displayBrightnessToggle = pkgs.callPackage ../pkgs/display-brightness-toggle {};
+  monitorControl = pkgs.callPackage ../pkgs/monitor-control {};
   synergyKeys = pkgs.callPackage ../pkgs/synergy-keys {};
   t3Ssh = pkgs.callPackage ../pkgs/t3-ssh {};
   tesseractOcr = pkgs.tesseract.override { enableLanguages = [ "eng" ]; };
@@ -589,7 +590,8 @@ in
     kdePackages.accessibility-inspector
     krohnkitePatched # tiling window manager
     desktopRefresh # steady desktop refresh while Adaptive Sync stays enabled
-    displayBrightnessToggle # toggle a black overlay on the primary display
+    displayBrightnessToggle # compatibility entrypoint for Monitor control
+    monitorControl # named monitor blackout tray and controller
     kdePackages.kamoso # webcam app
     kdePackages.kdenlive # video editing
     kdePackages.kclock # simple clock/timer app

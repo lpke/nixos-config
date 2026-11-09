@@ -128,10 +128,10 @@ def help_file():
         cfg = configuration()
     except (OSError, ValueError, TypeError):
         cfg = Configuration("the configured T3 host route", "the configured Mac T3 URL", "")
-    text = (ASSETS / "help.txt").read_text().replace("@URL@", cfg.url).replace("@ROUTE@", cfg.route)
+    text = (ASSETS / "help.md").read_text().replace("@URL@", cfg.url).replace("@ROUTE@", cfg.route)
     cache = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "t3-tailscale"
     cache.mkdir(mode=0o700, parents=True, exist_ok=True)
-    path = cache / "help.txt"
+    path = cache / "help.md"
     path.write_text(text)
     path.chmod(0o600)
     return path

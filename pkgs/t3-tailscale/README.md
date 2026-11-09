@@ -10,7 +10,7 @@ Private settings come from `~/.config/tailscale-config/t3-gateway.json`, provisi
 only by the explicitly enabled chezmoi external. The file contains a single-host
 IPv4 route, its HTTP URL and the expected public T3 environment ID. No credential
 or encrypted T3 catalog is read. The private repository owns target values and
-operating instructions; `help.txt` is rendered with those values at runtime.
+operating instructions; `help.md` is rendered with those values at runtime.
 
 Start merges the T3 route into the daemon's current advertisements. Pause and
 Quit remove only that route. All other advertisements and preferences are kept.

@@ -1,4 +1,4 @@
-"""Expose an SVG filename so Plasma renders at its own screen's pixel ratio."""
+"""Shared native tray icon rendering and primary-click menu behavior."""
 
 import hashlib
 import os
@@ -6,11 +6,21 @@ from pathlib import Path
 import tempfile
 
 from PyQt6.QtCore import QByteArray, QRectF, QSize, Qt
-from PyQt6.QtGui import QIcon, QIconEngine, QPainter, QPixmap
+from PyQt6.QtGui import QCursor, QIcon, QIconEngine, QPainter, QPixmap
 from PyQt6.QtSvg import QSvgRenderer
+from PyQt6.QtWidgets import QSystemTrayIcon
 
 
 ICON_SIZES = (*range(16, 65), 80, 96, 128, 256)
+
+
+def primary_click_opens_menu(tray):
+    def activated(reason):
+        # Right click already opens the native context menu through the tray host.
+        if reason == QSystemTrayIcon.ActivationReason.Trigger and tray.contextMenu():
+            tray.contextMenu().popup(QCursor.pos())
+
+    tray.activated.connect(activated)
 
 
 def cached_svg(data):

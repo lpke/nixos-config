@@ -17,7 +17,7 @@ stdenvNoCC.mkDerivation {
   installPhase = ''
     runHook preInstall
     mkdir -p "$out/lib/synergy-keys" "$out/bin"
-    cp -r synergy_keys "$out/lib/synergy-keys/"
+    cp -r synergy_keys help.md "$out/lib/synergy-keys/"
     cp ${../tray-support/tray_icon.py} "$out/lib/synergy-keys/tray_icon.py"
     for entry in cli controller tray; do
       name="synergy-keys-$entry"

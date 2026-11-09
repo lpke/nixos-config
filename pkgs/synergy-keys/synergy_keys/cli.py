@@ -32,8 +32,8 @@ def main():
         try:
             cache = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "synergy-keys"
             cache.mkdir(mode=0o700, parents=True, exist_ok=True)
-            path = cache / "help.txt"
-            path.write_text(parser.format_help())
+            path = cache / "help.md"
+            path.write_text((Path(__file__).resolve().parents[1] / "help.md").read_text())
             os.execvp("alacritty", ["alacritty", "-e", "nvim", "--", str(path)])
         except OSError as error:
             print(f"Cannot open command help: {error}", file=sys.stderr)

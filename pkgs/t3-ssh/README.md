@@ -12,7 +12,7 @@ T3 0.1.7 only derives editor links from the active SSH profile or the server's
 advertised SSH targets, so an alternate SSH profile alone does not enable its
 editor button on HTTP. Its native SSH tunnel also forces `ControlPath=none`.
 The persistent forward is available for health checks and optional URL pairing;
-a URL route alone carries no SSH editor metadata. See `help.txt` for use.
+a URL route alone carries no SSH editor metadata. See `help.md` for use.
 
 The chezmoi `t3code` launcher calls `t3-ssh auto-start` when this optional helper
 is available. A locked runtime marker contains the current graphical session's

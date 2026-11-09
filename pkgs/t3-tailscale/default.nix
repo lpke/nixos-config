@@ -11,7 +11,7 @@ stdenvNoCC.mkDerivation {
   installPhase = ''
     runHook preInstall
     mkdir -p "$out/lib/t3-tailscale" "$out/bin"
-    cp -r t3_tailscale help.txt "$out/lib/t3-tailscale/"
+    cp -r t3_tailscale help.md "$out/lib/t3-tailscale/"
     makeWrapper ${python3}/bin/python "$out/bin/t3-tailscale" \
       --add-flags "-m t3_tailscale.cli" \
       --prefix PYTHONPATH : "$out/lib/t3-tailscale" \

@@ -6,6 +6,7 @@ import sys
 
 from PyQt6.QtCore import QProcess, QTimer
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from tray_icon import primary_click_opens_menu
 
 from .icons import icons
 
@@ -47,6 +48,7 @@ class Tray:
         self.menu.addSeparator()
         self.menu.addAction("Quit tray", lambda: app.quit())
         self.tray.setContextMenu(self.menu)
+        primary_click_opens_menu(self.tray)
         self.display()
         self.tray.show()
         app.aboutToQuit.connect(self.shutdown)

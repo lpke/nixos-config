@@ -31,11 +31,12 @@ in
 
   input.keyboard.options = lib.splitString "," osConfig.services.xserver.xkb.options;
 
-  shortcuts = withDeps ./shortcuts.nix;
-  hotkeys.commands.display-brightness-toggle = {
-    name = "Toggle primary display blackout";
-    key = "Meta+Ctrl+Alt+Shift+D";
-    command = "/run/current-system/sw/bin/display-brightness-toggle";
+  shortcuts = lib.recursiveUpdate (withDeps ./shortcuts.nix) {
+    # Retire the old primary-only action, including its cached KService command.
+    "plasma-manager-commands.desktop".display-brightness-toggle = [];
+    "services/plasma-manager-commands.desktop".display-brightness-toggle = [];
+    "monitor-control.desktop".toggle-blackout = "Meta+Ctrl+Alt+Shift+D";
+    "services/monitor-control.desktop".toggle-blackout = "Meta+Ctrl+Alt+Shift+D";
   };
   panels = withDeps ./panels.nix;
   window-rules = withDeps ./window-rules.nix;

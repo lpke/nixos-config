@@ -8,7 +8,7 @@ from unittest.mock import patch
 from xml.etree import ElementTree
 
 from PyQt6.QtCore import QEventLoop, QTimer
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon
 
 from t3_tray.tray import MENU_RIGHT_GUTTER, Tray, TRANSPORTS
 from t3_tray.icons import AQUA, RED, icon_svg
@@ -41,6 +41,17 @@ class TrayTests(unittest.TestCase):
                 self.assertIsNone(upper.get("stroke-dasharray"))
                 self.assertIsNone(lower.get("stroke-dasharray"))
                 self.assertIsNotNone(right.get("stroke-dasharray"))
+
+    def test_primary_click_opens_menu_and_other_clicks_keep_native_handling(self):
+        with patch.object(self.tray.menu, "popup") as popup:
+            self.tray.tray.activated.emit(QSystemTrayIcon.ActivationReason.Trigger)
+            popup.assert_called_once()
+            popup.reset_mock()
+            for reason in (QSystemTrayIcon.ActivationReason.Context,
+                           QSystemTrayIcon.ActivationReason.MiddleClick):
+                self.tray.tray.activated.emit(reason)
+            popup.assert_not_called()
+        self.assertIs(self.tray.tray.contextMenu(), self.tray.menu)
 
     def test_same_state_does_not_republish_large_icon_arrays(self):
         with patch.object(self.tray.tray, "setIcon") as publish:

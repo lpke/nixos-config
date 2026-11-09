@@ -6,7 +6,7 @@ import time
 
 from PyQt6.QtCore import QProcess, QTimer
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
-from tray_icon import svg_icon
+from tray_icon import primary_click_opens_menu, svg_icon
 
 from . import controls, synergy
 from .runtime import CONTROLLER_UNIT, describe, directory, read_json
@@ -73,6 +73,7 @@ class Tray:
         self.menu.addAction("Show logs", lambda: self.command("alacritty", ["--hold", "-e", "synergy-keys", "logs"]))
         self.menu.addAction("Command help", lambda: self.command("synergy-keys", ["help"]))
         self.tray.setContextMenu(self.menu)
+        primary_click_opens_menu(self.tray)
         self.icons = {(sharing, keys): svg_icon(icon_svg(sharing, keys))
                       for sharing in (False, True) for keys in (False, True)}
         self.tray.setIcon(self.icons[False, False])

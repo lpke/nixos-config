@@ -112,10 +112,10 @@ def describe(state):
 
 def help_file():
     cfg = configuration()
-    text = (ASSETS / "help.txt").read_text()
+    text = (ASSETS / "help.md").read_text()
     text = text.replace("@LOCAL_URL@", cfg.local_url).replace("@SSH_HOST@", cfg.ssh_host)
     cache = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "t3-ssh"
     cache.mkdir(mode=0o700, parents=True, exist_ok=True)
-    path = cache / "help.txt"
+    path = cache / "help.md"
     path.write_text(text)
     return path
