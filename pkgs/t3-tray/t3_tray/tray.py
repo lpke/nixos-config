@@ -25,6 +25,8 @@ class Tray:
         self.commands = set()
         self.polling = set()
         self.closing = False
+        self.quitting = self.quit_started = False
+        self.pending_controls = set()
         self.states = {key: {"status": "Checking", "connected": False, "active": False}
                        for key in TRANSPORTS}
         self.icons = icons()
@@ -46,7 +48,7 @@ class Tray:
             menu.addAction("Help", lambda checked=False, p=program: self.command(p, ["help"]))
             self.actions[key] = {"summary": summary, "start": start, "pause": pause, "menu": menu}
         self.menu.addSeparator()
-        self.menu.addAction("Quit tray", lambda: app.quit())
+        self.menu.addAction("Quit all", self.quit_all)
         self.tray.setContextMenu(self.menu)
         primary_click_opens_menu(self.tray)
         self.display()
@@ -78,12 +80,27 @@ class Tray:
         self.states[key] = state
         self.display()
 
+    def quit_all(self):
+        self.quitting = True
+        self.menu.setEnabled(False)
+        self.finish_quit()
+
+    def finish_quit(self):
+        if self.quitting and not self.quit_started and not self.pending_controls:
+            self.quit_started = True
+            self.command("t3-tray", ["quit"])
+
     def control(self, key, action):
+        if self.quitting:
+            return
         self.command(TRANSPORTS[key][1], [action])
 
     def command(self, program, arguments, polling=None):
         process = QProcess(self.app)
         self.commands.add(process)
+        quit_command = program == "t3-tray" and arguments == ["quit"]
+        if program in {value[1] for value in TRANSPORTS.values()} and arguments and arguments[0] in ("start", "stop"):
+            self.pending_controls.add(process)
         timed_out = False
         if polling == "review":
             timeout = QTimer(process)
@@ -101,7 +118,9 @@ class Tray:
             if polling:
                 self.polling.discard(polling)
             self.commands.discard(process)
+            self.pending_controls.discard(process)
             process.deleteLater()
+            self.finish_quit()
 
         def finished(code, status):
             if polling:
@@ -127,6 +146,12 @@ class Tray:
                 detail = bytes(process.readAllStandardError()).decode(errors="replace").strip()
                 self.tray.showMessage("T3", detail or "Command failed. Open Help or Show logs.",
                                       QSystemTrayIcon.MessageIcon.Warning)
+            if quit_command:
+                if code == 0:
+                    self.app.quit()
+                else:
+                    self.quitting = self.quit_started = False
+                    self.menu.setEnabled(True)
             cleanup()
             if not polling:
                 self.tick()
@@ -144,6 +169,9 @@ class Tray:
                 detail = ("Git review launcher is unavailable. Apply your dotfiles to install it."
                           if program == TRANSPORTS["review"][1] else process.errorString())
                 self.tray.showMessage("T3", detail, QSystemTrayIcon.MessageIcon.Warning)
+            if quit_command:
+                self.quitting = self.quit_started = False
+                self.menu.setEnabled(True)
             cleanup()
 
         process.finished.connect(finished)
@@ -151,7 +179,7 @@ class Tray:
         process.start(program, arguments)
 
     def tick(self):
-        if self.closing:
+        if self.closing or self.quitting:
             return
         for key, (_, program) in TRANSPORTS.items():
             if key not in self.polling:
@@ -167,6 +195,7 @@ class Tray:
                 process.kill()
                 process.waitForFinished(1000)
         self.commands.clear()
+        self.pending_controls.clear()
         self.polling.clear()
         self.tray.hide()
 

@@ -13,8 +13,9 @@ Core
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
   t3code                       Launch T3 Code; use Settings > About for stable updates.
-  t3-tray show                 Show connection and Git review status controls.
-  t3-tray quit                 Hide the tray, keeping connections and Git review available.
+  t3-tray show                 Start connections, Git review and their controls.
+  T3 Controls                  Open the same tray from the application menu.
+  t3-tray quit                 Quit connections, Git review and their controls.
   t3-ssh start                 Start or resume SSH and show the shared T3 tray.
   t3-ssh stop                  Pause the connection and keep its tray controls.
   t3-ssh status                Show connection health.
@@ -36,6 +37,9 @@ Services
 
 Synergy
   synergy-keys                 Show Synergy screen and keyboard mapping status.
+  synergy                      Launch sharing and its custom controls.
+  synergy-keys tray            Restore the Synergy controls.
+  synergy-keys quit            Quit Synergy and its keyboard controller/tray.
   synergy-keys pause           Pause keyboard mappings and restore Linux mode.
   synergy-keys resume          Resume automatic keyboard mappings.
   synergy-keys synergy pause   Pause Synergy sharing.

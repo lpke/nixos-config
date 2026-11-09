@@ -72,6 +72,8 @@ class Tray:
         self.menu.addAction("Refresh screen detection", lambda: self.command("synergy-keys", ["refresh"]))
         self.menu.addAction("Show logs", lambda: self.command("alacritty", ["--hold", "-e", "synergy-keys", "logs"]))
         self.menu.addAction("Command help", lambda: self.command("synergy-keys", ["help"]))
+        self.menu.addSeparator()
+        self.menu.addAction("Quit Synergy", lambda: self.command("synergy-keys", ["quit"]))
         self.tray.setContextMenu(self.menu)
         primary_click_opens_menu(self.tray)
         self.icons = {(sharing, keys): svg_icon(icon_svg(sharing, keys))

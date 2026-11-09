@@ -24,3 +24,7 @@ def icon_svg(tailscale, review, ssh):
 def icons():
     return {(tailscale, review, ssh): svg_icon(icon_svg(tailscale, review, ssh))
             for tailscale in (False, True) for review in (False, True) for ssh in (False, True)}
+
+
+def app_icon_svg():
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="{AQUA}" stroke-width="2.6"/>{GLYPH}</svg>'

@@ -17,7 +17,7 @@ def main():
         prog="synergy-keys",
         description="Inspect Synergy shortcuts and screen detection. App shortcuts are resolved on the Mac.",
     )
-    parser.add_argument("command", nargs="?", default="status", choices=["status", "refresh", "logs", "help", "inspect", "pause", "resume", "synergy"])
+    parser.add_argument("command", nargs="?", default="status", choices=["status", "refresh", "logs", "help", "inspect", "pause", "resume", "synergy", "launch", "tray", "quit"])
     parser.add_argument("shortcut", nargs="?", help="Inspector search, or Synergy action: pause, resume, config")
     parser.add_argument("--json", action="store_true", help="Print an inspector trace without opening a window")
     parser.add_argument("--device", choices=["Keyboard", "Logitech G903"], default="Keyboard", help="Device for --json inspection")
@@ -38,9 +38,9 @@ def main():
         except OSError as error:
             print(f"Cannot open command help: {error}", file=sys.stderr)
             return 1
-    if args.command in ("pause", "resume", "synergy"):
+    if args.command in ("pause", "resume", "synergy", "launch", "tray", "quit"):
         try:
-            controls.control("synergy" if args.command == "synergy" else "keys", args.shortcut if args.command == "synergy" else args.command)
+            controls.control("synergy" if args.command in ("synergy", "launch", "tray", "quit") else "keys", args.shortcut if args.command == "synergy" else args.command)
             print(f"{'Synergy' if args.command == 'synergy' else 'synergy-keys'}: {args.shortcut or args.command}")
             return 0
         except (OSError, ValueError, subprocess.SubprocessError) as error:

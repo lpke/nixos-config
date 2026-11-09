@@ -1,8 +1,9 @@
 # T3 status tray
 
 Home Manager's `user/t3-tray.nix` starts one `t3-tray.service` at desktop login.
-Its StatusNotifier id is `T3`. The service is independent of the connections and
-Git review launcher, so closing its UI never pauses them.
+Its StatusNotifier id is `T3`. Opening T3 Controls starts its SSH connection,
+scoped Tailscale route and Git review listener. Quit all stops those helpers
+before closing the tray; the T3 desktop app and shared VPN daemon stay independent.
 
 The solid upper-left quarter reports Tailscale, the solid lower-left quarter
 reports the Git review launcher, and the dotted right half reports SSH. Each
@@ -28,8 +29,10 @@ quarter and submenu; unavailable helpers disable Start. Status checks have a
 
 Polls use separate asynchronous child processes, so an offline route cannot hold
 up the other route or menu. Shutdown stops only child checks/commands before Qt teardown.
-Global Quit tray exits the UI without changing either transport. `t3-tray show`
-restores it; `t3-tray quit` hides it. Starting either helper also restores the tray.
+Quit all waits for pending menu controls, then stops all three helpers and closes
+the tray. Failed shutdown keeps the controls available for retry. `t3-tray show`
+starts the helpers and tray; `t3-tray quit` quits them together. Starting an
+individual helper restores the tray without resuming the other helpers.
 
 The SSH target stays on demand, with its existing first-T3-launch startup marker.
 Tailscale's main daemon still starts at boot and remembers the advertised route.
@@ -64,9 +67,9 @@ python3 -B pkgs/t3-tray/test_trays.py
 The runner creates an isolated D-Bus session and uses the offscreen platform.
 It tests all eight independent icon states, exact physical sizes, separate menu
 commands and polling slots, malformed/error responses, no duplicate icon exports,
-UI-only Quit, missing/old/timed-out review helpers and teardown of pending checks. Runtime controller tests remain in
+coordinated Quit all, missing/old/timed-out review helpers and teardown of pending checks. Runtime controller tests remain in
 each transport package. Live integration should verify the exported IconPixmap
-sizes, menu/status and tray-only quit/show while preserving any SSH master/tunnel.
+sizes, menu/status and coordinated quit/show using disposable connection targets.
 
 The real SNI export check needs the installed KDE platform-theme plugin, PyQt6,
 `busctl` and `dbus-run-session`:

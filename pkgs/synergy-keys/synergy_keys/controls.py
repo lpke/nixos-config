@@ -8,7 +8,7 @@ import subprocess
 import time
 
 from . import synergy
-from .runtime import CONTROLLER_UNIT, directory, read_json, write_json
+from .runtime import CONTROLLER_UNIT, TRAY_UNIT, directory, read_json, write_json
 
 
 NATIVE_ID = "tray-icon tray app"
@@ -123,6 +123,26 @@ def keys(action):
 
 
 def sharing(action):
+    if action == 'launch':
+        # Explicit app launch also loads an installed tray update.
+        command('systemctl', '--user', 'restart', TRAY_UNIT)
+        action = 'resume'
+    if action == 'tray':
+        command('systemctl', '--user', 'start', TRAY_UNIT)
+        return
+    if action == 'quit':
+        # Set sharing's pause before stopping anything so the tray cannot rearm keys.
+        set_preference('synergy_paused', True)
+        command('systemctl', '--user', 'stop', CONTROLLER_UNIT)
+        if 'com.symless.synergy' in command('flatpak', 'ps', '--columns=application').splitlines():
+            try:
+                command('flatpak', 'kill', 'com.symless.synergy')
+            except subprocess.CalledProcessError:
+                if 'com.symless.synergy' in command('flatpak', 'ps', '--columns=application').splitlines():
+                    raise
+        # A tray action runs in this unit's cgroup. Queue its stop, then return.
+        command('systemctl', '--user', '--no-block', 'stop', TRAY_UNIT)
+        return
     if action == "config":
         native_action("Show config")
         return

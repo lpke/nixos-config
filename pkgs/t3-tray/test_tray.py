@@ -74,14 +74,17 @@ class TrayTests(unittest.TestCase):
                     next(a for a in menu.actions() if a.text() == "Show logs").trigger()
                     command.assert_called_with("alacritty", ["--hold", "-e", program, "logs"])
 
-    def test_shared_quit_only_exits_ui(self):
-        with patch.object(self.app, "quit") as quit, patch.object(Tray, "tick"):
-            tray = Tray(self.app)
-            self.addCleanup(tray.shutdown)
-            with patch.object(tray, "command") as command:
-                next(a for a in tray.menu.actions() if a.text() == "Quit tray").trigger()
-            quit.assert_called_once()
+    def test_shared_quit_waits_for_pending_controls_before_quitting_all(self):
+        pending = object()
+        self.tray.pending_controls.add(pending)
+        with patch.object(self.tray, "command") as command:
+            next(a for a in self.tray.menu.actions() if a.text() == "Quit all").trigger()
             command.assert_not_called()
+            self.tray.pending_controls.clear()
+            self.tray.finish_quit()
+            command.assert_called_once_with("t3-tray", ["quit"])
+            self.tray.finish_quit()
+            self.assertEqual(command.call_count, 1)
 
     def test_polling_is_independent_and_never_duplicates_pending_checks(self):
         with patch.object(self.tray, "command") as command:

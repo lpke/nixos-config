@@ -4,8 +4,16 @@ The tray controls Synergy sharing and keyboard mappings independently. Its color
 ring means sharing is running; its white pointer means mappings are ready.
 Red marks a stopped, paused or unavailable part.
 
+Synergy carries the keyboard and mouse between computers. synergy-keys watches
+which screen is active and selects the matching keyboard mappings. Its controller
+runs only while sharing and its tray are active; the two pause choices are independent.
+Launch Synergy from the app menu or command to open sharing and these controls.
+
 | Command | Action |
 | --- | --- |
+| `synergy` | Start sharing and show the custom controls. |
+| `synergy-keys tray` | Restore the tray without changing pause choices. |
+| `synergy-keys quit` | Quit Synergy and its controls; restore Linux mappings. |
 | `synergy-keys` | Show sharing and mapping status. |
 | `synergy-keys pause` / `resume` | Pause or resume keyboard mappings. |
 | `synergy-keys synergy pause` / `resume` | Pause or resume sharing. |

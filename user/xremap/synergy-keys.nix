@@ -1,6 +1,15 @@
 { config, pkgs, ... }:
 let
   synergyKeys = pkgs.callPackage ../../pkgs/synergy-keys {};
+  app = pkgs.makeDesktopItem {
+    name = "com.symless.synergy";
+    desktopName = "Synergy";
+    comment = "Screen sharing and keyboard mapping controls";
+    exec = "${synergyKeys}/bin/synergy";
+    icon = "${synergyKeys}/share/icons/hicolor/scalable/apps/synergy-controls.svg";
+    categories = [ "Utility" ];
+    startupNotify = false;
+  };
 in
 {
   xdg.configFile."synergy-keys/config.json".text = builtins.toJSON {
@@ -51,4 +60,7 @@ in
 
   # Keep the interactive command aligned with targeted user-service activations.
   home.file.".local/bin/synergy-keys".source = "${synergyKeys}/bin/synergy-keys";
+  home.file.".local/bin/synergy".source = "${synergyKeys}/bin/synergy";
+  xdg.dataFile."applications/com.symless.synergy.desktop".source =
+    "${app}/share/applications/com.symless.synergy.desktop";
 }

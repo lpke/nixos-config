@@ -19,6 +19,10 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$out/lib/synergy-keys" "$out/bin"
     cp -r synergy_keys help.md "$out/lib/synergy-keys/"
     cp ${../tray-support/tray_icon.py} "$out/lib/synergy-keys/tray_icon.py"
+    mkdir -p "$out/share/icons/hicolor/scalable/apps"
+    PYTHONPATH="$out/lib/synergy-keys" ${python}/bin/python -B -c \
+      'from synergy_keys.tray import icon_svg; print(icon_svg(True, True))' \
+      > "$out/share/icons/hicolor/scalable/apps/synergy-controls.svg"
     for entry in cli controller tray; do
       name="synergy-keys-$entry"
       if [ "$entry" = cli ]; then name=synergy-keys; fi
@@ -30,6 +34,12 @@ stdenvNoCC.mkDerivation {
         --prefix PATH : "$out/bin" \
         --prefix PATH : ${lib.makeBinPath [ systemd flatpak ydotool alacritty nix ]}
     done
+    makeWrapper ${python}/bin/python "$out/bin/synergy" \
+      --add-flags "-m synergy_keys.cli launch" \
+      --set PYTHONDONTWRITEBYTECODE 1 \
+      --prefix PYTHONPATH : "$out/lib/synergy-keys" \
+      --prefix PATH : "$out/bin" \
+      --prefix PATH : ${lib.makeBinPath [ systemd flatpak ]}
     wrapQtApp "$out/bin/synergy-keys"
     wrapQtApp "$out/bin/synergy-keys-tray"
     runHook postInstall

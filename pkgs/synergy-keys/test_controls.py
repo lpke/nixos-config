@@ -102,6 +102,28 @@ class ControlTests(unittest.TestCase):
         with patch.object(controls, "bus", side_effect=bus):
             self.assertEqual(controls.native_menu(), (":native", "/Menu"))
 
+    def test_launch_restores_tray_and_sharing_without_changing_keys_pause(self):
+        controls.set_preference('keys_paused', True)
+        with patch.object(controls.synergy, 'processes', return_value={'running': True}), patch.object(controls, 'command') as command, patch.object(controls, 'wait_running'):
+            controls.control('synergy', 'launch')
+        command.assert_called_once_with('systemctl', '--user', 'restart', controls.TRAY_UNIT)
+        self.assertTrue(controls.preferences()['keys_paused'])
+        self.assertFalse(controls.preferences()['synergy_paused'])
+
+    def test_quit_closes_only_synergy_and_its_units_and_preserves_keys_choice(self):
+        controls.set_preference('keys_paused', True)
+        def result(*args):
+            return 'com.symless.synergy\nother.app' if args[:2] == ('flatpak', 'ps') else ''
+        with patch.object(controls, 'command', side_effect=result) as command:
+            controls.control('synergy', 'quit')
+        self.assertEqual(command.call_args_list, [
+            call('systemctl', '--user', 'stop', controls.CONTROLLER_UNIT),
+            call('flatpak', 'ps', '--columns=application'),
+            call('flatpak', 'kill', 'com.symless.synergy'),
+            call('systemctl', '--user', '--no-block', 'stop', controls.TRAY_UNIT),
+        ])
+        self.assertEqual(controls.preferences(), {'keys_paused': True, 'synergy_paused': True})
+
     def test_native_action_selects_label_from_exported_layout(self):
         tree = [0, {}, [{"data": [3, {"label": {"data": "Stop"}}, []]}]]
         with patch.object(controls, "native_menu", return_value=(":native", "/Menu")), patch.object(controls, "bus", return_value=[1, tree]), patch.object(controls, "command") as command:
