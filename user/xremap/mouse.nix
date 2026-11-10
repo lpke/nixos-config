@@ -56,7 +56,7 @@ in
       remap = {
         "BTN_EXTRA" = "n"; # left front - n
         "BTN_SIDE" = "TAB"; # left back - tab
-        "BTN_FORWARD" = "BTN_RIGHT"; # right front - right click
+        "BTN_FORWARD" = "i"; # right front - i
         "KEY_F20" = "ESC"; # right back - esc
       };
     })
