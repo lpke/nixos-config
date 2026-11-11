@@ -36,8 +36,9 @@ function changed(window, oldOpacity) {
 }
 function watch(window) {
     if (/t3-quake-placeholder/.test(window.windowClass)) {
-        window.setData(Effect.WindowAddedGrabRole, effect);
-        window.setData(Effect.WindowClosedGrabRole, effect);
+        // Native grabs also cancel an opening animation already started by KDE.
+        effect.grab(window, Effect.WindowAddedGrabRole, true);
+        effect.grab(window, Effect.WindowClosedGrabRole, true);
     }
     window.windowOpacityChanged.connect(changed);
 }

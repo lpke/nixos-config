@@ -12,7 +12,7 @@ stdenvNoCC.mkDerivation {
   doCheck = true;
   checkPhase = ''
     runHook preCheck
-    node --test tests/controller.test.cjs
+    node --test tests/controller.test.cjs tests/effect.test.cjs
     QT_QPA_PLATFORM=offscreen PYTHONPATH="$PWD" ${python}/bin/python -B -m unittest discover -s tests -p 'test_*.py'
     runHook postCheck
   '';
