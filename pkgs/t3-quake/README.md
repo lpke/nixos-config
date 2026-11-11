@@ -23,7 +23,6 @@ command. T3’s executable, launcher, backend and settings remain independent.
 `patches/krohnkite-t3-quake.patch` preserves tile and layout identity while
 borrowing. Deploy both with the normal NixOS switch, then log in again.
 Do not activate the controller against an older Krohnkite package.
-The `t3-quake` development branch has **not** been activated on the live desktop.
 
 ## Tests
 
