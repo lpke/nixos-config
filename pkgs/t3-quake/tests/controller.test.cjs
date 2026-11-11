@@ -217,3 +217,53 @@ test('a newer focus choice cancels pending placeholder recall activation', () =>
     assert.equal(c.mode, 'normal');
     assert.equal(workspace.activeWindow, peer);
 });
+
+
+test('geometry and buffers settle before revealing a resized client', () => {
+    const {c, t3, prepare, tick} = setup();
+    prepare();
+    assert.equal(t3.opacity, 0);
+    tick(16);
+    assert.equal(t3.keepAbove, false, 'concealment precedes native placement');
+    tick(16);
+    assert.equal(t3.keepAbove, true);
+    t3.bufferGeometry = {...t3.frameGeometry};
+    tick(16);
+    tick(32);
+    t3.bufferGeometry.width -= 1;
+    tick(16);
+    tick(32);
+    assert.equal(t3.opacity, 0, 'a newer buffer restarts the settle interval');
+    tick(32);
+    assert.equal(c.mode, 'opening');
+});
+
+test('a placeholder on the wrong output is corrected before T3 leaves home', () => {
+    const {c, t3, prepare, tick} = setup();
+    c.summon();
+    const p = {...t3, internalId: 'placeholder', resourceClass: 't3-quake-placeholder',
+        caption: 'T3 quake · t3', opacity: 0.99951171875, output: {}};
+    c.add(p);
+    tick();
+    assert.equal(p.output, t3.output);
+    assert.equal(c.mode, 'placeholder');
+    assert.equal(t3.opacity, 1);
+});
+
+
+test('a late output change preserves an already consumed tiler acknowledgment', () => {
+    const {c, t3, workspace, tick, settle} = setup();
+    c.summon();
+    const p = {...t3, internalId: 'placeholder', resourceClass: 't3-quake-placeholder',
+        caption: 'T3 quake · t3', opacity: 0.99951171875};
+    c.add(p); workspace.stackingOrder.push(p);
+    tick(16);
+    assert.equal(p.opacity, 1, 'the tiler acknowledgment has been consumed');
+    p.output = {};
+    tick(16);
+    assert.equal(p.output, t3.output);
+    tick(16);
+    assert.equal(c.mode, 'placeholder', 'the corrected output must settle');
+    settle();
+    assert.equal(c.mode, 'quake');
+});

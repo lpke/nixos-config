@@ -534,7 +534,7 @@ in
       libxi libxcb libxrender libxkbcommon
       mesa pango cairo alsa-lib
       gtk3 gdk-pixbuf freetype fontconfig
-      libgbm libnotify
+      libgbm libglvnd libnotify
       # for codex-acp
       libcap
     ];

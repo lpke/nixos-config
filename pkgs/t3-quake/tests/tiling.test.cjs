@@ -110,3 +110,21 @@ test('the actual Columns arrangement preserves column membership and geometry', 
     assert.equal(columns.columns.length, 2);
     assert.equal(JSON.stringify([peer.geometry, origin.geometry]), before);
 });
+
+
+test('fractional T3 client sizes do not trigger an endless native configure loop', () => {
+    const {context} = setup();
+    const {KWinWindow, Rect} = vm.runInContext('CONFIG = {}; KWINCONFIG = {}; Qt = {rect: (x,y,width,height) => ({x,y,width,height})}; ({KWinWindow, Rect})', context);
+    let writes = 0;
+    const native = {resourceClass: 'com.t3tools.T3Code', deleted: false,
+        frameGeometry: {x: 0, y: 25, width: 1638.4, height: 1702.4},
+        resizeable: true, minSize: {width: 1, height: 1}, maxSize: {width: 10000, height: 10000}};
+    const actual = native.frameGeometry;
+    Object.defineProperty(native, 'frameGeometry', {get: () => actual, set() {writes++;}});
+    const wrapper = Object.create(KWinWindow.prototype);
+    wrapper.window = native;
+    wrapper.commit(new Rect(0, 25, 1638, 1702));
+    assert.equal(writes, 0);
+    wrapper.commit(new Rect(100, 25, 1200, 900));
+    assert.equal(writes, 1, 'real moves and resizes still reach the client');
+});

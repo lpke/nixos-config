@@ -120,3 +120,20 @@
      if (window) {
        if (comment === "unminimized") ctx.currentWindow = window;
        const workingArea = window.surface.workingArea;
+--- a/src/driver/kwin/kwinwindow.ts
++++ b/src/driver/kwin/kwinwindow.ts
+@@ -205,6 +205,14 @@
+         }
+       }
+       if (this.window.deleted) return;
++      // Chromium's Wayland surface rounds at the output's fractional scale.
++      // Reapplying subpixel differences causes an endless configure/commit loop.
++      if (/^(t3code|com\.t3tools\.t3code|t3-quake-placeholder)$/i.test(String(this.window.resourceClass))) {
++        const actual = this.window.frameGeometry;
++        if (Math.abs(actual.x - geometry.x) < 1 && Math.abs(actual.y - geometry.y) < 1 &&
++            Math.abs(actual.width - geometry.width) < 1 && Math.abs(actual.height - geometry.height) < 1)
++          return;
++      }
+       this.window.frameGeometry = toQRect(geometry);
+     }
+   }

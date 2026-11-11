@@ -10,6 +10,23 @@ Item {
     property double sentAt: 0
     property bool attached: false
     property bool ticking: false
+    property bool quakeEnabled: false
+    property string helperOwner: ""
+
+    ShortcutHandler {
+        name: "T3QuakeToggle"
+        text: "Toggle T3 Quake"
+        sequence: "Alt+`"
+        onActivated: toggle.call()
+    }
+    DBusCall {
+        id: toggle
+        service: "org.freedesktop.systemd1"
+        path: "/org/freedesktop/systemd1"
+        dbusInterface: "org.freedesktop.systemd1.Manager"
+        method: "StartUnit"
+        arguments: ["t3-quake-toggle.service", "replace"]
+    }
 
     function sync() {
         attached = controller && controller.window !== null;
@@ -17,7 +34,7 @@ Item {
     }
 
     function exchange() {
-        if (!controller || !controller.window || failed || pending) return;
+        if (!controller || !controller.window || !quakeEnabled || failed || pending) return;
         pending = true;
         sentAt = Date.now();
         bridge.arguments = [JSON.stringify(controller.message())];
@@ -41,15 +58,10 @@ Item {
         arguments: ["t3-quake.service", "replace"]
     }
     DBusCall {
-        id: stopController
-        service: "io.github.lpke.T3Quake"
-        path: "/T3Quake"
-        dbusInterface: "io.github.lpke.T3Quake"
-        method: "Stop"
-    }
-    DBusCall {
         id: bridge
-        service: "io.github.lpke.T3Quake"
+        // Constructing a remote interface can activate its D-Bus service, even
+        // before call(). Keep it unbound for the plain T3 Code launch mode.
+        service: root.quakeEnabled ? root.helperOwner : ""
         path: "/T3Quake"
         dbusInterface: "io.github.lpke.T3Quake"
         method: "Exchange"
@@ -62,6 +74,27 @@ Item {
         onFailed: {
             root.pending = false;
             if (root.attached) root.fail("The window controller stopped responding.");
+        }
+    }
+    // GetNameOwner never activates a stopped helper. Address its unique owner
+    // so a failed Exchange cannot auto-restart it during shutdown.
+    DBusCall {
+        id: modeCheck
+        service: "org.freedesktop.DBus"
+        path: "/org/freedesktop/DBus"
+        dbusInterface: "org.freedesktop.DBus"
+        method: "GetNameOwner"
+        arguments: ["io.github.lpke.T3Quake"]
+        onFinished: function(returnValue) {
+            root.helperOwner = returnValue[0];
+            root.quakeEnabled = true;
+            root.exchange();
+        }
+        onFailed: {
+            if (root.quakeEnabled && root.attached && !root.failed)
+                root.fail("The window controller stopped responding.");
+            root.quakeEnabled = false;
+            root.helperOwner = "";
         }
     }
     DBusCall {
@@ -83,7 +116,7 @@ Item {
         onFailed: console.warn("T3 quake: Could not display the error notification. Run t3-quake restart.")
     }
     Timer {
-        interval: 100; repeat: true; running: root.attached
+        interval: 100; repeat: true; running: root.attached && root.quakeEnabled
         onTriggered: {
             if (root.pending && Date.now() - root.sentAt > 2500)
                 root.fail("The window controller timed out.");
@@ -99,14 +132,14 @@ Item {
     }
     Connections {
         target: Workspace
-        function onWindowAdded(window) { root.controller.add(window); root.sync(); root.exchange(); }
+        function onWindowAdded(window) { root.controller.add(window); root.sync(); modeCheck.call(); }
         function onWindowRemoved(window) {
             var wasT3 = window === root.controller.window;
             root.controller.remove(window); root.sync();
             if (wasT3) {
                 root.failed = false;
                 root.pending = false;
-                stopController.call();
+                root.quakeEnabled = false;
             }
             else root.exchange();
         }
@@ -120,7 +153,13 @@ Item {
         Workspace.stackingOrder.forEach(function(window) { controller.add(window); });
         sync();
         tilerCheck.call();
-        exchange();
+        modeCheck.call();
     }
-    Component.onDestruction: { if (controller) controller.recover(); }
+    Component.onDestruction: {
+        failed = true;
+        quakeEnabled = false;
+        attached = false;
+        ticking = false;
+        if (controller) controller.recover();
+    }
 }

@@ -8,7 +8,9 @@ in
   programs.plasma = {
     configFile.kwinrc.Plugins.t3-quakeEnabled = true;
     configFile.kwinrc.Plugins.t3-quake-slideEnabled = true;
-    shortcuts."services/t3-quake.desktop"._launch = "Alt+`";
+    shortcuts.kwin.T3QuakeToggle = "Alt+`";
+    shortcuts."services/t3-quake-toggle.desktop"._launch = [];
+    shortcuts."services/t3-quake.desktop"._launch = [];
   };
   xdg.dataFile = {
     "kwin/scripts/t3-quake".source = "${quake}/share/kwin/scripts/t3-quake";
@@ -22,11 +24,12 @@ in
     "applications/t3-quake.desktop".text = ''
       [Desktop Entry]
       Type=Application
-      Name=T3 quake
-      Comment=Toggle T3 Code as a drop-down window
-      Exec=${config.home.homeDirectory}/.local/bin/t3-quake
+      Name=T3 Quake
+      Comment=T3 Code with drop-down window controls
+      Exec=${config.home.homeDirectory}/.local/bin/t3-quake launch %U
       Icon=t3code
-      NoDisplay=true
+      Categories=Development;
+      Keywords=t3;quake;coding;AI;
       StartupNotify=false
     '';
   };
@@ -43,6 +46,13 @@ in
       # KWin restores the real window if this process exits or stalls.
       Restart = "no";
       TimeoutStopSec = 3;
+    };
+  };
+  systemd.user.services.t3-quake-toggle = {
+    Unit.Description = "Toggle T3 Quake from the global shortcut";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${quake}/bin/t3-quake";
     };
   };
   systemd.user.services.t3-quake-error = {

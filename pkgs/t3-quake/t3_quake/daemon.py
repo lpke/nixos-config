@@ -8,11 +8,13 @@ from PyQt6.QtCore import QObject, Qt, QTimer, pyqtClassInfo, pyqtSlot
 from PyQt6.QtDBus import QDBusConnection
 from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 
+from .session import running_mode
+
 SERVICE = 'io.github.lpke.T3Quake'
 
 
 class Placeholder(QWidget):
-    def __init__(self, window_id, geometry):
+    def __init__(self, window_id, geometry, output=None):
         super().__init__()
         self.setWindowTitle('T3 quake · ' + window_id)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
@@ -30,6 +32,12 @@ class Placeholder(QWidget):
         text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(text)
         layout.addStretch()
+        # Give Wayland the home output before the first mapped buffer. Otherwise
+        # Qt's initial placement/scale can race the compositor's tile substitution.
+        screen = next((screen for screen in QApplication.screens() if screen.name() == output), None)
+        if screen is not None:
+            self.winId()
+            self.windowHandle().setScreen(screen)
         self.resize(round(geometry['width']), round(geometry['height']))
         self.show()
 
@@ -66,7 +74,7 @@ class Bridge(QObject):
             request = data.get('request') or {}
             if 'placeholder' in request and self.placeholder is None:
                 item = request['placeholder']
-                self.placeholder = Placeholder(item['id'], item['geometry'])
+                self.placeholder = Placeholder(item['id'], item['geometry'], item.get('output'))
                 self.placeholder.destroyed.connect(self.clear_placeholder)
             if data['mode'] == 'normal' and self.placeholder is not None:
                 self.placeholder.close()
@@ -95,6 +103,13 @@ class Bridge(QObject):
         QTimer.singleShot(0, self.app.quit)
 
     def watchdog(self):
+        # The launcher owns helper lifetime, including gaps during a native update.
+        # Legacy/manual starts still expire without a compositor heartbeat.
+        try:
+            if running_mode() == 'quake':
+                return
+        except (OSError, RuntimeError):
+            pass
         # No leaked helper if T3/KWin disappears. D-Bus releases with this process.
         timeout = 3 if self.connected else 30
         if time.monotonic() - self.seen > timeout:

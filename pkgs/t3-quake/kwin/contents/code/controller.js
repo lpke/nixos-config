@@ -92,7 +92,7 @@ Controller.prototype.summon = function() {
         width: Math.round(area.width * .6), height: Math.round(area.height * .6)};
     this.mode = "placeholder";
     this.deadline = Date.now() + 2500;
-    this.request = {placeholder: {id: String(w.internalId), geometry: this.saved.geometry}};
+    this.request = {placeholder: {id: String(w.internalId), geometry: this.saved.geometry, output: this.saved.output.name}};
     this.changed();
 };
 Controller.prototype.tick = function(now) {
@@ -103,6 +103,14 @@ Controller.prototype.tick = function(now) {
         if (!alive(this.placeholder)) return;
         if (this.tilerLoaded && this.placeholder.opacity !== 0.99951171875 && !this.placeholderReady)
             return;
+        if (this.placeholder.output !== this.saved.output) {
+            this.workspace.sendClientToScreen(this.placeholder, this.saved.output);
+            this.placeholder.frameGeometry = this.saved.geometry;
+            // An acknowledged placeholder may move again during its first
+            // configure. Preserve that acknowledgment while settling anew.
+            this.placeholderReady = this.placeholderReady ? now + 32 : 0;
+            return;
+        }
         // Allow Krohnkite's window-added handler to replace its tile first.
         if (!this.placeholderReady) {
             this.placeholderReady = now + 32;
@@ -110,29 +118,32 @@ Controller.prototype.tick = function(now) {
             return;
         }
         if (now < this.placeholderReady) return;
-        w.opacity = 0;
-        w.fullScreen = false;
-        w.setMaximize(false, false);
-        w.desktops = [this.workspace.currentDesktop];
-        w.activities = [this.workspace.currentActivity];
-        w.keepBelow = false;
-        w.keepAbove = true;
-        w.noBorder = true;
-        w.skipTaskbar = true;
-        w.skipPager = true;
-        w.skipSwitcher = true;
-        w.minimized = false;
-        this.workspace.sendClientToScreen(w, this.targetOutput);
-        w.frameGeometry = this.target;
+        this.conceal();
+        this.placeAt = now + 32;
+        this.placed = false;
         this.mode = "sizing";
         this.deadline = now + 2500;
         this.readyAt = 0;
     } else if (this.mode === "sizing" || this.mode === "return-sizing") {
+        if (now > this.deadline) throw new Error("T3 did not confirm its new window size.");
+        if (!this.placed) {
+            if (now < this.placeAt) return;
+            if (this.mode === "sizing") this.placeQuake(); else this.placeHome();
+            this.placed = true;
+            this.stableBuffer = null;
+            this.readyAt = 0;
+            return;
+        }
+        var buffer = JSON.stringify(rect(w.bufferGeometry || w.frameGeometry));
+        if (buffer !== this.stableBuffer) {
+            this.stableBuffer = buffer;
+            this.readyAt = 0;
+        }
         var goal = this.mode === "sizing" ? this.target : this.home;
         var size = w.frameGeometry;
         if (Math.abs(size.x - goal.x) < 2 && Math.abs(size.y - goal.y) < 2 &&
             Math.abs(size.width - goal.width) < 2 && Math.abs(size.height - goal.height) < 2) {
-            if (!this.readyAt) this.readyAt = now + 32;
+            if (!this.readyAt) this.readyAt = now + 64;
             if (now < this.readyAt) return;
             if (this.mode === "sizing") {
                 this.mode = "opening";
@@ -141,13 +152,38 @@ Controller.prototype.tick = function(now) {
                 w.opacity = this.saved.opacity;
                 this.workspace.activeWindow = w;
             } else this.finishReturn();
-        } else if (now > this.deadline) throw new Error("T3 did not confirm its new window size.");
+        } else {
+            this.readyAt = 0;
+            if (now > this.deadline) throw new Error("T3 did not confirm its new window size.");
+        }
     } else if (this.mode === "opening") {
         var fraction = Math.min(1, (now - this.started) / 180);
         if (fraction === 1) this.mode = "quake";
     } else if (this.mode === "closing" && now - this.started >= 180) {
         this.beginReturn();
     }
+};
+Controller.prototype.conceal = function() {
+    // The effect holds a zero-opacity render override before any native move.
+    // Plain window opacity can be delayed while KWin displays an old surface.
+    this.window.opacity = 0.9921875;
+    this.window.opacity = 0;
+};
+Controller.prototype.placeQuake = function() {
+    var w = this.window;
+    w.fullScreen = false;
+    w.setMaximize(false, false);
+    w.desktops = [this.workspace.currentDesktop];
+    w.activities = [this.workspace.currentActivity];
+    w.keepBelow = false;
+    w.keepAbove = true;
+    w.noBorder = true;
+    w.skipTaskbar = true;
+    w.skipPager = true;
+    w.skipSwitcher = true;
+    w.minimized = false;
+    this.workspace.sendClientToScreen(w, this.targetOutput);
+    w.frameGeometry = this.target;
 };
 Controller.prototype.focus = function(window) {
     if (this.mode === "normal") return;
@@ -188,27 +224,33 @@ Controller.prototype.restorePreviousFocus = function() {
         (!previous.activities.length || previous.activities.indexOf(this.workspace.currentActivity) >= 0))
         this.workspace.activeWindow = previous;
 };
-Controller.prototype.beginReturn = function() {
-    var w = this.window;
-    w.opacity = 0;
+Controller.prototype.beginReturn = function(immediate) {
+    this.conceal();
     this.home = alive(this.placeholder) ? rect(this.placeholder.frameGeometry) : this.saved.geometry;
-    w.keepAbove = this.saved.above;
-    w.keepBelow = this.saved.below;
-    w.noBorder = this.saved.border;
-    w.desktops = alive(this.placeholder) ? this.placeholder.desktops : this.saved.desktops;
-    w.activities = alive(this.placeholder) ? this.placeholder.activities : this.saved.activities;
-    var output = alive(this.placeholder) ? this.placeholder.output : this.saved.output;
-    if (this.workspace.screens.indexOf(output) < 0) output = this.workspace.activeScreen;
-    this.workspace.sendClientToScreen(w, output);
-    w.frameGeometry = this.home;
-    // Maximized/fullscreen geometry can only be confirmed after restoring its mode.
-    w.setMaximize(Boolean(this.saved.maximize & 1), Boolean(this.saved.maximize & 2));
-    w.fullScreen = this.saved.fullscreen;
+    this.homeDesktops = alive(this.placeholder) ? this.placeholder.desktops : this.saved.desktops;
+    this.homeActivities = alive(this.placeholder) ? this.placeholder.activities : this.saved.activities;
+    this.homeOutput = alive(this.placeholder) ? this.placeholder.output : this.saved.output;
     this.mode = "return-sizing";
     this.deadline = Date.now() + 2500;
     this.readyAt = 0;
-    // Explicit focus on a same-desktop application never changes desktop/activity.
+    this.placeAt = Date.now() + 32;
+    this.placed = false;
+    if (immediate) this.placeHome();
     if (!this.wantReturnFocus) this.restorePreviousFocus();
+};
+Controller.prototype.placeHome = function() {
+    var w = this.window;
+    w.keepAbove = this.saved.above;
+    w.keepBelow = this.saved.below;
+    w.noBorder = this.saved.border;
+    w.desktops = this.homeDesktops;
+    w.activities = this.homeActivities;
+    var output = this.homeOutput;
+    if (this.workspace.screens.indexOf(output) < 0) output = this.workspace.activeScreen;
+    this.workspace.sendClientToScreen(w, output);
+    w.frameGeometry = this.home;
+    w.setMaximize(Boolean(this.saved.maximize & 1), Boolean(this.saved.maximize & 2));
+    w.fullScreen = this.saved.fullscreen;
 };
 Controller.prototype.finishReturn = function() {
     var w = this.window, saved = this.saved, focus = this.wantReturnFocus;
@@ -224,13 +266,14 @@ Controller.prototype.finishReturn = function() {
     this.placeholder = null;
     this.placeholderReady = 0;
     w.minimized = saved.minimized;
+    w.opacity = 0.984375; // Release concealment without starting a slide.
     w.opacity = saved.opacity;
     if (focus) this.workspace.activeWindow = w;
 };
 Controller.prototype.recover = function() {
     if (this.saved && alive(this.window)) {
         this.wantReturnFocus = false;
-        this.beginReturn();
+        this.beginReturn(true);
         this.finishReturn();
     } else if (alive(this.placeholder)) this.placeholder.closeWindow();
     this.mode = "normal";

@@ -47,9 +47,18 @@ class BridgeTests(unittest.TestCase):
     def test_watchdog_stops_orphaned_helper(self):
         self.exchange()
         with patch('t3_quake.daemon.time.monotonic', return_value=self.bridge.seen + 4), \
+                patch('t3_quake.daemon.running_mode', return_value=None), \
                 patch.object(self.bridge.app, 'quit') as quit_app:
             self.bridge.watchdog()
             quit_app.assert_called_once()
+
+    def test_launcher_lease_keeps_helper_alive_during_an_updater_window_gap(self):
+        self.exchange()
+        with patch('t3_quake.daemon.time.monotonic', return_value=self.bridge.seen + 4), \
+                patch('t3_quake.daemon.running_mode', return_value='quake'), \
+                patch.object(self.bridge.app, 'quit') as quit_app:
+            self.bridge.watchdog()
+            quit_app.assert_not_called()
 
     def test_fractional_monitor_geometry_is_rounded_for_qt_widgets(self):
         widget = Placeholder('t3', {'width': 960.8, 'height': 762.4})
