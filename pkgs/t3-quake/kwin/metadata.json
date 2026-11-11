@@ -1,0 +1,6 @@
+{
+  "KPlugin": {"Id": "t3-quake", "Name": "T3 quake", "Description": "Borrow the T3 window and preserve its original tile", "Version": "1.0", "License": "MIT"},
+  "X-Plasma-API": "declarativescript",
+  "X-Plasma-MainScript": "ui/main.qml",
+  "KPackageStructure": "KWin/Script"
+}

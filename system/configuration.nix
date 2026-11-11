@@ -32,6 +32,7 @@ let
       ../patches/krohnkite-ignore-stale-driver.patch
       ../patches/krohnkite-guard-stale-shortcuts.patch
       ../patches/krohnkite-layout-directional-focus.patch
+      ../patches/krohnkite-t3-quake.patch
     ];
   });
 in

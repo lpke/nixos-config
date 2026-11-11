@@ -106,7 +106,7 @@ in
   {
   shortcuts = {
     # Yakuake Shortcuts
-    yakuake.toggle-window-state = ["Print" "Alt+`"]; # default: F12
+    yakuake.toggle-window-state = ["Print"]; # Alt+` belongs to T3 quake.
   };
 
   configFile = {

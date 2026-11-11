@@ -1,0 +1,122 @@
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -151,7 +151,7 @@
+       }
+ 
+       const window = this.windowMap.add(client);
+-      this.control.onWindowAdded(this, window);
++      if (!this.borrowT3Tile(window)) this.control.onWindowAdded(this, window);
+       if (window.state !== WindowState.Unmanaged) {
+         this.bindWindowEvents(window, client);
+         LOG?.send(LogModules.newWindowAdded, "", debugWin(client), {
+@@ -173,6 +173,48 @@
+   }
+ 
+   //#region implement methods of IDriverContext`
++  // Replace one slot, rather than inserting another tile and reflowing its neighbors.
++  public borrowT3Tile(placeholder: WindowClass): boolean {
++    const native = (placeholder.window as KWinWindow).window;
++    if (String(native.resourceClass) !== "t3-quake-placeholder") return false;
++    const prefix = "T3 quake · ";
++    if (!native.caption.startsWith(prefix)) return false;
++    const id = native.caption.substring(prefix.length);
++    const tiles = this.engine.windows.list;
++    const index = tiles.findIndex(window => window.id === id);
++    if (index < 0) return false;
++    const origin = tiles[index];
++    const nativeOrigin = (origin.window as KWinWindow).window;
++    if (!/^(t3code|com\.t3tools\.t3code)$/i.test(String(nativeOrigin.resourceClass))) return false;
++    native.desktops = nativeOrigin.desktops;
++    native.activities = nativeOrigin.activities;
++    native.noBorder = true;
++    this.workspace.sendClientToScreen(native, nativeOrigin.output);
++    native.frameGeometry = nativeOrigin.frameGeometry;
++    placeholder.copyLayoutStateFrom(origin);
++    placeholder.quakeOrigin = origin;
++    origin.quakePlaceholder = placeholder;
++    origin.setState(WindowState.Unmanaged);
++    tiles[index] = placeholder;
++    native.opacity = 0.99951171875; // Acknowledge the completed substitution.
++    this.engine.arrange(this);
++    return true;
++  }
++
++  public returnT3Tile(placeholder: WindowClass): boolean {
++    const origin = placeholder.quakeOrigin;
++    if (!origin) return false;
++    const tiles = this.engine.windows.list;
++    const index = tiles.indexOf(placeholder);
++    if (index >= 0 && !(origin.window as KWinWindow).window.deleted) {
++      origin.copyLayoutStateFrom(placeholder);
++      delete origin.quakePlaceholder;
++      tiles[index] = origin;
++    } else this.engine.windows.remove(placeholder);
++    this.engine.arrange(this);
++    return true;
++  }
++
+   public setTimeout(func: () => void, timeout: number) {
+     KWinSetTimeout(() => this.enter(func), timeout);
+   }
+@@ -457,7 +499,7 @@
+       );
+       const window = this.windowMap.get(client);
+       if (window) {
+-        this.control.onWindowRemoved(this, window);
++        if (!this.returnT3Tile(window)) this.control.onWindowRemoved(this, window);
+         this.windowMap.remove(client);
+       }
+     });
+--- a/src/engine/window.ts
++++ b/src/engine/window.ts
+@@ -54,7 +54,13 @@
+     return state === WindowState.Floating || state === WindowState.TiledAfloat;
+   }
+ 
+-  public readonly id: string;
++  public quakeOrigin?: WindowClass;
++  public quakePlaceholder?: WindowClass;
++
++  // Layout membership follows the borrowed slot; the driver map still uses native IDs.
++  public get id(): string {
++    return this.quakeOrigin ? this.quakeOrigin.id : this.window.id;
++  }
+   public readonly window: IDriverWindow;
+ 
+   public get actualGeometry(): Readonly<Rect> {
+@@ -132,6 +138,17 @@
+     this.internalState = value;
+   }
+ 
++  public copyLayoutStateFrom(other: WindowClass): void {
++    this.internalState = other.internalState;
++    this.timestamp = other.timestamp;
++    this.geometry = other.geometry;
++    this.floatGeometry = other.floatGeometry;
++    this.weightMap = Object.assign({}, other.weightMap);
++    this._minSize = other._minSize;
++    this._maxSize = other._maxSize;
++    this.shouldCommitFloat = false;
++  }
++
+   public get surface(): ISurface {
+     return this.window.surface;
+   }
+@@ -168,7 +185,6 @@
+   private _maxSize: ISize;
+ 
+   constructor(window: IDriverWindow) {
+-    this.id = window.id;
+     this.window = window;
+ 
+     this.floatGeometry = window.geometry;
+--- a/src/engine/control.ts
++++ b/src/engine/control.ts
+@@ -217,6 +217,7 @@
+     window: WindowClass | null,
+     comment?: string
+   ): void {
++    if (window && window.quakePlaceholder) return;
+     if (window) {
+       if (comment === "unminimized") ctx.currentWindow = window;
+       const workingArea = window.surface.workingArea;

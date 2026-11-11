@@ -13,6 +13,10 @@ Core
   update-helium                Update the pinned Helium version and hash.
   update-postman               Update the pinned Postman version and hash.
   t3code                       Launch T3 Code; use Settings > About for stable updates.
+  t3-quake                     Toggle T3's drop-down window (Alt+`); return it when dismissed.
+  t3-quake restore             Return T3 to its original window.
+  t3-quake status              Show drop-down controller status.
+  t3-quake restart             Recover and restart drop-down handling; T3 stays open.
   t3-tray show                 Start connections, Git review and their controls.
   T3 Controls                  Open the same tray from the application menu.
   t3-tray quit                 Quit connections, Git review and their controls.

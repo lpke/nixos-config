@@ -19,6 +19,7 @@ in
     ./t3-ssh.nix
     ./t3-tailscale.nix
     ./t3-tray.nix
+    ./t3-quake.nix
     ./html-tray.nix
     ./monitor-control.nix
     ./vscode.nix
