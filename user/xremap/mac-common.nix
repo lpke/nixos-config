@@ -94,6 +94,8 @@ in
         "SUPER-m" = "C-ALT-SHIFT-SUPER_R-m";
         "SUPER-n" = "C-ALT-SHIFT-SUPER_R-n";
         "C-delete" = "SUPER_R-delete";
+        # F18 is PC dictation, also registered with KDE; never leak it remotely.
+        "F18" = [];
       };
     }
 
@@ -118,10 +120,12 @@ in
       mode = macModes;
       device.not = [ "Logitech G903" ];
       exact_match = true;
-      # Linux pinky+Alt+V/B matches native Mac Control+Alt+V/B.
+      # Keep the Alt baseline and accept the requested Shift aliases.
       remap = {
         "SUPER-ALT-v" = "C-ALT-SHIFT-SUPER_R-F9";
         "SUPER-ALT-b" = "C-ALT-SHIFT-SUPER_R-F10";
+        "SUPER-SHIFT-v" = "C-ALT-SHIFT-SUPER_R-F9";
+        "SUPER-SHIFT-b" = "C-ALT-SHIFT-SUPER_R-F10";
       };
     }
 

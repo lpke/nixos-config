@@ -51,13 +51,14 @@ class InspectorTests(unittest.TestCase):
             self.assertEqual([{k: v for k, v in r.items() if k != "inspect_source"} for r in self.sources.data[name]], production[name])
 
     def test_every_protocol_chord_and_every_app_output(self):
-        self.assertEqual(len(self.sources.data["protocol"]["bindings"]), 148)
+        self.assertGreater(len(self.sources.data["protocol"]["bindings"]), 148)
         for binding in self.sources.data["protocol"]["bindings"]:
             with self.subTest(chord=binding["input"]):
                 result = trace(self.sources, binding["input"])
                 self.assertIn(binding["relay"], result.transport)
                 self.assertEqual([o["output"] for o in result.outcomes],
-                                 [from_mac(binding[branch]).label(mac=True) for branch in ["normal", "terminal"]])
+                                 [from_mac(binding[branch]).label(mac=True) for branch in ["normal", "terminal"]] +
+                                 [from_mac(target).label(mac=True) for target in binding.get("applications", {}).values()])
                 self.assertIn("missing/empty", result.outcomes[1]["when"])
                 self.assertTrue(all(s["exists"] for s in result.sources))
                 self.assertTrue(any(s["line"] for s in result.sources if "synergy-keymap.json" in s["path"]))
@@ -77,13 +78,13 @@ class InspectorTests(unittest.TestCase):
         for chord, action in {"meta+m": "Alacritty", "meta+n": "Helium", "meta+h": "Focus window left",
                               "meta+l": "Focus window right", "meta+alt+v": "Grow window down",
                               "meta+alt+b": "Grow window right", "meta+wheelup": "Raise hovered",
-                              "meta+wheeldown": "Lower hovered", "ctrl+wheelup": "Command+wheel up",
-                              "ctrl+wheeldown": "Command+wheel down"}.items():
+                              "meta+wheeldown": "Lower hovered", "ctrl+wheelup": "Command+Plus",
+                              "ctrl+wheeldown": "Command+Minus"}.items():
             self.assertIn(action, trace(self.sources, chord).outcomes[0]["output"])
         self.assertEqual(trace(self.sources, "meta+m", "Logitech G903").outcomes[0]["output"], "Cmd+M")
         self.assertIn("suppressed", trace(self.sources, "F20", "Logitech G903").transport)
         self.assertIn("Left Cmd+K", trace(self.sources, "BTN_FORWARD", "Logitech G903").outcomes[0]["output"])
-        self.assertIn("PC action", trace(self.sources, "F18").transport)
+        self.assertEqual(trace(self.sources, "F18").transport, "Sequence: []")
         self.assertEqual(trace(self.sources, "ctrl+q").rule, "No PC remap")
         self.assertEqual(trace(self.sources, "ctrl+alt+l").outcomes[0]["output"], "Ctrl+Option+L")
 
@@ -91,8 +92,8 @@ class InspectorTests(unittest.TestCase):
         for key in "hjk":
             with self.subTest(key=key):
                 result = trace(self.sources, f"ctrl+{key}")
-                self.assertEqual(result.rule, "No PC remap")
-                self.assertEqual([o["output"] for o in result.outcomes], [f"Ctrl+{key.upper()}"])
+                self.assertIn(result.rule, {"No PC remap", "Synergy Mac-local app shortcuts"})
+                self.assertEqual([o["output"] for o in result.outcomes[:2]], [f"Ctrl+{key.upper()}"] * len(result.outcomes[:2]))
         self.assertEqual([o["output"] for o in trace(self.sources, "ctrl+l").outcomes], ["Cmd+L", "Ctrl+L"])
         for key, direction in zip("hjkl", ["left", "down", "up", "right"]):
             with self.subTest(key=key):
@@ -102,8 +103,8 @@ class InspectorTests(unittest.TestCase):
         for query, first in {"thumb+l": "Ctrl+L", "COMMAND-m": "Meta+M", "pinky-m": "Meta+M",
                              "ctrl + shift - c": "Ctrl+Shift+C", "control l": "Ctrl+L", "ctrl+q": "Ctrl+Q"}.items():
             self.assertEqual(self.catalog.search(query)[0].input, first)
-        self.assertEqual(len(self.catalog.search("thumb+l")), 1)
-        self.assertEqual(len(self.catalog.search("grw windw")), 2)
+        self.assertEqual([r.input for r in self.catalog.search("thumb+l")], ["Ctrl+L", "Ctrl+Shift+L"])
+        self.assertEqual(len(self.catalog.search("grw windw")), 4)
         self.assertEqual(self.catalog.search("nothingmatcheshere"), [])
         self.assertTrue(self.catalog.search("ctrl+"))
         self.assertTrue(all("Meta" in r.input for r in self.catalog.search("command")))

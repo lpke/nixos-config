@@ -144,6 +144,9 @@ def decode(sources, result, chord, ref):
             normal = "All other identified apps"
         result.outcomes = [{"when": normal, "output": from_mac(binding["normal"]).label(mac=True)},
                            {"when": terminal, "output": from_mac(binding["terminal"]).label(mac=True)}]
+        names.update({"com.t3tools.t3code": "T3 Code", "net.imput.helium": "Helium"})
+        for bundle, target in binding.get("applications", {}).items():
+            result.outcomes.append({"when": names.get(bundle, bundle) + " [" + bundle + "]", "output": from_mac(target).label(mac=True)})
         ref("dotfiles", "dot_hammerspoon/synergy-keymap.json", f'"input":"{binding["input"]}"', "Mac output chords; keep PC mirror in sync")
         ref("dotfiles", "dot_hammerspoon/synergy-keys.lua", "local terminal =", "Foreground app detection and native key events")
         ref("dotfiles", "dot_config/alacritty/alacritty.toml.tmpl", "[keyboard]", "Alacritty's further handling of the output chord")
@@ -163,7 +166,7 @@ def decode(sources, result, chord, ref):
     elif mods == {"meta"} and key == "delete":
         action, file, anchor = "Close the focused window", "synergy-actions.lua", "[hs.keycodes.map.forwarddelete]"
     elif hyper and key in {"pageup", "pagedown"}:
-        action = "Command+wheel up for app zoom" if key == "pageup" else "Command+wheel down for app zoom"
+        action = "Helium: Command+Plus page zoom; other apps: Command+wheel up" if key == "pageup" else "Helium: Command+Minus page zoom; other apps: Command+wheel down"
         file, anchor = "synergy-actions.lua", "local zoomRelays ="
     elif hyper and key in {"f9", "f10", "f13", "f14", "f15", "f16"}:
         action = {"f9": "Grow window down", "f10": "Grow window right", "f13": "Focus window left",

@@ -87,7 +87,7 @@ do not activate Home Manager or restart the tray just to test the inspector.
 
 The canonical shortcut protocol lives in dotfiles
 `dot_hammerspoon/synergy-keymap.json`. Its mirror is
-`user/xremap/synergy-keymap.json`; keep both byte-identical. It covers all 148
+`user/xremap/synergy-keymap.json`; keep both byte-identical. It covers 198
 app-dependent chords, including Shift/Alt/Super variants. Common launch, close,
 focus, growth, scroll, mouse gestures, and internal mode keys live separately in
 `user/xremap/mac-common.nix`.
@@ -97,17 +97,24 @@ Ctrl+H/J/K passes through unchanged; Ctrl+L sends real Control in terminals
 and Command in other Mac apps. Native Mac Control-based desktop shortcuts
 belong to the Mac keyboard layer and are not Synergy aliases.
 
-Ctrl+wheel sends Command+wheel for app zoom, including the Figma canvas.
+Ctrl+wheel sends Command+Plus/Minus for Helium page zoom. Other apps receive
+Command+wheel, including the Figma canvas.
 Super+wheel still raises/lowers the hovered Mac window. These wheel rules apply
 only in Mac modes and handle both standard and high-resolution wheel input.
 The PC sends Hyper+PageUp/PageDown, reserved by Hammerspoon's `synergy-actions.lua`,
-which emits native Command+wheel events at the pointer. xremap cannot emit wheel
+which resolves page versus wheel zoom on the Mac. xremap cannot emit wheel
 events directly. Deploy the Mac receiver before activating these PC mappings.
 
 Never allocate Ctrl+Alt+F1–F12 tokens without Shift. Linux intercepts them as
 virtual console switches even with Meta held. Avoid Ctrl+Shift+Meta+arrows,
 which KDE uses to move windows between desktops. Hyper+F9–F16 and Hyper+Y,
 M/N, D/Escape, H/J/K/L are already reserved for other Mac actions.
+
+Alt+W closes a Helium tab through an app-specific relay. T3 Code primary
+shortcuts translate Ctrl to Command, including panel, palette, picker, thread
+and model shortcuts; other apps and terminals keep their existing outputs.
+Super+Shift+V/B grows windows down/right alongside Super+Alt+V/B. On a native
+Mac keyboard layer the desktop modifier is Control.
 
 The Mac receiver creates fresh native key events and complete target taps.
 Do not set explicit Unicode text on Command events: macOS then bypasses native

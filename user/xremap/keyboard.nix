@@ -14,6 +14,8 @@ in
   keymap = [
     (noMouse {
       name = "Voquill dictate";
+      # Keep the PC dictation trigger out of remote Mac sessions.
+      mode = "local";
       remap = {
         "F18" = {
           launch = [

@@ -41,12 +41,12 @@ class InspectorUiTests(unittest.TestCase):
 
     def test_search_select_and_device_switch(self):
         self.window.query.setText("ThUmB - L")
-        self.assertEqual(self.window.results.count(), 1)
+        self.assertEqual(self.window.results.count(), 2)
         details = self.window.details.toPlainText()
         for text in ["ThUmB - L", "Ctrl+L", "Cmd+L", "Alacritty", "iTerm2", "missing/empty", "synergy-keymap.json", "synergy-keys.lua"]:
             self.assertIn(text, details)
         self.window.query.setText("grw windw")
-        self.assertEqual(self.window.results.count(), 2)
+        self.assertEqual(self.window.results.count(), 4)
         self.window.results.setCurrentRow(1)
         self.assertIn("Grow window", self.window.details.toPlainText())
         self.window.query.setText("meta+m")

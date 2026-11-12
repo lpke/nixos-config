@@ -62,6 +62,9 @@ class ProtocolTests(unittest.TestCase):
         actual = {}
         for binding in self.manifest["bindings"]:
             source = binding["source"]
+            if binding["normal"] == binding["terminal"]:
+                self.assertTrue(binding.get("applications"))
+                continue
             key = frozenset(source["modifiers"]), source["key"]
             self.assertNotIn(key, actual)
             actual[key] = tuple((set(binding[c]["modifiers"]), binding[c]["key"]) for c in ["normal", "terminal"])
@@ -74,7 +77,7 @@ class ProtocolTests(unittest.TestCase):
         self.assertTrue(relays["exact_match"])
         self.assertEqual(relays["remap"], {b["input"]: b["relay"] for b in self.manifest["bindings"]})
         tokens = {(b["transport"]["key"], frozenset(b["transport"]["modifiers"])) for b in self.manifest["bindings"]}
-        self.assertEqual(len(tokens), 148)
+        self.assertEqual(len(tokens), len(self.manifest["bindings"]))
         reserved = {"m", "n", "d", "escape", "h", "j", "k", "l", "y", "pageup", "pagedown",
                     *[f"f{i}" for i in range(9, 17)]}
         hyper = frozenset(["ctrl", "alt", "shift", "cmd"])
@@ -89,12 +92,35 @@ class ProtocolTests(unittest.TestCase):
     def test_common_actions_and_mode_keys_remain_available(self):
         blocks = {b["name"]: b for b in self.config["keymap"]}
         self.assertEqual(blocks["Synergy Mac actions"]["remap"], {
-            "SUPER-m": "C-ALT-SHIFT-SUPER_R-m", "SUPER-n": "C-ALT-SHIFT-SUPER_R-n", "C-delete": "SUPER_R-delete"})
+            "SUPER-m": "C-ALT-SHIFT-SUPER_R-m", "SUPER-n": "C-ALT-SHIFT-SUPER_R-n", "C-delete": "SUPER_R-delete", "F18": []})
         self.assertEqual(blocks["Synergy app-independent shortcuts"]["remap"], {
             "SUPER-space": "SUPER_R-space", "SHIFT-ALT-SUPER-s": "C-ALT-SHIFT-s"})
         internal = self.config["modeSwitchInternalKeymap"]
         self.assertEqual(internal[1]["remap"], {"KEY_F22": {"set_mode": "local"}, "KEY_F24": {"set_mode": "mac"}})
         self.assertTrue(all(b["device"]["only"] == ["ydotoold virtual device"] for b in internal))
+
+    def test_app_specific_routes_and_growth_aliases(self):
+        bindings = {b["input"]: b for b in self.manifest["bindings"]}
+        for key in "bdjknopsu":
+            binding = bindings[f"C-{key}"]
+            self.assertEqual(binding["normal"], {"modifiers": ["ctrl"], "key": key})
+            self.assertEqual(binding["applications"]["com.t3tools.t3code"], {"modifiers": ["cmd"], "key": key})
+        alt_w = bindings["ALT-w"]
+        self.assertEqual(alt_w["normal"], alt_w["source"])
+        self.assertEqual(alt_w["terminal"], alt_w["source"])
+        self.assertEqual(alt_w["applications"]["net.imput.helium"], {"modifiers": ["cmd"], "key": "w"})
+        growth = next(b for b in self.config["keymap"] if b["name"] == "Synergy window growth")
+        for key in "vb":
+            self.assertEqual(growth["remap"][f"SUPER-SHIFT-{key}"], growth["remap"][f"SUPER-ALT-{key}"])
+        for binding in self.manifest["bindings"]:
+            self.assertNotEqual((set(binding["transport"]["modifiers"]), binding["transport"]["key"]),
+                                ({"alt", "shift", "cmd"}, "q"), "Do not relay macOS immediate logout")
+
+    def test_pc_dictation_does_not_leak_into_remote_modes(self):
+        keyboard = json.loads(subprocess.check_output([
+            "nix", "eval", "--json", "--file", str(ROOT / "user/xremap/keyboard.nix")]))
+        dictate = next(rule for rule in keyboard["keymap"] if rule["name"] == "Voquill dictate")
+        self.assertEqual(dictate["mode"], "local")
 
     def test_dotfiles_protocol_mirror(self):
         canonical = Path.home() / ".local/share/chezmoi/dot_hammerspoon/synergy-keymap.json"
