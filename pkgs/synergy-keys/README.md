@@ -100,7 +100,9 @@ belong to the Mac keyboard layer and are not Synergy aliases.
 Ctrl+wheel sends Command+Plus/Minus for Helium page zoom. Other apps receive
 Command+wheel, including the Figma canvas.
 Super+wheel still raises/lowers the hovered Mac window. These wheel rules apply
-only in Mac modes and handle both standard and high-resolution wheel input.
+only in Mac modes. Zoom uses standard wheel reports and swallows the parallel
+high-resolution reports, giving one zoom step per wheel detent. Stacking still
+accepts both streams because it latches one action per burst direction.
 The PC sends Hyper+PageUp/PageDown, reserved by Hammerspoon's `synergy-actions.lua`,
 which resolves page versus wheel zoom on the Mac. xremap cannot emit wheel
 events directly. Deploy the Mac receiver before activating these PC mappings.

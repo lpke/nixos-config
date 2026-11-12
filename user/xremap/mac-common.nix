@@ -133,13 +133,14 @@ in
       name = "Synergy app zoom";
       mode = macModes;
       exact_match = true;
-      # xremap cannot emit wheel events. Hammerspoon turns these reserved
-      # relays into Command+wheel for app zoom, including Figma.
+      # One detent emits both normal and high-resolution wheel reports.
+      # Relay only normal reports; swallow high-resolution duplicates so they
+      # neither zoom twice nor leak Ctrl+wheel into native window stacking.
       remap = {
         "C-XUPSCROLL" = "C-ALT-SHIFT-SUPER_R-pageup";
         "C-XDOWNSCROLL" = "C-ALT-SHIFT-SUPER_R-pagedown";
-        "C-XHIRES_UPSCROLL" = "C-ALT-SHIFT-SUPER_R-pageup";
-        "C-XHIRES_DOWNSCROLL" = "C-ALT-SHIFT-SUPER_R-pagedown";
+        "C-XHIRES_UPSCROLL" = [];
+        "C-XHIRES_DOWNSCROLL" = [];
       };
     }
 

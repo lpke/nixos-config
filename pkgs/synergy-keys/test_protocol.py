@@ -133,9 +133,16 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(set(zoom["mode"]), {"mac", "mac-super-left", "mac-super-right"})
         self.assertTrue(zoom["exact_match"])
         self.assertNotIn("device", zoom, "Ctrl may be held on a separate keyboard from the mouse")
-        for stream in ("X", "XHIRES_"):
-            for direction, key in (("UP", "pageup"), ("DOWN", "pagedown")):
-                self.assertEqual(zoom["remap"][f"C-{stream}{direction}SCROLL"], f"C-ALT-SHIFT-SUPER_R-{key}")
+        for direction, key in (("UP", "pageup"), ("DOWN", "pagedown")):
+            self.assertEqual(zoom["remap"][f"C-X{direction}SCROLL"], f"C-ALT-SHIFT-SUPER_R-{key}")
+            self.assertEqual(zoom["remap"][f"C-XHIRES_{direction}SCROLL"], [])
+            # A mouse can deliver several high-resolution reports per detent.
+            # One ordinary report completes it. Fast adjacent detents must all
+            # survive; this must not depend on a time-based debounce.
+            for reports in (1, 8):
+                events = ([f"C-XHIRES_{direction}SCROLL"] * reports + [f"C-X{direction}SCROLL"]) * 3
+                outputs = [zoom["remap"][event] for event in events if zoom["remap"][event]]
+                self.assertEqual(outputs, [f"C-ALT-SHIFT-SUPER_R-{key}"] * 3)
         stack = next(b for b in self.config["keymap"] if b["name"] == "Synergy hovered window stacking")
         self.assertTrue(all(key.startswith("SUPER-") for key in stack["remap"]))
 
