@@ -1,0 +1,505 @@
+diff --git a/res/main.qml b/res/main.qml
+index 872224d..7540a5d 100644
+--- a/res/main.qml
++++ b/res/main.qml
+@@ -28,6 +28,8 @@ import "../code/script.js" as K
+ 
+ Item {
+     id: scriptRoot
++    property var driver: null
++    property bool ready: false
+ 
+     TaskManager.ActivityInfo {
+         id: activityInfo
+@@ -53,7 +55,49 @@ Item {
+             "timerRoot": scriptRoot
+         };
+ 
+-        (new K.KWinDriver(api)).main();
++        driver = new K.KWinDriver(api);
++        driver.main();
++        ready = true;
++    }
++    Component.onDestruction: {
++        ready = false;
++        if (driver) driver.dispose();
++        driver = null;
++    }
++    Connections {
++        target: Options
++        function onConfigChanged() { configReloadTimer.restart(); }
++    }
++    Timer {
++        id: configReloadTimer
++        interval: 100
++        onTriggered: {
++            try { if (ready) driver.reloadConfig(); }
++            catch (error) { console.warn("Krohnkite settings reload:", String(error)); }
++        }
++    }
++    ShortcutHandler {
++        name: "KrohnkiteReloadConfig"
++        text: "Krohnkite: Reload settings"
++        sequence: ""
++        onActivated: {
++            var result;
++            try {
++                if (!ready) throw new Error("Krohnkite initialization did not finish.");
++                driver.reloadConfig();
++                result = "ok";
++            }
++            catch (error) { result = String(error); }
++            reloadReply.arguments = [result];
++            reloadReply.call();
++        }
++    }
++    DBusCall {
++        id: reloadReply
++        service: "io.github.lpke.KrohnkiteReload"
++        path: "/Reload"
++        dbusInterface: "io.github.lpke.KrohnkiteReload"
++        method: "Done"
+     }
+     Loader {
+         id: shortcutsLoader;
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index 6a6630e..f7dca4c 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -103,6 +103,9 @@ class KWinDriver implements IDriverContext {
+   private windowMap: WrapperMap<Window, WindowClass>;
+   private entered: boolean;
+   private generation: number;
++  private disposed = false;
++  private started = false;
++  private connections: Array<{ signal: QSignal; callback: (...args: any[]) => void }> = [];
+ 
+   constructor(api: Api) {
+     KWIN = api.kwin;
+@@ -125,6 +128,8 @@ class KWinDriver implements IDriverContext {
+    */
+ 
+   public main() {
++    if (this.started || this.disposed) return;
++    this.started = true;
+     CONFIG = KWINCONFIG = new KWinConfig();
+     LOG?.send(LogModules.printConfig, undefined, `Config: ${CONFIG}`);
+ 
+@@ -137,6 +142,60 @@ class KWinDriver implements IDriverContext {
+     }
+   }
+ 
++  // Keep the live engine: reconstructing it loses tile order, layout ratios and
++  // manual float decisions. App rules remain defaults for newly opened windows.
++  public reloadConfig(): boolean {
++    if (this.isStaleDriver() || this.entered)
++      throw new Error("Krohnkite is busy; retry after the current window operation.");
++    if (this.workspace.stackingOrder.some(client => client.move || client.resize))
++      throw new Error("Finish moving or resizing the window before reloading.");
++    const previousLog = LOG;
++    const previous = KWINCONFIG;
++    let candidate: KWinConfig;
++    try {
++      candidate = new KWinConfig();
++      for (const key of Object.keys(previous) as Array<keyof KWinConfig>) {
++        if ((key === "layoutPerActivity" || key === "layoutPerDesktop" || key.indexOf("dock") === 0) &&
++            JSON.stringify(previous[key]) !== JSON.stringify(candidate[key]))
++          throw new Error(`Changing ${key} requires an explicit Krohnkite restart.`);
++      }
++    } catch (error) {
++      LOG = previousLog;
++      throw error;
++    }
++    if (JSON.stringify(previous) === JSON.stringify(candidate)) return false;
++    // Disabled layouts can still be selected in an existing desktop. Keep their
++    // factories and instances until the user switches layouts; only cycling order
++    // and defaults for new surfaces change.
++    candidate.layoutFactories = Object.assign({}, previous.layoutFactories, candidate.layoutFactories);
++    this.entered = true;
++    try {
++      CONFIG = KWINCONFIG = candidate;
++      this.engine.reloadConfig();
++      this.engine.arrange(this);
++    } catch (error) {
++      CONFIG = KWINCONFIG = previous;
++      LOG = previousLog;
++      this.engine.reloadConfig();
++      this.engine.arrange(this);
++      throw error;
++    } finally {
++      this.entered = false;
++    }
++    return true;
++  }
++
++  // QML component destruction must retire callbacks explicitly. A generation
++  // variable alone cannot protect a different imported JS URL after an upgrade.
++  public dispose(): void {
++    if (this.disposed) return;
++    this.disposed = true;
++    for (const { signal, callback } of this.connections.splice(0)) {
++      try { signal.disconnect(callback); } catch (_) { /* QObject already gone. */ }
++    }
++    KWinTimerPool.instance.dispose();
++  }
++
+   private addWindow(client: Window): WindowClass | null {
+     if (
+       !client.deleted &&
+@@ -216,7 +275,7 @@ class KWinDriver implements IDriverContext {
+   }
+ 
+   public setTimeout(func: () => void, timeout: number) {
+-    KWinSetTimeout(() => this.enter(func), timeout);
++    KWinSetTimeout(() => { if (!this.isStaleDriver()) this.enter(func); }, timeout);
+   }
+ 
+   public showNotification(text: string) {
+@@ -225,6 +284,11 @@ class KWinDriver implements IDriverContext {
+   }
+   //#endregion
+ 
++  private connectShortcut(signal: QSignal, callback: () => void): void {
++    signal.connect(callback);
++    this.connections.push({ signal, callback });
++  }
++
+   private bindShortcut() {
+     const callbackShortcut = (shortcut: Shortcut) => {
+       return () => {
+@@ -247,92 +311,60 @@ class KWinDriver implements IDriverContext {
+           nativeFocus();
+       });
+     };
+-    this.shortcuts
+-      .getToggleDock()
+-      .activated.connect(callbackShortcut(Shortcut.ToggleDock));
+-    this.shortcuts
+-      .getFocusNext()
+-      .activated.connect(callbackShortcut(Shortcut.FocusNext));
+-    this.shortcuts
+-      .getFocusPrev()
+-      .activated.connect(callbackShortcut(Shortcut.FocusPrev));
+-    this.shortcuts
+-      .getFocusDown()
+-      .activated.connect(
+-        callbackFocus("down", () => this.workspace.slotSwitchWindowDown())
+-      );
+-    this.shortcuts
+-      .getFocusUp()
+-      .activated.connect(
+-        callbackFocus("up", () => this.workspace.slotSwitchWindowUp())
+-      );
+-    this.shortcuts
+-      .getFocusLeft()
+-      .activated.connect(
+-        callbackFocus("left", () => this.workspace.slotSwitchWindowLeft())
+-      );
+-    this.shortcuts
+-      .getFocusRight()
+-      .activated.connect(
+-        callbackFocus("right", () => this.workspace.slotSwitchWindowRight())
+-      );
+-
+-    this.shortcuts
+-      .getShiftDown()
+-      .activated.connect(callbackShortcut(Shortcut.ShiftDown));
+-    this.shortcuts
+-      .getShiftUp()
+-      .activated.connect(callbackShortcut(Shortcut.ShiftUp));
+-    this.shortcuts
+-      .getShiftLeft()
+-      .activated.connect(callbackShortcut(Shortcut.ShiftLeft));
+-    this.shortcuts
+-      .getShiftRight()
+-      .activated.connect(callbackShortcut(Shortcut.ShiftRight));
+-
+-    this.shortcuts
+-      .getGrowHeight()
+-      .activated.connect(callbackShortcut(Shortcut.GrowHeight));
+-    this.shortcuts
+-      .getShrinkHeight()
+-      .activated.connect(callbackShortcut(Shortcut.ShrinkHeight));
+-    this.shortcuts
+-      .getShrinkWidth()
+-      .activated.connect(callbackShortcut(Shortcut.ShrinkWidth));
+-    this.shortcuts
+-      .getGrowWidth()
+-      .activated.connect(callbackShortcut(Shortcut.GrowWidth));
+-
+-    this.shortcuts
+-      .getIncrease()
+-      .activated.connect(callbackShortcut(Shortcut.Increase));
+-    this.shortcuts
+-      .getDecrease()
+-      .activated.connect(callbackShortcut(Shortcut.Decrease));
+-
+-    this.shortcuts
+-      .getToggleFloat()
+-      .activated.connect(callbackShortcut(Shortcut.ToggleFloat));
+-    this.shortcuts
+-      .getFloatAll()
+-      .activated.connect(callbackShortcut(Shortcut.ToggleFloatAll));
+-    this.shortcuts
+-      .getNextLayout()
+-      .activated.connect(callbackShortcut(Shortcut.NextLayout));
+-    this.shortcuts
+-      .getPreviousLayout()
+-      .activated.connect(callbackShortcut(Shortcut.PreviousLayout));
+-
+-    this.shortcuts
+-      .getRotate()
+-      .activated.connect(callbackShortcut(Shortcut.Rotate));
+-    this.shortcuts
+-      .getRotatePart()
+-      .activated.connect(callbackShortcut(Shortcut.RotatePart));
+-
+-    this.shortcuts
+-      .getSetMaster()
+-      .activated.connect(callbackShortcut(Shortcut.SetMaster));
++    this.connectShortcut(this.shortcuts
++      .getToggleDock().activated, callbackShortcut(Shortcut.ToggleDock));
++    this.connectShortcut(this.shortcuts
++      .getFocusNext().activated, callbackShortcut(Shortcut.FocusNext));
++    this.connectShortcut(this.shortcuts
++      .getFocusPrev().activated, callbackShortcut(Shortcut.FocusPrev));
++    this.connectShortcut(this.shortcuts.getFocusDown().activated,
++      callbackFocus("down", () => this.workspace.slotSwitchWindowDown()));
++    this.connectShortcut(this.shortcuts.getFocusUp().activated,
++      callbackFocus("up", () => this.workspace.slotSwitchWindowUp()));
++    this.connectShortcut(this.shortcuts.getFocusLeft().activated,
++      callbackFocus("left", () => this.workspace.slotSwitchWindowLeft()));
++    this.connectShortcut(this.shortcuts.getFocusRight().activated,
++      callbackFocus("right", () => this.workspace.slotSwitchWindowRight()));
++
++    this.connectShortcut(this.shortcuts
++      .getShiftDown().activated, callbackShortcut(Shortcut.ShiftDown));
++    this.connectShortcut(this.shortcuts
++      .getShiftUp().activated, callbackShortcut(Shortcut.ShiftUp));
++    this.connectShortcut(this.shortcuts
++      .getShiftLeft().activated, callbackShortcut(Shortcut.ShiftLeft));
++    this.connectShortcut(this.shortcuts
++      .getShiftRight().activated, callbackShortcut(Shortcut.ShiftRight));
++
++    this.connectShortcut(this.shortcuts
++      .getGrowHeight().activated, callbackShortcut(Shortcut.GrowHeight));
++    this.connectShortcut(this.shortcuts
++      .getShrinkHeight().activated, callbackShortcut(Shortcut.ShrinkHeight));
++    this.connectShortcut(this.shortcuts
++      .getShrinkWidth().activated, callbackShortcut(Shortcut.ShrinkWidth));
++    this.connectShortcut(this.shortcuts
++      .getGrowWidth().activated, callbackShortcut(Shortcut.GrowWidth));
++
++    this.connectShortcut(this.shortcuts
++      .getIncrease().activated, callbackShortcut(Shortcut.Increase));
++    this.connectShortcut(this.shortcuts
++      .getDecrease().activated, callbackShortcut(Shortcut.Decrease));
++
++    this.connectShortcut(this.shortcuts
++      .getToggleFloat().activated, callbackShortcut(Shortcut.ToggleFloat));
++    this.connectShortcut(this.shortcuts
++      .getFloatAll().activated, callbackShortcut(Shortcut.ToggleFloatAll));
++    this.connectShortcut(this.shortcuts
++      .getNextLayout().activated, callbackShortcut(Shortcut.NextLayout));
++    this.connectShortcut(this.shortcuts
++      .getPreviousLayout().activated, callbackShortcut(Shortcut.PreviousLayout));
++
++    this.connectShortcut(this.shortcuts
++      .getRotate().activated, callbackShortcut(Shortcut.Rotate));
++    this.connectShortcut(this.shortcuts
++      .getRotatePart().activated, callbackShortcut(Shortcut.RotatePart));
++
++    this.connectShortcut(this.shortcuts
++      .getSetMaster().activated, callbackShortcut(Shortcut.SetMaster));
+ 
+     const callbackShortcutLayout = (layoutClass: ILayoutClass) => {
+       return () => {
+@@ -344,45 +376,34 @@ class KWinDriver implements IDriverContext {
+       };
+     };
+ 
+-    this.shortcuts
+-      .getTileLayout()
+-      .activated.connect(callbackShortcutLayout(TileLayout));
+-    this.shortcuts
+-      .getMonocleLayout()
+-      .activated.connect(callbackShortcutLayout(MonocleLayout));
+-    this.shortcuts
+-      .getThreeColumnLayout()
+-      .activated.connect(callbackShortcutLayout(ThreeColumnLayout));
+-    this.shortcuts
+-      .getSpreadLayout()
+-      .activated.connect(callbackShortcutLayout(SpreadLayout));
+-    this.shortcuts
+-      .getStairLayout()
+-      .activated.connect(callbackShortcutLayout(StairLayout));
+-    this.shortcuts
+-      .getFloatingLayout()
+-      .activated.connect(callbackShortcutLayout(FloatingLayout));
+-    this.shortcuts
+-      .getQuarterLayout()
+-      .activated.connect(callbackShortcutLayout(QuarterLayout));
+-    this.shortcuts
+-      .getStackedLayout()
+-      .activated.connect(callbackShortcutLayout(StackedLayout));
+-    this.shortcuts
+-      .getColumnsLayout()
+-      .activated.connect(callbackShortcutLayout(ColumnsLayout));
+-    this.shortcuts
+-      .getSpiralLayout()
+-      .activated.connect(callbackShortcutLayout(SpiralLayout));
+-    this.shortcuts
+-      .getBTreeLayout()
+-      .activated.connect(callbackShortcutLayout(BTreeLayout));
++    this.connectShortcut(this.shortcuts
++      .getTileLayout().activated, callbackShortcutLayout(TileLayout));
++    this.connectShortcut(this.shortcuts
++      .getMonocleLayout().activated, callbackShortcutLayout(MonocleLayout));
++    this.connectShortcut(this.shortcuts
++      .getThreeColumnLayout().activated, callbackShortcutLayout(ThreeColumnLayout));
++    this.connectShortcut(this.shortcuts
++      .getSpreadLayout().activated, callbackShortcutLayout(SpreadLayout));
++    this.connectShortcut(this.shortcuts
++      .getStairLayout().activated, callbackShortcutLayout(StairLayout));
++    this.connectShortcut(this.shortcuts
++      .getFloatingLayout().activated, callbackShortcutLayout(FloatingLayout));
++    this.connectShortcut(this.shortcuts
++      .getQuarterLayout().activated, callbackShortcutLayout(QuarterLayout));
++    this.connectShortcut(this.shortcuts
++      .getStackedLayout().activated, callbackShortcutLayout(StackedLayout));
++    this.connectShortcut(this.shortcuts
++      .getColumnsLayout().activated, callbackShortcutLayout(ColumnsLayout));
++    this.connectShortcut(this.shortcuts
++      .getSpiralLayout().activated, callbackShortcutLayout(SpiralLayout));
++    this.connectShortcut(this.shortcuts
++      .getBTreeLayout().activated, callbackShortcutLayout(BTreeLayout));
+   }
+ 
+   //#region Helper functions
+   private isStaleDriver(): boolean {
+     return (
+-      this.generation !== KWIN_DRIVER_GENERATION ||
++      this.disposed || this.generation !== KWIN_DRIVER_GENERATION ||
+       typeof this.workspace === "undefined"
+     );
+   }
+@@ -402,6 +423,7 @@ class KWinDriver implements IDriverContext {
+       else this.enter(() => handler.apply(this, args));
+     };
+     signal.connect(wrapper);
++    this.connections.push({ signal, callback: wrapper });
+ 
+     return wrapper;
+   }
+diff --git a/src/driver/kwin/kwinsettimeout.ts b/src/driver/kwin/kwinsettimeout.ts
+index 11392b4..041e7ab 100644
+--- a/src/driver/kwin/kwinsettimeout.ts
++++ b/src/driver/kwin/kwinsettimeout.ts
+@@ -25,6 +25,8 @@ class KWinTimerPool {
+ 
+   public timers: QTimer[];
+   public numTimers: number;
++  private generation = 0;
++  private active: Array<{timer: QTimer; callback: () => void}> = [];
+ 
+   constructor() {
+     this.timers = [];
+@@ -53,6 +55,7 @@ class KWinTimerPool {
+       return;
+     }
+ 
++    const generation = this.generation;
+     const callback = () => {
+       try {
+         timer.triggered.disconnect(callback);
+@@ -60,18 +63,31 @@ class KWinTimerPool {
+         /* ignore */
+       }
+       try {
+-        func();
++        if (generation === this.generation) func();
+       } catch (e) {
+         /* ignore */
+       }
+-      this.timers.push(timer);
++      this.active = this.active.filter(entry => entry.timer !== timer);
++      if (generation === this.generation) this.timers.push(timer);
+     };
+ 
+     timer.interval = timeout;
+     timer.repeat = false;
+     timer.triggered.connect(callback);
++    this.active.push({timer, callback});
+     timer.start();
+   }
++  public dispose(): void {
++    this.generation++;
++    for (const {timer, callback} of this.active.splice(0)) {
++      try { timer.stop(); timer.triggered.disconnect(callback); timer.destroy(); } catch (_) {}
++    }
++    for (const timer of this.timers.splice(0)) {
++      try { timer.stop(); timer.destroy(); } catch (_) {}
++    }
++    this.numTimers = 0;
++  }
++
+ }
+ 
+ function KWinSetTimeout(func: () => void, timeout: number) {
+diff --git a/src/engine/engine.ts b/src/engine/engine.ts
+index 3adf5d5..5e7779e 100644
+--- a/src/engine/engine.ts
++++ b/src/engine/engine.ts
+@@ -38,6 +38,13 @@ class TilingEngine {
+     this._gapsSurfacesCfg = [];
+   }
+ 
++  public reloadConfig(): void {
++    DefaultGapsCfg.reset();
++    this._defaultGaps = null;
++    this._gapsSurfacesCfg = [];
++    this.layouts.reloadConfig();
++  }
++
+   /**
+    * Adjust layout based on the change in size of a tile.
+    *
+diff --git a/src/engine/gaps.ts b/src/engine/gaps.ts
+index 622fb05..425b1fc 100644
+--- a/src/engine/gaps.ts
++++ b/src/engine/gaps.ts
+@@ -19,7 +19,9 @@
+ // DEALINGS IN THE SOFTWARE.
+ 
+ class DefaultGapsCfg implements IGaps {
+-  static _gapsInstance: DefaultGapsCfg;
++  static _gapsInstance: DefaultGapsCfg | null = null;
++
++  public static reset(): void { DefaultGapsCfg._gapsInstance = null; }
+ 
+   public readonly left: number;
+   public readonly right: number;
+diff --git a/src/engine/layoutstore.ts b/src/engine/layoutstore.ts
+index 26255aa..18e7764 100644
+--- a/src/engine/layoutstore.ts
++++ b/src/engine/layoutstore.ts
+@@ -113,6 +113,8 @@ class LayoutStoreEntry {
+     return targetLayout;
+   }
+ 
++  public reloadConfig(): void { this.updateCurrentIndex(); }
++
+   private updateCurrentIndex(): void {
+     const idx = CONFIG.layoutOrder.indexOf(this.currentID);
+     this.currentIndex = idx === -1 ? null : idx;
+@@ -132,6 +134,10 @@ class LayoutStore {
+     this.store = {};
+   }
+ 
++  public reloadConfig(): void {
++    Object.keys(this.store).forEach(key => this.store[key].reloadConfig());
++  }
++
+   public getCurrentLayout(srf: ISurface): ILayout {
+     return srf.ignore
+       ? FloatingLayout.instance

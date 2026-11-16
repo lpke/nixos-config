@@ -1,5 +1,5 @@
 # ══════════════════════════════════════════════════════════════════
-# PLASMA-MANAGER: changes require nixos build and re-log
+# PLASMA-MANAGER: rebuild applies settings; compositor binary updates need re-login
 # ══════════════════════════════════════════════════════════════════
 { lib, osConfig, pkgs }:
 

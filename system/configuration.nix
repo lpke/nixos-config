@@ -33,8 +33,10 @@ let
       ../patches/krohnkite-guard-stale-shortcuts.patch
       ../patches/krohnkite-layout-directional-focus.patch
       ../patches/krohnkite-t3-quake.patch
+      ../patches/krohnkite-live-reload.patch
     ];
   });
+  krohnkiteControl = pkgs.callPackage ../pkgs/krohnkite-control { krohnkite = krohnkitePatched; };
 in
   {
   imports =
@@ -589,6 +591,7 @@ in
     kdePackages.filelight
     kdePackages.accessibility-inspector
     krohnkitePatched # tiling window manager
+    krohnkiteControl # state-preserving settings reload and explicit script replacement
     desktopRefresh # steady desktop refresh while Adaptive Sync stays enabled
     displayBrightnessToggle # compatibility entrypoint for Monitor control
     monitorControl # named monitor blackout tray and controller

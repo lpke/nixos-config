@@ -11,6 +11,7 @@ let
 in
 {
   imports = [
+    ./plasma/reload.nix
     inputs.xremap-flake.homeManagerModules.default
     ./kglance.nix
     ./plasma/directional-focus.nix

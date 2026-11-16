@@ -2,9 +2,11 @@
 """Exercise the built Krohnkite callbacks with real apps on private virtual outputs."""
 
 import argparse
+import configparser
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
@@ -13,7 +15,7 @@ import tempfile
 import time
 
 
-def check_focus_lifecycle(root):
+def check_focus_lifecycle(root, processes):
     """Dispatch registered shortcuts, unload Krohnkite, and load it again."""
     address = os.environ["DBUS_SESSION_BUS_ADDRESS"]
     if str(root / "runtime") not in address:
@@ -57,11 +59,27 @@ def check_focus_lifecycle(root):
         if marker + " FAIL" in output:
             raise RuntimeError(f"Lifecycle assertion failed: {condition}")
         scripting("unloadScript", "s", f"lifecycle-{count}")
+        return output
 
     def invoke(direction):
         bus("/component/kwin", "org.kde.kglobalaccel.Component", "invokeShortcut",
             "s", "DirectionalFocus" + direction, service="org.kde.kglobalaccel")
         time.sleep(0.2)
+
+    def floating_after_reload():
+        script('apps.forEach(w => workspace.sendClientToScreen(w, workspace.screens[0]));'
+               'workspace.activeWindow = apps[0];')
+        bus("/component/kwin", "org.kde.kglobalaccel.Component", "invokeShortcut",
+            "s", "KrohnkiteToggleFloat", service="org.kde.kglobalaccel")
+        time.sleep(0.2)
+        script('workspace.activeWindow.frameGeometry = {x:200,y:200,width:500,height:400};')
+        time.sleep(0.6)
+        script("", 'workspace.activeWindow.frameGeometry.width === 500 && '
+                   'workspace.activeWindow.frameGeometry.height === 400')
+        bus("/component/kwin", "org.kde.kglobalaccel.Component", "invokeShortcut",
+            "s", "KrohnkiteToggleFloat", service="org.kde.kglobalaccel")
+        time.sleep(0.2)
+        print("ROUTER_CHECK PASS floating stays movable after Krohnkite reload")
 
     def unload():
         config = root / "config/kwinrc"
@@ -70,11 +88,15 @@ def check_focus_lifecycle(root):
         wait_for(lambda: not scripting("isScriptLoaded", "s", "krohnkite")[0])
         assert scripting("isScriptLoaded", "s", "directional-focus")[0]
 
-    def load():
+    def load(replacement=False):
         config = root / "config/kwinrc"
         config.write_text(config.read_text()
                           .replace("krohnkiteEnabled=false", "krohnkiteEnabled=true")
                           .replace("runFocusTests=true", "runFocusTests=false"))
+        if replacement:
+            target = root / "replacement/krohnkite"
+            shutil.copytree(root / "data/kwin/scripts/krohnkite", target)
+            scripting("loadDeclarativeScript", "ss", str(target / "contents/ui/main.qml"), "krohnkite")
         scripting("start")
         time.sleep(0.5)
         assert scripting("isScriptLoaded", "s", "krohnkite")[0]
@@ -112,12 +134,14 @@ def check_focus_lifecycle(root):
     for direction in ["Left", "Right", "Up", "Down"]:
         native_direction(direction)
     load()
+    floating_after_reload()
     tiled_direction("Right")
     tiled_direction("Left")
     unload()
     native_direction("Right")
     native_direction("Left")
-    load()
+    load(replacement=True)
+    floating_after_reload()
     tiled_direction("Right")
     infos = bus("/component/kwin", "org.kde.kglobalaccel.Component", "allShortcutInfos",
                 "s", "default", service="org.kde.kglobalaccel")[0]
@@ -126,6 +150,78 @@ def check_focus_lifecycle(root):
         assert infos["DirectionalFocus" + direction][6] == [0x10000000 + ord(key)]
         assert infos["KrohnkiteFocus" + direction][6] == []
     print("ROUTER_CHECK PASS shortcut ownership survives disable and re-enable")
+
+    cli = os.environ.get("KROHNKITE_CONTROL")
+    if not cli:
+        return
+
+    def control(action):
+        subprocess.run([cli, action], check=True, timeout=15)
+
+    script('workspace.activeWindow = apps[0];')
+    bus("/component/kwin", "org.kde.kglobalaccel.Component", "invokeShortcut",
+        "s", "KrohnkiteToggleFloat", service="org.kde.kglobalaccel")
+    time.sleep(.2)
+    script('workspace.activeWindow.frameGeometry = {x:200,y:200,width:500,height:400};')
+    time.sleep(.3)
+    config = root / "config/kwinrc"
+    settings = configparser.ConfigParser()
+    settings.optionxform = str
+    settings.read(config)
+    settings['Script-krohnkite']['floatingClass'] = '1Password'
+    with config.open('w') as stream:
+        settings.write(stream, space_around_delimiters=False)
+    control("reload")
+    time.sleep(.3)
+    script("", 'workspace.activeWindow.frameGeometry.width === 500 && '
+               'workspace.activeWindow.frameGeometry.height === 400')
+    print("RELOAD_CHECK PASS settings refresh preserves a manually floated window")
+
+    settings['Script-krohnkite']['screenGapLeft'] = '17'
+    with config.open('w') as stream:
+        settings.write(stream, space_around_delimiters=False)
+    bus('/KWin', 'org.kde.KWin', 'reconfigure')
+    time.sleep(.5)
+    script('var tiled = apps.find(w => w !== workspace.activeWindow);', 'tiled.frameGeometry.x === 17')
+    print('RELOAD_CHECK PASS KWin reconfigure alone refreshes settings automatically')
+
+    processes.append(subprocess.Popen([
+        "alacritty", "--config-file", "/dev/null", "--class", "1Password",
+        "--command", "sleep", "120",
+    ], env=os.environ | {"WAYLAND_DISPLAY": "focus-test", "QT_QPA_PLATFORM": "wayland"},
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True))
+    time.sleep(1)
+    script('var password = workspace.stackingOrder.find(w => String(w.resourceClass) === "1Password");'
+           'if (password) password.frameGeometry = {x:600,y:200,width:440,height:330};', '!!password')
+    time.sleep(.4)
+    script('var password = workspace.stackingOrder.find(w => String(w.resourceClass) === "1Password");'
+           'print("RELOAD_GEOMETRY", JSON.stringify(password.frameGeometry));',
+           'Math.abs(password.frameGeometry.width - 440) < 20 && '
+           'Math.abs(password.frameGeometry.height - 330) < 20')
+    print("RELOAD_CHECK PASS new windows use the refreshed floating rule")
+
+    for _ in range(3):
+        control("restart")
+        time.sleep(.3)
+        floating_after_reload()
+    print("RELOAD_CHECK PASS three fresh-bundle restarts preserve functional floating")
+
+    # Deliberately reject a bad replacement, then prove the prior tiler works.
+    broken = root / 'broken-bundle'
+    wrapper = Path(cli).read_bytes()
+    python = re.search(rb'/nix/store/[^\x00\s\'\"]+/bin/python', wrapper).group(0).decode()
+    package = Path(os.environ['KROHNKITE_TEST_PACKAGE'])
+    shutil.copytree(package / 'share/kwin/scripts/krohnkite', broken)
+    broken.chmod(0o700)
+    qml = broken / 'contents/ui/main.qml'
+    qml.chmod(0o600)
+    qml.write_text('This is deliberately invalid QML for the recovery test.\n')
+    outcome = subprocess.run([
+        python, str(Path(cli).parent.parent / 'lib/krohnkite-control/control.py'), 'restart',
+    ], env=os.environ | {'KROHNKITE_PACKAGE': str(broken)}, capture_output=True, text=True, timeout=20)
+    assert outcome.returncode == 1 and 'Restored the previous working' in outcome.stderr, outcome.stderr
+    floating_after_reload()
+    print('RELOAD_CHECK PASS a rejected bundle restores a working tiler')
 
 
 def run_session(root):
@@ -164,7 +260,7 @@ def run_session(root):
                     raise RuntimeError("Focus assertion failed")
                 if "FOCUS_CHECK DONE" in output:
                     print("\n".join(line for line in output.splitlines() if "FOCUS_CHECK" in line))
-                    check_focus_lifecycle(root)
+                    check_focus_lifecycle(root, processes)
                     return
                 if any(process.poll() is not None for process in processes):
                     raise RuntimeError("A test application exited early")
@@ -216,6 +312,9 @@ def main():
         ).replace(
             "        (new K.KWinDriver(api)).main();",
             "        testDriver = new K.KWinDriver(api);\n        testDriver.main();",
+        ).replace(
+            "        driver.main();",
+            "        testDriver = driver;\n        testDriver.main();",
         )
         if "testDriver.main();" not in source:
             raise RuntimeError("Krohnkite entrypoint changed; update test instrumentation")
@@ -265,6 +364,7 @@ def main():
             "LIBGL_ALWAYS_SOFTWARE": "1", "QT_QUICK_BACKEND": "software", "KWIN_COMPOSE": "Q",
             "QT_FORCE_STDERR_LOGGING": "1", "QT_LOGGING_TO_CONSOLE": "1",
             "QT_LOGGING_RULES": "kwin_scripting.debug=true;js.debug=true",
+            "KROHNKITE_TEST_PACKAGE": str(args.package),
         })
         subprocess.run([
             "dbus-run-session", f"--config-file={root / 'bus.conf'}", "--",
