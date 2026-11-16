@@ -78,6 +78,7 @@
 
     # Start windows with this class as floating (but still manage them)
     kwinrc.Script-krohnkite.floatingClass = builtins.concatStringsSep "," [
+      "1Password"
       "BoltLauncher"
       "org.prismlauncher.PrismLauncher"
       "org.kde.yakuake"
