@@ -19,6 +19,7 @@
   configFile = {
     spectaclerc = {
       # screenshots
+      GuiConfig.quitAfterSaveCopyExport = true;
       ImageSave.imageSaveLocation = "file:///home/luke/Pictures/Screenshots";
       ImageSave.imageFilenameTemplate = "screenshot_<yyyy>-<MM>-<dd>_<HH><mm><ss>";
       ImageSave.translatedScreenshotsFolder = "Screenshots";
