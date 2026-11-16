@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 import time
 
 from . import synergy
@@ -36,7 +37,18 @@ def set_preference(key, value):
 
 
 def command(*args):
-    return subprocess.run(args, check=True, capture_output=True, text=True, timeout=10).stdout.strip()
+    # Synergy's daemon inherits these descriptors after its launcher exits.
+    # Pipes make communicate() wait for the daemon until the command times out,
+    # rolling a successful cold resume back to paused. Files let us wait for
+    # just the launcher while retaining command output and error diagnostics.
+    with tempfile.TemporaryFile(mode="w+") as stdout, tempfile.TemporaryFile(mode="w+") as stderr:
+        result = subprocess.run(args, stdout=stdout, stderr=stderr, text=True, timeout=10)
+        stdout.seek(0)
+        stderr.seek(0)
+        result.stdout = stdout.read()
+        result.stderr = stderr.read()
+    result.check_returncode()
+    return result.stdout.strip()
 
 
 def bus(*args):

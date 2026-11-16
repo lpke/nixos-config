@@ -2,8 +2,11 @@
 
 from contextlib import redirect_stdout
 import io
+import os
 from pathlib import Path
+import signal
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import call, patch
@@ -20,6 +23,37 @@ class ControlTests(unittest.TestCase):
             mock = patch.object(controls, name, return_value=value)
             mock.start()
             self.addCleanup(mock.stop)
+
+    def test_command_returns_when_daemon_inherits_output(self):
+        pid_file = self.root / "daemon.pid"
+        launcher = (
+            "import pathlib, subprocess, sys; "
+            "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], "
+            "start_new_session=True); "
+            f"pathlib.Path({str(pid_file)!r}).write_text(str(child.pid)); "
+            "print('started')"
+        )
+        run = subprocess.run
+
+        def bounded_run(*args, **kwargs):
+            # A leaked output pipe should fail quickly, without launching Synergy.
+            kwargs["timeout"] = .5
+            return run(*args, **kwargs)
+
+        try:
+            with patch.object(controls.subprocess, "run", side_effect=bounded_run):
+                self.assertEqual(controls.command(sys.executable, "-c", launcher), "started")
+            os.kill(int(pid_file.read_text()), 0)  # The daemon is still alive.
+        finally:
+            if pid_file.exists():
+                os.kill(int(pid_file.read_text()), signal.SIGTERM)
+
+    def test_command_failure_preserves_output_and_exit_status(self):
+        with self.assertRaises(subprocess.CalledProcessError) as caught:
+            controls.command(sys.executable, "-c", "import sys; print('out'); print('error', file=sys.stderr); sys.exit(3)")
+        self.assertEqual(caught.exception.returncode, 3)
+        self.assertEqual(caught.exception.stdout, "out\n")
+        self.assertEqual(caught.exception.stderr, "error\n")
 
     def test_keys_pause_persists_and_stops_only_controller(self):
         with patch.object(controls, "command") as command:

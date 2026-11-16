@@ -37,7 +37,10 @@ menu actions. Its exact item ID and title identify the backend without confusing
 other apps using the same AppIndicator library. Plasma hides this native item;
 it must remain running and registered because closing it also stops Synergy's
 service. The custom tray never kills the Synergy service or core. Resume can
-start the Flatpak service after a complete app exit. This integration follows
+start the Flatpak service after a complete app exit. Launcher output is captured
+in temporary files: the daemon inherits output descriptors, so pipes would keep
+the launch command waiting until its timeout and restore a saved sharing pause.
+This integration follows
 Synergy 3.6's exported menu protocol and reports changes as errors rather than
 guessing at private service commands.
 
