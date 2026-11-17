@@ -20,6 +20,7 @@ let
     commandName = "prs";
   };
   desktopRefresh = pkgs.callPackage ../pkgs/kwin-desktop-refresh {};
+  scriptRecovery = pkgs.callPackage ../pkgs/kwin-script-recovery {};
   displayBrightnessToggle = pkgs.callPackage ../pkgs/display-brightness-toggle {};
   monitorControl = pkgs.callPackage ../pkgs/monitor-control {};
   synergyKeys = pkgs.callPackage ../pkgs/synergy-keys {};
@@ -593,6 +594,7 @@ in
     krohnkitePatched # tiling window manager
     krohnkiteControl # state-preserving settings reload and explicit script replacement
     desktopRefresh # steady desktop refresh while Adaptive Sync stays enabled
+    scriptRecovery # clear orphaned script callbacks without closing applications
     displayBrightnessToggle # compatibility entrypoint for Monitor control
     monitorControl # named monitor blackout tray and controller
     kdePackages.kamoso # webcam app

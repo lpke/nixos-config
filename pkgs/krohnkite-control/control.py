@@ -79,6 +79,25 @@ def replace(bus, source, cache):
     return bundle
 
 
+def recover(bus):
+    effects = ('org.kde.KWin', '/Effects', 'org.kde.kwin.Effects')
+    loaded = call(bus, *effects, 'isEffectLoaded', 'scriptrecovery')[0]
+    if not loaded and not call(bus, *effects, 'loadEffect', 'scriptrecovery')[0]:
+        raise RuntimeError('The KWin script recovery plugin could not be loaded.')
+    call(bus, *effects, 'debug', 'scriptrecovery', 'reset')
+    deadline = time.monotonic() + 5
+    while True:
+        status = call(bus, *effects, 'debug', 'scriptrecovery', 'status')[0]
+        if status != 'pending':
+            call(bus, *effects, 'unloadEffect', 'scriptrecovery')
+            if status != 'restarted':
+                raise RuntimeError(f'Script recovery failed: {status}')
+            return
+        if time.monotonic() > deadline:
+            raise RuntimeError('KWin scripting recovery timed out.')
+        time.sleep(.05)
+
+
 @pyqtClassInfo('D-Bus Interface', SERVICE)
 class Completion(QObject):
     def __init__(self, app):
@@ -133,8 +152,8 @@ def acknowledge(bus, app):
 
 def main():
     parser = argparse.ArgumentParser(prog='krohnkite', description=__doc__)
-    parser.add_argument('action', choices=['reload', 'restart'], nargs='?', default='reload',
-                        help='reload settings in place; restart replaces code and resets runtime layout choices')
+    parser.add_argument('action', choices=['reload', 'restart', 'recover'], nargs='?', default='reload',
+                        help='reload settings; restart the tiler; recover clears orphaned callbacks by resetting KWin scripts')
     args = parser.parse_args()
     app = QCoreApplication(sys.argv)
     bus = QDBusConnection.sessionBus()
@@ -150,7 +169,9 @@ def main():
         if old_bundle and (old_bundle.parent != cache or not old_bundle.is_dir()):
             old_bundle = None
         try:
-            if args.action == 'restart':
+            if args.action == 'recover':
+                recover(bus)
+            elif args.action == 'restart':
                 bundle = replace(bus, Path(os.environ['KROHNKITE_PACKAGE']), cache)
             # Reparse kwinrc without restarting the compositor or the tiler.
             call(bus, 'org.kde.KWin', '/KWin', 'org.kde.KWin', 'reconfigure')
@@ -173,7 +194,8 @@ def main():
             for old in cache.glob('bundle-*'):
                 if old.is_dir() and old != bundle:
                     shutil.rmtree(old)
-        print('Krohnkite settings reloaded.' if bundle is None else 'Krohnkite script restarted.')
+        print('KWin scripts recovered.' if args.action == 'recover' else
+              'Krohnkite settings reloaded.' if bundle is None else 'Krohnkite script restarted.')
     return 0
 
 

@@ -223,6 +223,16 @@ def check_focus_lifecycle(root, processes):
     floating_after_reload()
     print('RELOAD_CHECK PASS a rejected bundle restores a working tiler')
 
+    if os.environ.get('KWIN_SCRIPT_RECOVERY'):
+        assert bus('/Effects', 'org.kde.kwin.Effects', 'loadEffect', 's', 'scriptrecovery') == [True]
+        bus('/Effects', 'org.kde.kwin.Effects', 'debug', 'ss', 'scriptrecovery', 'reset')
+        wait_for(lambda: bus('/Effects', 'org.kde.kwin.Effects', 'debug', 'ss', 'scriptrecovery', 'status') == ['restarted'])
+        control('reload')
+        floating_after_reload()
+        bus('/Effects', 'org.kde.kwin.Effects', 'unloadEffect', 's', 'scriptrecovery')
+        print('RECOVERY_CHECK PASS script engine resets without closing apps or compositor')
+
+
 
 def run_session(root):
     processes = []

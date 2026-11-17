@@ -37,6 +37,7 @@ Core
 Services
   krohnkite reload             Reload tiling settings without resetting the layout.
   krohnkite restart            Replace the tiling script; see krohnkite --help.
+  krohnkite recover            Clear orphaned tilers by resetting KWin scripts.
   xrs                          Restart xremap and restore current Synergy Mac mappings.
   wrs                          Reload the wireless kernel module.
   prs                          Restart Piper, libratbag autostart, and ratbagd.

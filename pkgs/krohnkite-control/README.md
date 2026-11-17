@@ -6,19 +6,24 @@ floating decisions. App-class/title rules affect newly opened windows. Applied
 KWin settings also refresh automatically after a KWin reconfigure. The activation
 hook sends it after Plasma Manager writes settings during rebuilds.
 
-Run `krohnkite restart` once to load this support into an older running session,
-or after changing the tiler code. It replaces only Krohnkite, waits for shutdown,
+Use `krohnkite restart` after changing the tiler code. It replaces only Krohnkite, waits for shutdown,
 copies the entire installed bundle to fresh URLs to bypass Qt's cache, and waits
 for the initialized replacement to acknowledge it. It resets runtime layout
 choices; use `reload` for settings. A failed replacement attempts to restore the
 last acknowledged bundle, when available. The first replacement has no saved
 bundle to recover. Neither command restarts the Wayland compositor.
 
+If floating windows snap back into tiles after a drag, run `krohnkite recover`.
+It resets KWin's scripting engine, including other enabled KWin scripts, while
+keeping the compositor and applications alive. This clears callbacks orphaned
+by an older tiler that did not disconnect them on unload. Script restart alone
+cannot remove those callbacks. Recovery loads the installed tiler explicitly
+and makes future script enables prefer the current system data path.
+
 Settings that change desktop/activity layout identity or dock structure require
 an explicit script restart. Changes to layout defaults affect new layout
 instances; existing instances keep their manual adjustments. A full compositor
-binary update still requires a new session. These controls do not recover an
-unidentified second tiler loaded independently under another name.
+binary update still requires a new session.
 
 The lifecycle patch is `patches/krohnkite-live-reload.patch`. It disconnects native
 and shortcut signals and cancels deferred work when QML unloads. Upstream's newer

@@ -70,6 +70,18 @@ class ControlTests(unittest.TestCase):
                 control.wait_unloaded(None)
         self.assertEqual(scripting.call_args.args[1], 'isScriptLoaded')
 
+    def test_recovery_accepts_an_already_loaded_plugin(self):
+        with patch.object(control, 'call', side_effect=[[True], ['pending'], ['restarted'], []]) as call:
+            control.recover(None)
+        methods = [entry.args[4] for entry in call.call_args_list]
+        self.assertEqual(methods, ['isEffectLoaded', 'debug', 'debug', 'unloadEffect'])
+
+    def test_recovery_refuses_a_missing_plugin_before_reset(self):
+        with patch.object(control, 'call', side_effect=[[False], [False]]) as call:
+            with self.assertRaisesRegex(RuntimeError, 'could not be loaded'):
+                control.recover(None)
+        self.assertEqual(call.call_count, 2)
+
 
 if __name__ == '__main__':
     unittest.main()
