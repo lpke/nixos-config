@@ -231,6 +231,10 @@ def check_focus_lifecycle(root, processes):
         floating_after_reload()
         bus('/Effects', 'org.kde.kwin.Effects', 'unloadEffect', 's', 'scriptrecovery')
         print('RECOVERY_CHECK PASS script engine resets without closing apps or compositor')
+    if os.environ.get('KROHNKITE_SERVICE_CHECK'):
+        subprocess.run([sys.executable, str(Path(__file__).parent.parent / 'pkgs/krohnkite-control/session_check.py'),
+                        str(root), cli], check=True)
+
 
 
 
@@ -371,11 +375,14 @@ def main():
             "XDG_CACHE_HOME": str(root / "cache"), "XDG_RUNTIME_DIR": str(root / "runtime"),
             "XDG_STATE_HOME": str(root / "state"), "XDG_CONFIG_DIRS": str(root / "config-dirs"),
             "DBUS_SYSTEM_BUS_ADDRESS": f"unix:path={root / 'no-system-bus'}",
-            "LIBGL_ALWAYS_SOFTWARE": "1", "QT_QUICK_BACKEND": "software", "KWIN_COMPOSE": "Q",
+            "LIBGL_ALWAYS_SOFTWARE": "1", "LP_NUM_THREADS": "2", "QT_QUICK_BACKEND": "software", "KWIN_COMPOSE": "Q",
             "QT_FORCE_STDERR_LOGGING": "1", "QT_LOGGING_TO_CONSOLE": "1",
             "QT_LOGGING_RULES": "kwin_scripting.debug=true;js.debug=true",
             "KROHNKITE_TEST_PACKAGE": str(args.package),
         })
+        if os.environ.get('KROHNKITE_SERVICE_CHECK'):
+            env['KROHNKITE_TEST_HOST_BUS'] = os.environ['DBUS_SESSION_BUS_ADDRESS']
+            env['KROHNKITE_TEST_HOST_RUNTIME'] = os.environ['XDG_RUNTIME_DIR']
         subprocess.run([
             "dbus-run-session", f"--config-file={root / 'bus.conf'}", "--",
             sys.executable, str(Path(__file__).resolve()), "--private-session", str(root),

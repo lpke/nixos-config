@@ -83,5 +83,55 @@ class ControlTests(unittest.TestCase):
         self.assertEqual(call.call_count, 2)
 
 
+class LifecycleTests(unittest.TestCase):
+    def test_start_restores_controls_without_a_restart(self):
+        with patch.object(control.lifecycle, 'command') as command:
+            control.lifecycle.launch()
+        command.assert_called_once_with('systemctl', '--user', 'start', 'krohnkite-tray.service')
+
+    def test_quit_queues_unit_stop_to_avoid_killing_its_own_menu_command(self):
+        with patch.object(control.lifecycle, 'command') as command:
+            control.lifecycle.quit_app()
+        command.assert_called_once_with('systemctl', '--user', '--no-block', 'stop', 'krohnkite-tray.service')
+
+    def test_stop_disables_autoload_before_unloading_and_does_not_stop_the_tray(self):
+        events = []
+        with patch.object(control.lifecycle, 'enable', side_effect=lambda value: events.append(('enabled', value))), \
+             patch.object(control, 'kwin_available', return_value=True), \
+             patch.object(control, 'scripting', side_effect=lambda _, method, *args: events.append(method) or [True]), \
+             patch.object(control, 'wait_unloaded', side_effect=lambda _: events.append('stopped')), \
+             patch.object(control, 'call', side_effect=lambda *args: events.append(args[4])), \
+             patch.object(control.lifecycle, 'quit_app') as quit_app:
+            control.stop_tiler(None)
+        self.assertEqual(events, [('enabled', False), 'isScriptLoaded', 'unloadScript', 'stopped', 'reconfigure'])
+        quit_app.assert_not_called()
+
+    def test_stop_is_safe_after_kwin_has_exited(self):
+        with patch.object(control.lifecycle, 'enable') as enabled, \
+             patch.object(control, 'kwin_available', return_value=False), \
+             patch.object(control, 'scripting') as scripting:
+            control.stop_tiler(None)
+        enabled.assert_called_once_with(False)
+        scripting.assert_not_called()
+
+    def test_start_is_idempotent_and_enables_runtime_choice(self):
+        with patch.object(control, 'kwin_available', return_value=True), \
+             patch.object(control.lifecycle, 'enable') as enabled, \
+             patch.object(control, 'scripting', return_value=[True]), \
+             patch.object(control, 'activate') as activate, \
+             patch.object(control, 'call'), patch.object(control, 'acknowledge') as ack:
+            control.start_tiler(None, None, Path('/unused'))
+        enabled.assert_called_once_with(True)
+        activate.assert_not_called()
+        ack.assert_called_once_with(None, None)
+
+    def test_status_is_read_only(self):
+        with patch.object(control, 'kwin_available', return_value=True), \
+             patch.object(control, 'scripting', return_value=[False]), \
+             patch.object(control.lifecycle, 'enable') as enabled:
+            self.assertEqual(control.status(None), {'running': False, 'status': 'Stopped'})
+        enabled.assert_not_called()
+
+
 if __name__ == '__main__':
     unittest.main()

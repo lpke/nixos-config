@@ -49,9 +49,8 @@
   };
 
   configFile = {
-    # ENABLE KROHNKITE
-    # Equivilent of: System Settings > KWin Scripts > Krohnkite > check the box > apply)
-    kwinrc.Plugins.krohnkiteEnabled = true;
+    # The controls own krohnkiteEnabled at runtime so Stop survives reconfiguration.
+    # The tray service starts tiling at each desktop login.
 
     # Keep H/J/K/L directional rather than applying the optional dwm remapping.
     kwinrc.Script-krohnkite.directionalKeyDwm = false;

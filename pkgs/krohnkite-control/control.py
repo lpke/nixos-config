@@ -2,15 +2,19 @@
 
 import argparse
 import fcntl
+import json
 import os
 from pathlib import Path
 import shutil
 import sys
+import subprocess
 import tempfile
 import time
 
 from PyQt6.QtCore import QCoreApplication, QObject, QTimer, pyqtClassInfo, pyqtSlot
 from PyQt6.QtDBus import QDBusConnection, QDBusMessage
+
+import lifecycle
 
 
 SERVICE = 'io.github.lpke.KrohnkiteReload'
@@ -150,19 +154,96 @@ def acknowledge(bus, app):
         raise RuntimeError(completion.result)
 
 
+
+def kwin_available(bus):
+    return call(bus, 'org.freedesktop.DBus', '/org/freedesktop/DBus',
+                'org.freedesktop.DBus', 'NameHasOwner', 'org.kde.KWin')[0]
+
+
+def status(bus):
+    if not kwin_available(bus):
+        return {'running': False, 'status': 'Unavailable'}
+    running = scripting(bus, 'isScriptLoaded', PLUGIN)[0]
+    return {'running': running, 'status': 'Running' if running else 'Stopped'}
+
+
+def stop_tiler(bus):
+    # This flag is runtime-owned, so a later KWin reconfigure cannot re-enable it.
+    lifecycle.enable(False)
+    if not kwin_available(bus):
+        return
+    if scripting(bus, 'isScriptLoaded', PLUGIN)[0]:
+        if not scripting(bus, 'unloadScript', PLUGIN)[0]:
+            raise StopRefused('KWin refused to stop Krohnkite.')
+        wait_unloaded(bus)
+    call(bus, 'org.kde.KWin', '/KWin', 'org.kde.KWin', 'reconfigure')
+
+
+def start_tiler(bus, app, cache):
+    if not kwin_available(bus):
+        raise RuntimeError('KWin is not running.')
+    lifecycle.enable(True)
+    bundle = None
+    if not scripting(bus, 'isScriptLoaded', PLUGIN)[0]:
+        bundle = stage(Path(os.environ['KROHNKITE_PACKAGE']), cache)
+        activate(bus, bundle, loaded=False)
+    call(bus, 'org.kde.KWin', '/KWin', 'org.kde.KWin', 'reconfigure')
+    acknowledge(bus, app)
+    if bundle:
+        remember_bundle(cache, bundle)
+
+
+def remember_bundle(cache, bundle):
+    temporary = cache / 'last-good.tmp'
+    temporary.write_text(str(bundle))
+    temporary.replace(cache / 'last-good')
+    for old in cache.glob('bundle-*'):
+        if old.is_dir() and old != bundle:
+            shutil.rmtree(old)
+
+
 def main():
     parser = argparse.ArgumentParser(prog='krohnkite', description=__doc__)
-    parser.add_argument('action', choices=['reload', 'restart', 'recover'], nargs='?', default='reload',
-                        help='reload settings; restart the tiler; recover clears orphaned callbacks by resetting KWin scripts')
+    parser.add_argument('action', choices=['launch', 'start', 'stop', 'status', 'reload', 'restart', 'recover', 'quit', 'help'],
+                        nargs='?', default='launch', help='launch controls, start/stop tiling, inspect status, reload, restart, recover, quit or open help')
+    parser.add_argument('--json', action='store_true', help='print machine-readable status')
+    parser.add_argument('--backend', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.json and args.action != 'status':
+        parser.error('--json is only for status')
+    if args.backend and args.action not in ('start', 'stop'):
+        parser.error('--backend is only for service start/stop')
+    if args.action == 'help':
+        lifecycle.open_help()
+        return 0
+    if args.action == 'quit':
+        lifecycle.quit_app()
+        return 0
+    if args.action in ('launch', 'start') and not args.backend:
+        # ExecStartPost takes actions.lock too; do not hold it across unit startup.
+        lifecycle.launch()
     app = QCoreApplication(sys.argv)
     bus = QDBusConnection.sessionBus()
+    if args.action == 'status':
+        state = status(bus)
+        print(json.dumps(state) if args.json else f"Krohnkite: {state['status']}")
+        return 0
     cache = Path(os.environ.get('XDG_CACHE_HOME', Path.home() / '.cache')) / 'krohnkite-control'
     cache.mkdir(mode=0o700, parents=True, exist_ok=True)
     with (cache / 'actions.lock').open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
+        if args.action in ('launch', 'start'):
+            if not args.backend and lifecycle.tray_state() not in ('active', 'activating'):
+                raise RuntimeError('The Krohnkite tray stopped while starting.')
+            start_tiler(bus, app, cache)
+            print('Krohnkite started.')
+            return 0
+        if args.action == 'stop':
+            stop_tiler(bus)
+            print('Krohnkite stopped.')
+            return 0
         if not scripting(bus, 'isScriptLoaded', PLUGIN)[0]:
-            raise RuntimeError('Krohnkite is disabled; enable it in KWin Scripts first.')
+            raise RuntimeError('Krohnkite is stopped. Run krohnkite start first.')
         bundle = None
         previous = cache / 'last-good'
         old_bundle = Path(previous.read_text().strip()) if previous.is_file() else None
@@ -188,12 +269,7 @@ def main():
                 raise RuntimeError(f'{error} Recovery also failed: {recovery}') from error
             raise RuntimeError(f'{error} Restored the previous working script bundle.') from error
         if bundle:
-            temporary = cache / 'last-good.tmp'
-            temporary.write_text(str(bundle))
-            temporary.replace(previous)
-            for old in cache.glob('bundle-*'):
-                if old.is_dir() and old != bundle:
-                    shutil.rmtree(old)
+            remember_bundle(cache, bundle)
         print('KWin scripts recovered.' if args.action == 'recover' else
               'Krohnkite settings reloaded.' if bundle is None else 'Krohnkite script restarted.')
     return 0
@@ -202,6 +278,6 @@ def main():
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (RuntimeError, OSError) as error:
+    except (RuntimeError, OSError, subprocess.SubprocessError) as error:
         print(f'Krohnkite: {error}', file=sys.stderr)
         sys.exit(1)

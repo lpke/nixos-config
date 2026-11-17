@@ -1,0 +1,60 @@
+diff --git a/src/driver/kwin/kwindriver.ts b/src/driver/kwin/kwindriver.ts
+index f7dca4c..0974b85 100644
+--- a/src/driver/kwin/kwindriver.ts
++++ b/src/driver/kwin/kwindriver.ts
+@@ -194,6 +194,12 @@ class KWinDriver implements IDriverContext {
+       try { signal.disconnect(callback); } catch (_) { /* QObject already gone. */ }
+     }
+     KWinTimerPool.instance.dispose();
++    for (const native of this.workspace.stackingOrder) {
++      try {
++        const window = this.windowMap.get(native);
++        if (window) (window.window as KWinWindow).restore();
++      } catch (_) { /* A native window may already be destroyed during logout. */ }
++    }
+   }
+ 
+   private addWindow(client: Window): WindowClass | null {
+diff --git a/src/driver/kwin/kwinwindow.ts b/src/driver/kwin/kwinwindow.ts
+index 9649fbf..70f770a 100644
+--- a/src/driver/kwin/kwinwindow.ts
++++ b/src/driver/kwin/kwinwindow.ts
+@@ -124,6 +124,22 @@ class KWinWindow implements IDriverWindow {
+ 
+   private noBorderManaged: boolean;
+   private noBorderOriginal: boolean;
++  private layerOriginal?: { above: boolean; below: boolean };
++  private layerApplied?: { above: boolean; below: boolean };
++
++  public restore(): void {
++    if (this.window.deleted) return;
++    if (this.noBorderManaged && this.window.noBorder)
++      this.window.noBorder = this.noBorderOriginal;
++    if (this.layerOriginal && this.layerApplied &&
++        this.window.keepAbove === this.layerApplied.above &&
++        this.window.keepBelow === this.layerApplied.below) {
++      this.window.keepAbove = this.layerOriginal.above;
++      this.window.keepBelow = this.layerOriginal.below;
++    }
++    this.noBorderManaged = false;
++    this.layerApplied = undefined;
++  }
+ 
+   constructor(window: Window, workspace: Workspace) {
+     this.workspace = workspace;
+@@ -178,12 +194,15 @@ class KWinWindow implements IDriverWindow {
+     }
+ 
+     if (windowLayer !== undefined) {
++      if (!this.layerOriginal)
++        this.layerOriginal = { above: this.window.keepAbove, below: this.window.keepBelow };
+       if (windowLayer === WindowLayer.Above) this.window.keepAbove = true;
+       else if (windowLayer === WindowLayer.Below) this.window.keepBelow = true;
+       else if (windowLayer === WindowLayer.Normal) {
+         this.window.keepAbove = false;
+         this.window.keepBelow = false;
+       }
++      this.layerApplied = { above: this.window.keepAbove, below: this.window.keepBelow };
+     }
+ 
+     if (geometry !== undefined) {

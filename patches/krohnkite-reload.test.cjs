@@ -27,7 +27,7 @@ function setup() {
         },
     } });
     vm.runInContext(fs.readFileSync(process.env.KROHNKITE_SCRIPT, 'utf8'), context);
-    const classes = vm.runInContext('({KWinDriver, WindowClass, WindowState, Rect, DefaultGapsCfg})', context);
+    const classes = vm.runInContext('({KWinDriver, KWinWindow, WindowClass, WindowState, getWindowLayer, Rect, DefaultGapsCfg})', context);
     const driver = new classes.KWinDriver({ workspace, timerRoot: {},
         kwin: { readConfig: (key, fallback) => settings[key] ?? fallback },
         shortcuts: new Proxy({}, { get: (_, name) => () => ({activated: signal(name)}) }),
@@ -108,4 +108,29 @@ test('shutdown cancels deferred tiling work before a replacement can start', () 
     assert.equal(timers[0].destroyed, true);
     lateCallback();
     assert.equal(calls, 0);
+});
+
+
+test('stopping restores window borders and stacking flags owned by tiling', () => {
+    const { KWinWindow, getWindowLayer, workspace } = setup();
+    const native = { internalId: 'one', resourceClass: 'app', resourceName: 'app',
+        caption: '', windowRole: '', noBorder: false, keepAbove: false, keepBelow: true };
+    const window = new KWinWindow(native, workspace);
+    window.commit(undefined, true, getWindowLayer(1));
+    assert.equal(native.noBorder, true);
+    assert.equal(native.keepBelow, false);
+    window.restore();
+    assert.equal(native.noBorder, false);
+    assert.equal(native.keepBelow, true);
+});
+
+test('stopping respects stacking changes made by another window controller', () => {
+    const { KWinWindow, getWindowLayer, workspace } = setup();
+    const native = { internalId: 'one', resourceClass: 'app', resourceName: 'app',
+        caption: '', windowRole: '', noBorder: false, keepAbove: false, keepBelow: false };
+    const window = new KWinWindow(native, workspace);
+    window.commit(undefined, false, getWindowLayer(1));
+    native.keepAbove = true;
+    window.restore();
+    assert.equal(native.keepAbove, true);
 });

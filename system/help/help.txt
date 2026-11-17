@@ -35,6 +35,12 @@ Core
   t3-tailscale logs            Show gateway and tray logs.
 
 Services
+  krohnkite                    Launch the tiling controls and start tiling.
+  krohnkite start              Start tiling and restore its tray if needed.
+  krohnkite stop               Stop tiling, keeping its tray available.
+  krohnkite status             Show whether tiling is running.
+  krohnkite help               Open command help in Neovim and Alacritty.
+  krohnkite quit               Stop tiling and close its tray.
   krohnkite reload             Reload tiling settings without resetting the layout.
   krohnkite restart            Replace the tiling script; see krohnkite --help.
   krohnkite recover            Clear orphaned tilers by resetting KWin scripts.

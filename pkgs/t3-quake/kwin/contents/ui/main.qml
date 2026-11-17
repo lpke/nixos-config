@@ -12,6 +12,7 @@ Item {
     property bool ticking: false
     property bool quakeEnabled: false
     property string helperOwner: ""
+    property var queuedCommand: null
 
     ShortcutHandler {
         name: "T3QuakeToggle"
@@ -40,9 +41,17 @@ Item {
         bridge.arguments = [JSON.stringify(controller.message())];
         bridge.call();
     }
+    function applyCommand() {
+        var command = queuedCommand;
+        queuedCommand = null;
+        pending = false;
+        try { controller.command(command); root.sync(); }
+        catch (error) { root.fail(String(error)); }
+    }
     function fail(reason) {
         if (failed) return;
         failed = true;
+        queuedCommand = null;
         controller.recover();
         sync();
         console.warn("T3 quake:", reason);
@@ -66,10 +75,14 @@ Item {
         dbusInterface: "io.github.lpke.T3Quake"
         method: "Exchange"
         onFinished: function(returnValue) {
-            root.pending = false;
-            if (root.failed || !root.attached) return;
-            try { controller.command(JSON.parse(returnValue[0])); root.sync(); }
-            catch (error) { root.fail(String(error)); }
+            if (root.failed || !root.attached) { root.pending = false; return; }
+            try {
+                root.queuedCommand = JSON.parse(returnValue[0]);
+                // Start/Stop can change tiler ownership between quake summons.
+                if (root.queuedCommand.action === "toggle" && controller.mode === "normal")
+                    tilerCheck.call();
+                else root.applyCommand();
+            } catch (error) { root.pending = false; root.fail(String(error)); }
         }
         onFailed: {
             root.pending = false;
@@ -104,7 +117,17 @@ Item {
         dbusInterface: "org.kde.kwin.Scripting"
         method: "isScriptLoaded"
         arguments: ["krohnkite"]
-        onFinished: function(returnValue) { root.controller.tilerLoaded = returnValue[0]; }
+        onFinished: function(returnValue) {
+            root.controller.tilerLoaded = returnValue[0];
+            if (root.queuedCommand !== null) root.applyCommand();
+        }
+        onFailed: {
+            if (root.queuedCommand !== null) {
+                root.queuedCommand = null;
+                root.pending = false;
+                root.fail("Could not read the window tiling state.");
+            }
+        }
     }
     DBusCall {
         id: notification

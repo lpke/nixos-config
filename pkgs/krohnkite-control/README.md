@@ -1,37 +1,32 @@
 # Krohnkite controls
 
-`krohnkite reload` rereads the applied settings without replacing the live tiler.
-It keeps tile order, layout proportions, desktop layout choices and manual
-floating decisions. App-class/title rules affect newly opened windows. Applied
-KWin settings also refresh automatically after a KWin reconfigure. The activation
-hook sends it after Plasma Manager writes settings during rebuilds.
+Launch **Krohnkite** from the app launcher or run `krohnkite` to start tiling and
+its tray. `start` restores both, `stop` keeps the controls available, and `quit`
+stops tiling and closes the tray. Both start at desktop login. `status` reports
+actual KWin state; `help` opens the short guide in Neovim in a new Alacritty window.
 
-Use `krohnkite restart` after changing the tiler code. It replaces only Krohnkite, waits for shutdown,
-copies the entire installed bundle to fresh URLs to bypass Qt's cache, and waits
-for the initialized replacement to acknowledge it. It resets runtime layout
-choices; use `reload` for settings. A failed replacement attempts to restore the
-last acknowledged bundle, when available. The first replacement has no saved
-bundle to recover. Neither command restarts the Wayland compositor.
+The tray service owns startup and unconditional stop cleanup, including after
+SIGKILL. Its icon stays white in either state and uses the shared fractional-scale
+SVG renderer. Runtime controls own KWin's enable flag so Stop survives KWin
+reconfiguration. Restarting or updating the tray starts tiling again.
+Stopping restores borders and stacking flags owned by tiling, leaving geometry
+free to move. T3 Quake refreshes tiler state before borrowing a window.
 
-If floating windows snap back into tiles after a drag, run `krohnkite recover`.
-It resets KWin's scripting engine, including other enabled KWin scripts, while
-keeping the compositor and applications alive. This clears callbacks orphaned
-by an older tiler that did not disconnect them on unload. Script restart alone
-cannot remove those callbacks. Recovery loads the installed tiler explicitly
-and makes future script enables prefer the current system data path.
+`reload` preserves tile order, layout proportions and manual floating choices;
+class/title rules affect new windows. Desktop/activity identity and dock
+structure changes need `restart`. Code restart uses fresh bundle URLs, confirms
+shutdown/readiness and can recover a previously acknowledged bundle. It resets
+runtime layout choices; the first replacement has no saved recovery bundle.
 
-Settings that change desktop/activity layout identity or dock structure require
-an explicit script restart. Changes to layout defaults affect new layout
-instances; existing instances keep their manual adjustments. A full compositor
-binary update still requires a new session.
+`recover` clears older orphaned callbacks by resetting all KWin scripts while
+keeping apps and the compositor alive. The native recovery plugin explicitly
+loads the installed tiler and refreshes inherited Nix data paths. Compositor
+binary updates still need a new session.
 
-The lifecycle patch is `patches/krohnkite-live-reload.patch`. It disconnects native
-and shortcut signals and cancels deferred work when QML unloads. Upstream's newer
-[runtime cleanup](https://codeberg.org/anametologin/Krohnkite/src/branch/master/src/driver/kwindriver.ts)
-uses the same explicit ownership; this backport keeps the installed layout engine.
-
-Checks: build this package for its fake-D-Bus tests; run
-`node --test patches/krohnkite-{focus,reload}.test.cjs` with `KROHNKITE_SCRIPT`
-pointing to the built script. Set `KROHNKITE_CONTROL` to the built command when
-running `patches/krohnkite-focus-headless.py --package <built-krohnkite>` for
-private-compositor reload, floating and restart checks.
+Build this package for isolated Qt and fake-D-Bus tests. The compiled tiler tests
+use `KROHNKITE_SCRIPT` with `patches/krohnkite-{focus,reload}.test.cjs`.
+`patches/krohnkite-focus-headless.py --package <tiler>` uses a private compositor.
+Set `KROHNKITE_CONTROL` to the built CLI and `KROHNKITE_SERVICE_CHECK=1` to add
+resource-limited temporary-service stop, relaunch and SIGKILL checks; all window
+operations and configuration remain private. The tray's stop hook also runs when
+it is killed, so launch the desktop app to restore it.

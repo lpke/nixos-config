@@ -136,6 +136,7 @@ let
           "T3" # Qt's tray id is its application display name
           "Synergy"
           "Monitor control"
+          "Krohnkite"
         ];
       };
     };

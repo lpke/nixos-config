@@ -35,6 +35,7 @@ let
       ../patches/krohnkite-layout-directional-focus.patch
       ../patches/krohnkite-t3-quake.patch
       ../patches/krohnkite-live-reload.patch
+      ../patches/krohnkite-stop-cleanup.patch
     ];
   });
   krohnkiteControl = pkgs.callPackage ../pkgs/krohnkite-control { krohnkite = krohnkitePatched; };

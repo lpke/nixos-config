@@ -12,6 +12,7 @@ in
 {
   imports = [
     ./plasma/reload.nix
+    ./plasma/krohnkite-tray.nix
     inputs.xremap-flake.homeManagerModules.default
     ./kglance.nix
     ./plasma/directional-focus.nix
