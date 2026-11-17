@@ -19,7 +19,13 @@ class Tray:
         self.closing = False
         self.state = {'running': False, 'status': 'Checking'}
         self.error = ''
-        self.tray = QSystemTrayIcon(svg_icon(Path(__file__).with_name('tiling.svg')), app)
+        self.status_error = ''
+        source = Path(__file__).with_name('tiling.svg').read_text()
+        # Neutral grey for stopped; match the other trays' error red.
+        self.icons = {color: svg_icon(source.replace('#ffffff', color))
+                      for color in ('#ffffff', '#808080', '#da4453')}
+        self.displayed_icon = None
+        self.tray = QSystemTrayIcon(app)
         self.menu = QMenu()
         self.summary = self.menu.addAction('Krohnkite: Checking')
         self.summary.setEnabled(False)
@@ -48,7 +54,13 @@ class Tray:
                   'restart': 'Restarting', 'recover': 'Recovering', 'quit': 'Quitting'}.get(self.pending)
         status = status or self.state['status']
         self.summary.setText(f'Krohnkite: {status}')
-        self.tray.setToolTip(f'Krohnkite: {status}' + (f'\n{self.error}' if self.error else ''))
+        error = self.status_error or self.error
+        self.tray.setToolTip(f'Krohnkite: {status}' + (f'\n{error}' if error else ''))
+        color = '#da4453' if error or self.state['status'] == 'Unavailable' else (
+            '#ffffff' if self.state['running'] else '#808080')
+        if color != self.displayed_icon:
+            self.tray.setIcon(self.icons[color])
+            self.displayed_icon = color
         available = self.state['status'] in ('Running', 'Stopped') and self.pending is None
         for action, item in self.actions.items():
             item.setEnabled(available and (not self.state['running'] if action == 'start' else self.state['running']))
@@ -96,16 +108,16 @@ class Tray:
                     if not isinstance(state, dict) or state.get('status') not in ('Running', 'Stopped', 'Unavailable') or not isinstance(state.get('running'), bool):
                         raise ValueError('Invalid Krohnkite status.')
                     self.state = state
+                    self.status_error = ''
                 except (ValueError, TypeError) as failure:
                     self.state = {'running': False, 'status': 'Unavailable'}
-                    self.error = str(failure)
-            elif action != 'help':
-                self.pending = None
+                    self.status_error = str(failure)
+            else:
+                if action != 'help':
+                    self.pending = None
                 self.error = error if code or expired else ''
                 if self.error:
                     self.tray.showMessage('Krohnkite', self.error, QSystemTrayIcon.MessageIcon.Warning)
-            elif code:
-                self.tray.showMessage('Krohnkite', error, QSystemTrayIcon.MessageIcon.Warning)
             self.processes.discard(process)
             process.deleteLater()
             self.display()

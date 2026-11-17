@@ -6,9 +6,10 @@ stops tiling and closes the tray. Both start at desktop login. `status` reports
 actual KWin state; `help` opens the short guide in Neovim in a new Alacritty window.
 
 The tray service owns startup and unconditional stop cleanup, including after
-SIGKILL. Its icon stays white in either state and uses the shared fractional-scale
-SVG renderer. Runtime controls own KWin's enable flag so Stop survives KWin
-reconfiguration. Restarting or updating the tray starts tiling again.
+SIGKILL. Its icon is white when running, dark neutral grey when stopped and red
+on errors, using the shared fractional-scale SVG renderer. Runtime controls own
+KWin's enable flag so Stop survives KWin reconfiguration. Restarting or updating
+the tray starts tiling again.
 Stopping restores borders and stacking flags owned by tiling, leaving geometry
 free to move. T3 Quake refreshes tiler state before borrowing a window.
 

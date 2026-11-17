@@ -58,6 +58,40 @@ class TrayTests(unittest.TestCase):
         timer.return_value.start.assert_not_called()
         self.assertIsNone(self.tray.pending)
 
+    def test_icon_colours_follow_state_and_errors_take_priority(self):
+        for running, status, error, color in [
+            (True, 'Running', '', '#ffffff'),
+            (False, 'Stopped', '', '#808080'),
+            (False, 'Unavailable', '', '#da4453'),
+            (True, 'Running', 'Command failed', '#da4453'),
+            (False, 'Stopped', 'Command failed', '#da4453'),
+        ]:
+            self.tray.state = {'running': running, 'status': status}
+            self.tray.error = error
+            self.tray.display()
+            self.assertEqual(self.tray.tray.icon().cacheKey(), self.tray.icons[color].cacheKey())
+
+    def test_status_recovery_clears_poll_errors_without_hiding_command_errors(self):
+        def finish(action, code, output=b'', error=b''):
+            with patch('tray.QProcess') as process, patch('tray.QTimer'):
+                process.return_value.readAllStandardError.return_value = error
+                process.return_value.readAllStandardOutput.return_value = output
+                self.tray.run([action], polling=action == 'status', action=action)
+                process.return_value.finished.connect.call_args[0][0](code)
+
+        stopped = b'{"running": false, "status": "Stopped"}'
+        with patch.object(self.tray.tray, 'showMessage'):
+            finish('status', 1, error=b'Bus unavailable')
+            self.assertEqual(self.tray.displayed_icon, '#da4453')
+            finish('status', 0, stopped)
+            self.assertEqual(self.tray.displayed_icon, '#808080')
+            finish('help', 1, error=b'Terminal failed')
+            finish('status', 0, stopped)
+            self.assertEqual(self.tray.displayed_icon, '#da4453')
+            self.assertIn('Terminal failed', self.tray.tray.toolTip())
+            finish('stop', 0)
+            self.assertEqual(self.tray.displayed_icon, '#808080')
+
     def test_white_icon_uses_shared_renderer_at_fractional_pixel_sizes(self):
         icon = svg_icon(Path(__file__).with_name('tiling.svg'))
         for size in (16, 20, 22, 24, 25, 30, 32, 36):
