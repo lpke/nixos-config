@@ -93,6 +93,8 @@ in
       remap = {
         "SUPER-m" = "C-ALT-SHIFT-SUPER_R-m";
         "SUPER-n" = "C-ALT-SHIFT-SUPER_R-n";
+        # Lower the focused window. Synergy drops Karabiner's native F17 relay.
+        "SUPER-KEY_COMMA" = "C-ALT-SHIFT-SUPER_R-end";
         "C-delete" = "SUPER_R-delete";
         # F18 is PC dictation, also registered with KDE; never leak it remotely.
         "F18" = [];

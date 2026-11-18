@@ -172,6 +172,8 @@ def decode(sources, result, chord, ref):
         action = {"f9": "Grow window down", "f10": "Grow window right", "f13": "Focus window left",
                   "f14": "Focus window down", "f15": "Focus window up", "f16": "Focus window right"}[key]
         file, anchor = "window-shortcuts.lua", f'key = "{key}"'
+    elif hyper and key == "end":
+        action, file, anchor = "Lower the focused window", "window-shortcuts.lua", 'key = "end"'
     elif (hyper and key in {"f11", "f12"}) or (mods == {"ctrl"} and key in {"xupscroll", "xdownscroll"}):
         action = "Raise hovered window" if key in {"f11", "xupscroll"} else "Lower hovered window"
         file, anchor = "scroll-stack.lua", "local relays ="

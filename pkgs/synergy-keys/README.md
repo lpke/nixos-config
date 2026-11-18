@@ -102,7 +102,8 @@ belong to the Mac keyboard layer and are not Synergy aliases.
 
 Ctrl+wheel sends Command+Plus/Minus for Helium page zoom. Other apps receive
 Command+wheel, including the Figma canvas.
-Super+wheel still raises/lowers the hovered Mac window. These wheel rules apply
+Super+wheel raises/lowers the hovered Mac window. Super+comma lowers the
+focused Mac window through Hyper+End. These rules apply
 only in Mac modes. Zoom uses standard wheel reports and swallows the parallel
 high-resolution reports, giving one zoom step per wheel detent. Stacking still
 accepts both streams because it latches one action per burst direction.
@@ -113,7 +114,7 @@ events directly. Deploy the Mac receiver before activating these PC mappings.
 Never allocate Ctrl+Alt+F1–F12 tokens without Shift. Linux intercepts them as
 virtual console switches even with Meta held. Avoid Ctrl+Shift+Meta+arrows,
 which KDE uses to move windows between desktops. Hyper+F9–F16 and Hyper+Y,
-M/N, D/Escape, H/J/K/L are already reserved for other Mac actions.
+M/N, D/Escape, H/J/K/L, and End are already reserved for other Mac actions.
 
 Alt+W closes a Helium tab through an app-specific relay. T3 Code primary
 shortcuts translate Ctrl to Command, including panel, palette, picker, thread

@@ -78,7 +78,8 @@ class InspectorTests(unittest.TestCase):
         for chord, action in {"meta+m": "Alacritty", "meta+n": "Helium", "meta+h": "Focus window left",
                               "meta+l": "Focus window right", "meta+alt+v": "Grow window down",
                               "meta+alt+b": "Grow window right", "meta+wheelup": "Raise hovered",
-                              "meta+wheeldown": "Lower hovered", "ctrl+wheelup": "Command+Plus",
+                              "meta+wheeldown": "Lower hovered", "meta+,": "Lower the focused window",
+                              "ctrl+wheelup": "Command+Plus",
                               "ctrl+wheeldown": "Command+Minus"}.items():
             self.assertIn(action, trace(self.sources, chord).outcomes[0]["output"])
         self.assertEqual(trace(self.sources, "meta+m", "Logitech G903").outcomes[0]["output"], "Cmd+M")

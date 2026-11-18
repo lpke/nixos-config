@@ -78,7 +78,7 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(relays["remap"], {b["input"]: b["relay"] for b in self.manifest["bindings"]})
         tokens = {(b["transport"]["key"], frozenset(b["transport"]["modifiers"])) for b in self.manifest["bindings"]}
         self.assertEqual(len(tokens), len(self.manifest["bindings"]))
-        reserved = {"m", "n", "d", "escape", "h", "j", "k", "l", "y", "pageup", "pagedown",
+        reserved = {"m", "n", "d", "escape", "h", "j", "k", "l", "y", "pageup", "pagedown", "end",
                     *[f"f{i}" for i in range(9, 17)]}
         hyper = frozenset(["ctrl", "alt", "shift", "cmd"])
         self.assertFalse(tokens & {(key, hyper) for key in reserved})
@@ -92,7 +92,8 @@ class ProtocolTests(unittest.TestCase):
     def test_common_actions_and_mode_keys_remain_available(self):
         blocks = {b["name"]: b for b in self.config["keymap"]}
         self.assertEqual(blocks["Synergy Mac actions"]["remap"], {
-            "SUPER-m": "C-ALT-SHIFT-SUPER_R-m", "SUPER-n": "C-ALT-SHIFT-SUPER_R-n", "C-delete": "SUPER_R-delete", "F18": []})
+            "SUPER-m": "C-ALT-SHIFT-SUPER_R-m", "SUPER-n": "C-ALT-SHIFT-SUPER_R-n",
+            "SUPER-KEY_COMMA": "C-ALT-SHIFT-SUPER_R-end", "C-delete": "SUPER_R-delete", "F18": []})
         self.assertEqual(blocks["Synergy app-independent shortcuts"]["remap"], {
             "SUPER-space": "SUPER_R-space", "SHIFT-ALT-SUPER-s": "C-ALT-SHIFT-s"})
         internal = self.config["modeSwitchInternalKeymap"]
