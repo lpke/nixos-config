@@ -164,11 +164,29 @@ class ControlTests(unittest.TestCase):
             controls.native_action("Stop")
         self.assertEqual(command.call_args.args[-5:], ("3", "clicked", "i", "0", "0"))
 
-    def test_resume_after_complete_app_exit_launches_daemon(self):
-        with patch.object(controls.synergy, "processes", side_effect=[{"running": False}, {"running": True}]), patch.object(controls, "native_action", side_effect=controls.MenuUnavailable("menu absent")), patch.object(controls, "command") as command, patch.object(controls, "wait_running"):
+    def test_cold_resume_finishes_on_core_readiness_with_the_launcher_still_running(self):
+        controls.set_preference('synergy_paused', True)
+        absent = {'running': False, 'session': None}
+        with patch.object(controls.synergy, 'processes', side_effect=[absent, absent, {'running': True}]), patch.object(controls, 'native_action', side_effect=controls.MenuUnavailable('menu absent')), patch.object(controls, 'command') as command:
             controls.control("synergy", "resume")
-        self.assertEqual(command.call_args.args[0], "flatpak")
-        self.assertEqual(command.call_args.args[-1], "-d")
+        command.assert_called_once_with('systemctl', '--user', 'start', 'synergy-native.service')
+        self.assertFalse(controls.preferences()['synergy_paused'])
+
+    def test_starting_backend_can_publish_menu_before_core(self):
+        starting = {'running': False, 'session': [123, '1']}
+        with patch.object(controls.synergy, 'processes', side_effect=[starting, starting, starting, {'running': True}]), patch.object(controls, 'native_action', side_effect=controls.ActionUnavailable('Start not offered')), patch.object(controls, 'command') as command, patch.object(controls.time, 'sleep'):
+            controls.control('synergy', 'resume')
+        command.assert_not_called()
+
+    def test_queued_pause_is_only_applied_if_still_requested(self):
+        with patch.object(controls.synergy, 'processes', return_value={'running': True}), patch.object(controls, 'native_action') as action, patch.object(controls, 'wait_running'):
+            controls.set_preference('synergy_paused', False)
+            controls.control('synergy', 'apply-saved-pause')
+            action.assert_not_called()
+            self.assertFalse(controls.preferences()['synergy_paused'])
+            controls.set_preference('synergy_paused', True)
+            controls.control('synergy', 'apply-saved-pause')
+            action.assert_called_once_with('Stop')
 
     def test_malformed_native_protocol_rolls_back_pause_preference(self):
         with patch.object(controls.synergy, "processes", return_value={"running": True}), patch.object(controls, "native_menu", return_value=(":native", "/Menu")), patch.object(controls, "bus", return_value=[1, []]):

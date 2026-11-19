@@ -20,6 +20,10 @@ class MenuUnavailable(OSError):
     """Synergy has no registered native tray backend."""
 
 
+class ActionUnavailable(OSError):
+    """The native menu does not currently offer the requested action."""
+
+
 def preferences_path():
     return Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "synergy-keys/controls.json"
 
@@ -96,7 +100,7 @@ def _native_action(label):
             command("busctl", "--user", "call", destination, path, "com.canonical.dbusmenu",
                     "Event", "isvu", str(identity), "clicked", "i", "0", "0")
             return
-    raise OSError(f"Synergy's native menu does not offer {label!r}.")
+    raise ActionUnavailable(f"Synergy's native menu does not offer {label!r}.")
 
 
 def wait_running(wanted, timeout=10):
@@ -168,20 +172,22 @@ def sharing(action):
         if wanted and not running:
             try:
                 native_action("Start")
-            except MenuUnavailable:
-                # Recover a completely closed Flatpak without killing its GUI or
-                # starting a second unmanaged core process ourselves.
-                command("flatpak", "run", "--command=/app/lib/com.symless.synergy/synergy-service",
-                        "com.symless.synergy", "-d")
+            except (MenuUnavailable, ActionUnavailable):
+                if synergy.processes()['session'] is None:
+                    # The Flatpak launcher can remain alive throughout sharing.
+                    # Wait only for systemd to exec it, then observe the core.
+                    command('systemctl', '--user', 'start', 'synergy-native.service')
                 deadline = time.monotonic() + 10
                 while time.monotonic() < deadline:
                     if synergy.processes()["running"]:
-                        break
+                        return
                     try:
                         native_action("Start")
                         break
-                    except MenuUnavailable:
+                    except (MenuUnavailable, ActionUnavailable):
                         time.sleep(.2)
+                else:
+                    raise OSError('Synergy did not start its sharing core. Check Synergy configuration and logs.')
         elif not wanted and running:
             native_action("Stop")
         wait_running(wanted)
@@ -195,4 +201,9 @@ def control(target, action):
         raise ValueError(f"Unknown control target: {target}")
     with (directory() / "actions.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
+        if target == 'synergy' and action == 'apply-saved-pause':
+            # An explicit resume may have won the lock since the tray's poll.
+            if not preferences().get('synergy_paused', False):
+                return
+            action = 'pause'
         (sharing if target == "synergy" else keys)(action)

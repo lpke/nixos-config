@@ -153,7 +153,7 @@ class Tray:
         sharing_identity = (snapshot["running"], snapshot["session"], snapshot["cores"], prefs.get("synergy_paused", False))
         if sharing_identity != self.previous_sharing:
             if snapshot["running"] and prefs.get("synergy_paused", False):
-                self.command("synergy-keys", ["synergy", "pause"], lifecycle=True)
+                self.command("synergy-keys", ["synergy", "apply-saved-pause"], lifecycle=True)
             self.previous_sharing = sharing_identity
         enabled = snapshot["running"] and not prefs.get("keys_paused", False) and not prefs.get("synergy_paused", False)
         identity = (enabled, snapshot["session"], snapshot["cores"])

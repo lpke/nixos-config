@@ -26,7 +26,7 @@ def main():
     args = parser.parse_args()
     if args.command not in ("inspect", "synergy") and (args.shortcut or args.json or args.device != "Keyboard"):
         parser.error("shortcut, --json and --device are only for inspect")
-    if args.command == "synergy" and (args.shortcut not in ("pause", "resume", "config") or args.json):
+    if args.command == "synergy" and (args.shortcut not in ("pause", "resume", "config", "apply-saved-pause") or args.json):
         parser.error("synergy requires pause, resume or config")
     if args.command == "help":
         try:

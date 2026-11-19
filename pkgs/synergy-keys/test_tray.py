@@ -73,7 +73,7 @@ class TrayTests(unittest.TestCase):
         with patch("synergy_keys.tray.controls.preferences", return_value={"synergy_paused": True}), patch("synergy_keys.tray.synergy.processes", return_value=self.snapshot), patch("synergy_keys.tray.read_json", return_value=self.state), patch.object(self.tray, "command") as command:
             self.tray.tick()
             self.tray.tick()
-        self.assertIn((("synergy-keys", ["synergy", "pause"]), {"lifecycle": True}), command.call_args_list)
+        self.assertIn((("synergy-keys", ["synergy", "apply-saved-pause"]), {"lifecycle": True}), command.call_args_list)
 
     def test_resume_transition_joins_start_instead_of_cancelling_it_with_restart(self):
         with patch("synergy_keys.tray.controls.preferences", return_value={"keys_paused": True}) as prefs, patch("synergy_keys.tray.synergy.processes", return_value=self.snapshot), patch("synergy_keys.tray.read_json", return_value=self.state), patch.object(self.tray, "command") as command:

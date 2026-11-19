@@ -17,6 +17,15 @@ in
     synergy_log = "${config.home.homeDirectory}/.var/app/com.symless.synergy/.local/state/Synergy/synergy.log";
   };
 
+  # Cold Resume starts this on demand. Flatpak may wait for its sandbox to exit.
+  systemd.user.services.synergy-native = {
+    Unit.Description = "Synergy native Flatpak backend";
+    Service = {
+      Type = "exec";
+      ExecStart = "${pkgs.flatpak}/bin/flatpak run --command=/app/lib/com.symless.synergy/synergy-service com.symless.synergy -d";
+    };
+  };
+
   # One visible tray manages sharing and independently pausable keyboard mappings.
   systemd.user.services.synergy-keys-tray = {
     Unit = {
