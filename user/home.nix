@@ -23,6 +23,7 @@ in
     ./t3-tray.nix
     ./t3-quake.nix
     ./html-tray.nix
+    ./app-tray.nix
     ./monitor-control.nix
     ./vscode.nix
   ];
