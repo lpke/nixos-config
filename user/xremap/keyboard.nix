@@ -27,6 +27,19 @@ in
     })
 
     (noMouse {
+      # KWin "Window Close" (Ctrl+Del, Meta+/) must not close T3 Code or T3 Quake.
+      name = "T3 keep open";
+      mode = "local";
+      application = {
+        only = [ "/^(com\\.t3tools\\.T3Code|t3-quake-placeholder)$/" ];
+      };
+      remap = {
+        "C-delete" = [];
+        "SUPER-slash" = [];
+      };
+    })
+
+    (noMouse {
       name = "Minecraft";
       # Linux focus stays on the game when Synergy switches to the Mac.
       mode = "local";
