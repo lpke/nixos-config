@@ -30,5 +30,7 @@
       VideoSave.translatedScreencastsFolder = "Recordings";
       VideoSave.preferredVideoFormat = 2;
     };
+    # no popup after each screenshot is saved/copied
+    "spectacle.notifyrc"."Event\\/newScreenshotSaved".Action = "";
   };
 }
