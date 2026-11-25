@@ -16,8 +16,10 @@ focus the placeholder to recall it there. Yakuake keeps Print.
 - `journalctl --user -u t3-quake`: helper diagnostics.
 
 Chezmoi's T3 launcher arbitrates modes and owns helper lifetime, including native
-updater relaunches. Closing T3 Quake stops the helper. Helper failure leaves T3
-usable and shows a silent notification with the restart command. NixOS owns
+updater relaunches. Closing T3 Quake stops the helper. A toggle with a stale
+or missing controller heartbeat reloads the controller once in an active
+Quake session. If recovery fails, T3 stays usable and a silent notification
+shows the restart command. NixOS owns
 `user/t3-quake.nix`, the controller/effect, shortcut and tiler patch. Native T3
 requires the public GLVND libraries in `programs.nix-ld` for hardware rendering.
 

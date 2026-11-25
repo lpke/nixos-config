@@ -14,6 +14,8 @@ from PyQt6.QtDBus import QDBus, QDBusConnection, QDBusMessage
 from .daemon import SERVICE
 from .session import running_mode
 
+HEARTBEAT_TIMEOUT = 3
+
 
 def call(service, path, interface, method, *arguments):
     message = QDBusMessage.createMethodCall(service, path, interface, method)
@@ -43,6 +45,33 @@ def launch_quake():
                      stderr=subprocess.DEVNULL, start_new_session=True)
 
 
+def reload_controller(mode):
+    call('org.kde.KWin', '/Scripting', 'org.kde.kwin.Scripting', 'unloadScript', 't3-quake')
+    call('org.kde.KWin', '/Effects', 'org.kde.kwin.Effects', 'unloadEffect', 't3-quake-slide')
+    if not call('org.kde.KWin', '/Effects', 'org.kde.kwin.Effects', 'loadEffect', 't3-quake-slide')[0]:
+        raise RuntimeError('The drop-down animation could not be loaded.')
+    subprocess.run(['systemctl', '--user', 'restart' if mode == 'quake' else 'stop',
+                    't3-quake.service'], check=True, timeout=8)
+    # KWin caches the Home Manager symlink URL. Load the current package directly.
+    script = Path(__file__).resolve().parents[3] / 'share/kwin/scripts/t3-quake/contents/ui/main.qml'
+    call('org.kde.KWin', '/Scripting', 'org.kde.kwin.Scripting', 'loadDeclarativeScript',
+         str(script), 't3-quake')
+    call('org.kde.KWin', '/Scripting', 'org.kde.kwin.Scripting', 'start')
+
+
+def wait_for_controller(launch):
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        if QDBusConnection.sessionBus().interface().isServiceRegistered(SERVICE).value():
+            state = json.loads(call(SERVICE, '/T3Quake', SERVICE, 'Command', 'status')[0])
+            if state.get('connected'):
+                return state['heartbeat_age'] < HEARTBEAT_TIMEOUT
+        if launch is not None and launch.poll() not in (None, 0):
+            raise RuntimeError('T3 could not be started.')
+        time.sleep(.1)
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(description='Borrow T3 as a drop-down window; press again to return it.')
     parser.add_argument('command', nargs='?', default='toggle',
@@ -66,40 +95,23 @@ def main():
                         'Close T3 Code first, then open T3 Quake.'], check=False)
         raise SystemExit(1)
     try:
-        registered = QDBusConnection.sessionBus().interface().isServiceRegistered(SERVICE).value()
-        if not registered and args.command in ('status', 'restore'):
-            print(json.dumps({'running': False, 'mode': 'normal'}))
-            return
+        if args.command in ('status', 'restore'):
+            if not QDBusConnection.sessionBus().interface().isServiceRegistered(SERVICE).value():
+                print(json.dumps({'running': False, 'mode': 'normal'}))
+                return
         if args.command == 'restart':
-            call('org.kde.KWin', '/Scripting', 'org.kde.kwin.Scripting', 'unloadScript', 't3-quake')
-            call('org.kde.KWin', '/Effects', 'org.kde.kwin.Effects', 'unloadEffect', 't3-quake-slide')
-            if not call('org.kde.KWin', '/Effects', 'org.kde.kwin.Effects', 'loadEffect', 't3-quake-slide')[0]:
-                raise RuntimeError('The drop-down animation could not be loaded.')
-            subprocess.run(['systemctl', '--user', 'restart' if mode == 'quake' else 'stop',
-                            't3-quake.service'], check=True, timeout=8)
-            # KWin's shared QML engine caches the stable Home Manager symlink URL.
-            # A canonical package URL loads the current version without a logout.
-            script = Path(__file__).resolve().parents[3] / 'share/kwin/scripts/t3-quake/contents/ui/main.qml'
-            call('org.kde.KWin', '/Scripting', 'org.kde.kwin.Scripting', 'loadDeclarativeScript',
-                 str(script), 't3-quake')
-            call('org.kde.KWin', '/Scripting', 'org.kde.kwin.Scripting', 'start')
+            reload_controller(mode)
             print('T3 quake restarted.')
             return
         if args.command == 'toggle':
             if mode is None:
                 launch = launch_quake()
-            deadline = time.monotonic() + 15
-            while time.monotonic() < deadline:
-                registered = QDBusConnection.sessionBus().interface().isServiceRegistered(SERVICE).value()
-                if registered:
-                    state = json.loads(call(SERVICE, '/T3Quake', SERVICE, 'Command', 'status')[0])
-                    if state.get('connected'):
-                        break
-                if launch is not None and launch.poll() not in (None, 0):
-                    raise RuntimeError('T3 could not be started.')
-                time.sleep(.1)
-            else:
-                raise RuntimeError('The T3 window controller did not become ready.')
+            if not wait_for_controller(launch):
+                if running_mode() != 'quake':
+                    raise RuntimeError('The T3 window controller did not become ready.')
+                reload_controller('quake')
+                if not wait_for_controller(launch):
+                    raise RuntimeError('The T3 window controller did not become ready after reloading.')
         result = call(SERVICE, '/T3Quake', SERVICE, 'Command', args.command)
         if args.command == 'status':
             print(result[0])
